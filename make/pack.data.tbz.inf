@@ -1,0 +1,4 @@
+Type: build-tool
+Name: pack.data.tbz
+Class: ru.myx.distro.make.FolderPackBuilder
+Requires:

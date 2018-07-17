@@ -1,0 +1,93 @@
+[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+
+# DistroShellContextSetInputSpec
+
+if [ "$1" = "--distro-path-auto" ] ; then
+	if [ -d "$MMDAPP/source/" ] && [ -d "$MMDAPP/cached" ] ; then
+		if [ -d "$MMDAPP/output/" ] ; then
+			set - "--distro-from-output"
+		else
+			set - "--distro-from-cached"
+		fi
+	fi
+fi
+if [ "$1" = "--distro-path-auto" ] ; then
+	if [ -d "$MMDAPP/distro/" ] ; then
+		set - "--distro-from-distro"
+	fi
+fi
+if [ "$1" = "--distro-path-auto" ] ; then
+	if [ -d "$MMDAPP/source/" ] ; then
+		set - "--distro-from-source"
+	fi
+fi
+if [ "$1" = "--distro-path-auto" ] ; then
+	echo "ERROR: DistroShellContextSetInputSpec: can't detect proper input source" >&2
+	exit 1
+fi
+
+
+if [ "$adpcChangeSpec" = "true" ] ; then
+	if [ -z "$1" ] ; then
+		echo "DistroShellContextSetInputSpec: inputSpec argument is required!" >&2
+		exit 1
+	fi
+	if ! DistroShellContext --is-spec-option "$1" ; then
+		echo "DistroShellContextSetInputSpec: inputSpec argument is invalid: $1" >&2
+		exit 1
+	fi
+fi
+
+
+case "$1" in
+	--distro-source-only)
+		MDSC_SOURCE="$MMDAPP/source"
+		MDSC_CACHED=""
+		MDSC_OUTPUT=""
+		MDSC_INMODE="source"
+		MDSC_OPTION="--distro-source-only"
+	;;
+	--distro-from-source)
+		MDSC_SOURCE="$MMDAPP/source"
+		MDSC_CACHED="$MMDAPP/cached/enhance"
+		MDSC_OUTPUT="$MMDAPP/cached/sources"
+		MDSC_INMODE="source"
+		MDSC_OPTION="--distro-from-source"
+	;;
+	--distro-from-cached)
+		MDSC_SOURCE="$MMDAPP/cached/sources"
+		MDSC_CACHED="$MMDAPP/cached/enhance"
+		MDSC_OUTPUT="$MMDAPP/output/cached"
+		MDSC_INMODE="source"
+		MDSC_OPTION="--distro-from-cached"
+	;;
+	--distro-from-output)
+		MDSC_SOURCE="$MMDAPP/output/distro"
+		MDSC_CACHED="$MMDAPP/output/cached"
+		MDSC_OUTPUT="$MMDAPP/output/distro"
+		MDSC_INMODE="distro"
+		MDSC_OPTION="--distro-from-output"
+	;;
+	--distro-from-distro)
+		MDSC_SOURCE="$MMDAPP/distro"
+		MDSC_CACHED="$MMDAPP/output/cached"
+		MDSC_OUTPUT="$MMDAPP/output/distro"
+		MDSC_INMODE="distro"
+		MDSC_OPTION="--distro-from-distro"
+	;;
+	*)
+		echo "DistroShellContextSetInputSpec: Invalid input spec: $argOption" >&2
+		return 1 
+		exit 1
+	;;
+esac
+
+if [ -z "$previousSpec" ] || [ "$previousSpec" != "MDSC_OPTION" ] ; then
+	export MDSC_INMODE
+	export MDSC_SOURCE
+	export MDSC_CACHED
+	export MDSC_OUTPUT
+	export MDSC_OPTION
+	
+	echo "DistroShellContextSetInputSpec: mode: $MDSC_INMODE, spec: $MDSC_OPTION" >&2
+fi

@@ -1,0 +1,21 @@
+Name: myx.distro-deploy
+Title: Basic distro package management tools 
+Requires: os.java myx.distro-source lib.apache-commons-compress
+Augments: developer-sdk:recommended
+Suggests: 
+Declares: 
+Provides:   myx/myx.distro-deploy \
+			build-tool:pack.jar \
+			build-tool:pack.tbz \
+			build-tool:pack.tgz \
+			build-tool:pack.txz \
+			build-tool:pack.zip \
+			build-tool:pack.data.tbz \
+			build-tool:pack.data.txz \
+			build-tool:pack.docs.txz \
+			build-tool:pack.java.jar \
+			build-tool:classpath.jar \
+			build-tool:classpath.java.jar \
+			build-tool:classpath.use.jars \
+			
+Replaces: 

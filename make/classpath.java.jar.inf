@@ -1,0 +1,4 @@
+Type: build-tool
+Name: classpath.java.jar
+Class: ru.myx.distro.make.ScanClasspathJavaBuilder
+Requires: 

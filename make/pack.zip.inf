@@ -1,0 +1,4 @@
+Type: build-tool
+Name: pack.zip
+Class: ru.myx.distro.make.FolderPackBuilder
+Requires:

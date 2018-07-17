@@ -1,0 +1,8 @@
+[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+
+#
+# Runs DistroCommand by loading it's compiled code from a distro image folder 
+#
+DistroFromImage(){
+	java -cp "$MMDAPP/output/cached/myx/myx.distro-source/java" ru.myx.distro.DistroImageCommand "$@"
+}

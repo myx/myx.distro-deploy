@@ -1,0 +1,114 @@
+[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+
+if ! type DistroShellContext >/dev/null 2>&1 ; then
+
+	# DistroShellContext
+	DistroShellContext(){
+		case "$1" in
+			--uncache)
+				echo "DistroShellContext: clear cache" >&2
+			;;
+			--is-spec-option)
+				case "$2" in
+					"--distro-path-auto")
+						return 0
+					;;
+					"--distro-source-only")
+						return 0
+					;;
+					"--distro-from-source")
+						return 0
+					;;
+					"--distro-from-cached")
+						return 0
+					;;
+					"--distro-from-output")
+						return 0
+					;;
+					"--distro-from-distro")
+						return 0
+					;;
+				esac
+				return 1
+			;;
+			*)
+				if DistroShellContext --is-spec-option "$1" ; then
+					local previousSpec="$MDSC_OPTION"
+					local adpcChangeSpec="true"
+			
+					echo "DistroShellContext: input spec: $1" >&2
+					. "$MDSC_ORIGIN/DistroShellContextSetInputSpec.include"		
+					return 0
+					# shift
+					# continue
+				fi
+			;;
+		esac
+	}
+	
+	Require(){
+		local distroCommand="$1" ; shift
+		if [ -z "$distroCommand" ] ; then
+			ShowDistroInfo.fn.sh ; return 1
+		fi
+		if type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+			return 0
+		fi
+		
+		if [ -f "$MDSC_SOURCE/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			source "$MDSC_SOURCE/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			return 0
+		fi
+		if [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			source "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			return 0
+		fi
+		source "${distroCommand%.fn.sh}.fn.sh"
+		return 0
+	}
+	
+	
+	Distro(){
+		local distroCommand="$1" ; shift
+		if [ -z "$distroCommand" ] ; then
+			ShowDistroInfo.fn.sh ; return 1
+		fi
+		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+			source "${distroCommand%.fn.sh}.fn.sh"
+		fi
+		"${distroCommand%.fn.sh}" "$@"
+	}
+fi
+
+if [ -z "$MDSC_ORIGIN" ] ; then
+	MDSC_ORIGIN=""
+	MDSC_SOURCE=""
+	MDSC_CACHED=""
+	MDSC_OUTPUT=""
+	MDSC_INMODE=""
+	MDSC_OPTION=""
+	
+	export MDSC_INMODE
+	export MDSC_SOURCE
+	export MDSC_CACHED
+	export MDSC_OUTPUT
+	export MDSC_OPTION
+
+	if [ -z "$MDSC_ORIGIN" ] && [ -d "$MMDAPP/source/myx/myx.distro-deploy/sh-lib" ] ; then
+		MDSC_ORIGIN="$MMDAPP/source/myx/myx.distro-deploy/sh-lib"
+	fi
+	if [ -z "$MDSC_ORIGIN" ] && [ -d "$MMDAPP/distro/myx/myx.distro-source/sh-lib" ] ; then
+		MDSC_ORIGIN="$MMDAPP/distro/myx/myx.distro-source/sh-lib"
+	fi
+	
+	export MDSC_ORIGIN
+	
+	echo "DistroContext: init: $MDSC_ORIGIN" >&2
+fi
+
+if DistroShellContext --is-spec-option "$1" ; then
+	echo "DistroShellContext: input spec: $1" >&2
+	. "$MDSC_ORIGIN/DistroShellContextSetInputSpec.include"		
+	shift
+fi
+

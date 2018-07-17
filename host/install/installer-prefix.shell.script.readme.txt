@@ -1,0 +1,9 @@
+#
+#	This script will be merged with others from dependency list
+#
+
+#
+#	$$$-PKG-REPO-$$$ - repository name
+#	$$$-PKG-NAME-$$$ - package name
+#	$$$-PKG-BASE-$$$ - package base URL
+#

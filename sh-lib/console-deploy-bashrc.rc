@@ -1,0 +1,45 @@
+echo "Working in $MMDAPP" >&2
+[ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
+
+# util -> prepare -> install 
+PATH="$PATH:$MMDAPP/source/myx/myx.distro-deploy/sh-scripts:$MMDAPP/source/myx/myx.distro-source/sh-scripts"
+
+. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
+DistroShellContext --distro-default
+
+Require ListDistroScripts
+Require ListAllActions
+
+# Action myx/yaumnrc/test-parser.url
+# Action make-ws2017.sh
+
+Action(){
+	local actionCommand="$1" ; shift
+	if [ -z "$actionCommand" ] ; then
+		ShowActionInfo.fn.sh ; return 1
+	fi
+	case "$actionCommand" in
+		*.sh)
+			( \
+				. "$MMDAPP/actions/$actionCommand" ; \
+				echo "$actionCommand: finished." ; \
+			)
+		;;
+		*)
+			echo "Unknown Action Type, source:" >&2
+			myx.common lib/prefix "    " cat "$MMDAPP/actions/$actionCommand"
+	esac
+}
+
+complete -W "\`ListDistroScripts\`" "."
+complete -W "\`ListDistroScripts\`" "*"
+complete -W "\`ListDistroScripts\`" "which"
+complete -W "\`ListDistroScripts --completion\`" "Require"
+complete -W "\`ListDistroScripts --completion\`" "Distro"
+complete -W "\`ListAllActions --completion\`"    "Action"
+
+complete -W "\`DistroListDistroScripts --type prepare\`" "Distro.Prepare"
+complete -W "\`DistroListDistroScripts --type util\`" "Distro.Util"
+
+PS1="MDUC: $PS1"
+export PS1
