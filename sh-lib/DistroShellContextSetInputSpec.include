@@ -2,24 +2,21 @@
 
 # DistroShellContextSetInputSpec
 
-if [ "$1" = "--distro-path-auto" ] ; then
-	if [ -d "$MMDAPP/source/" ] && [ -d "$MMDAPP/cached" ] ; then
-		if [ -d "$MMDAPP/output/" ] ; then
-			set - "--distro-from-output"
-		else
-			set - "--distro-from-cached"
-		fi
+if [ "$1" = "--distro-path-auto" ] && [ ! -z "$MDSC_OPTION" ] ; then
+	set - "$MDSC_OPTION"
+fi
+if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/source/" ] && [ -d "$MMDAPP/cached" ] ; then
+	if [ -d "$MMDAPP/output/" ] ; then
+		set - "--distro-from-output"
+	else
+		set - "--distro-from-cached"
 	fi
 fi
-if [ "$1" = "--distro-path-auto" ] ; then
-	if [ -d "$MMDAPP/distro/" ] ; then
-		set - "--distro-from-distro"
-	fi
+if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/distro/" ] ; then
+	set - "--distro-from-distro"
 fi
-if [ "$1" = "--distro-path-auto" ] ; then
-	if [ -d "$MMDAPP/source/" ] ; then
-		set - "--distro-from-source"
-	fi
+if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/source/" ] ; then
+	set - "--distro-from-source"
 fi
 if [ "$1" = "--distro-path-auto" ] ; then
 	echo "ERROR: DistroShellContextSetInputSpec: can't detect proper input source" >&2
@@ -82,7 +79,7 @@ case "$1" in
 	;;
 esac
 
-if [ -z "$previousSpec" ] || [ "$previousSpec" != "MDSC_OPTION" ] ; then
+if [ -z "${previousSpec:-$MDSC_OPTION}" ] || [ "$previousSpec" != "$MDSC_OPTION" ] ; then
 	export MDSC_INMODE
 	export MDSC_SOURCE
 	export MDSC_CACHED

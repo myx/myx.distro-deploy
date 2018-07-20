@@ -28,7 +28,7 @@ case "$0" in
 		# deploy-keywords-ssh.sh "ndss knt r3" -l root -C "uname -a" 
 
 		. "$( dirname $0 )/../sh-lib/DistroShellContext.include"
-		DistroShellContext --distro-default
+		DistroShellContext --distro-path-auto
 		
 		DeployKeywordsSsh "$@"
 	;;

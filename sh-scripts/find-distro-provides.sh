@@ -12,16 +12,16 @@ if [ "`type -t ListProjectProvides`" != "function" ] ; then
 fi
 
 FindDistroProvides(){
-	local PKG="$1"
-	if [ -z "$PKG" ] ; then
-		echo "FindDistroProvides: 'PKG' argument is required!" >&2 ; exit 1
+	local projectName="$1"
+	if [ -z "$projectName" ] ; then
+		echo "FindDistroProvides: 'projectName' argument is required!" >&2 ; exit 1
 	fi
 	
 	shift
 
-	local sshTarget="`ListProjectProvides "$PKG" "deploy-ssh-target"`"
+	local sshTarget="`ListProjectProvides "$projectName" "deploy-ssh-target"`"
 	if [ -z "$sshTarget" ] ; then
-		echo "FindDistroProvides: $PKG does not have ssh target set!" >&2 ; exit 1
+		echo "FindDistroProvides: $projectName does not have ssh target set!" >&2 ; exit 1
 	fi
 	
 	local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
@@ -34,7 +34,7 @@ case "$0" in
 		# find-distro-provides.sh --filter "distro-keywords:hz" --exec -l root -C "uname -a" 
 
 		. "$( dirname $0 )/../sh-lib/DistroShellContext.include"
-		DistroShellContext --distro-default
+		DistroShellContext --distro-path-auto
 		
 		FindDistroProvides "$@"
 	;;

@@ -36,7 +36,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 					local previousSpec="$MDSC_OPTION"
 					local adpcChangeSpec="true"
 			
-					echo "DistroShellContext: input spec: $1" >&2
+					[ -z "$MDSC_DETAIL" ] || echo "DistroShellContext: input spec: $1" >&2
 					. "$MDSC_ORIGIN/DistroShellContextSetInputSpec.include"		
 					return 0
 					# shift
@@ -87,12 +87,15 @@ if [ -z "$MDSC_ORIGIN" ] ; then
 	MDSC_OUTPUT=""
 	MDSC_INMODE=""
 	MDSC_OPTION=""
+	MDSC_DETAIL=""
 	
 	export MDSC_INMODE
 	export MDSC_SOURCE
 	export MDSC_CACHED
 	export MDSC_OUTPUT
 	export MDSC_OPTION
+
+	export MDSC_DETAIL
 
 	if [ -z "$MDSC_ORIGIN" ] && [ -d "$MMDAPP/source/myx/myx.distro-deploy/sh-lib" ] ; then
 		MDSC_ORIGIN="$MMDAPP/source/myx/myx.distro-deploy/sh-lib"
@@ -106,9 +109,19 @@ if [ -z "$MDSC_ORIGIN" ] ; then
 	echo "DistroContext: init: $MDSC_ORIGIN" >&2
 fi
 
-if DistroShellContext --is-spec-option "$1" ; then
-	echo "DistroShellContext: input spec: $1" >&2
-	. "$MDSC_ORIGIN/DistroShellContextSetInputSpec.include"		
-	shift
-fi
+
+while true ; do
+	if [ "--verbose" = "$1" ] ; then
+		export MDSC_DETAIL="true"
+		shift
+		continue
+	fi 
+	if DistroShellContext --is-spec-option "$1" ; then
+		[ -z "$MDSC_DETAIL" ] || echo "DistroShellContext: input spec: $1" >&2
+		. "$MDSC_ORIGIN/DistroShellContextSetInputSpec.include"		
+		shift
+		continue
+	fi
+	break
+done
 

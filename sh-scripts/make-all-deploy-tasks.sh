@@ -20,7 +20,7 @@ case "$0" in
 	*/sh-scripts/make-all-deploy-tasks.sh) 
 
 		. "$( dirname $0 )/../sh-lib/DistroShellContext.include"
-		DistroShellContext --distro-default
+		DistroShellContext --distro-path-auto
 		
 		MakeAllDeployTasks "$@"
 	;;

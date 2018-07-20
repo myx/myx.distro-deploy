@@ -1,11 +1,11 @@
 echo "Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-# util -> prepare -> install 
+# deploy -> source
 PATH="$PATH:$MMDAPP/source/myx/myx.distro-deploy/sh-scripts:$MMDAPP/source/myx/myx.distro-source/sh-scripts"
 
 . "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
-DistroShellContext --distro-default
+DistroShellContext --distro-path-auto
 
 Require ListDistroScripts
 Require ListAllActions
@@ -25,21 +25,26 @@ Action(){
 				echo "$actionCommand: finished." ; \
 			)
 		;;
+		*.url)
+			open "$MMDAPP/actions/$actionCommand"
+		;;
 		*)
 			echo "Unknown Action Type, source:" >&2
 			myx.common lib/prefix "    " cat "$MMDAPP/actions/$actionCommand"
 	esac
 }
 
+
 complete -W "\`ListDistroScripts\`" "."
 complete -W "\`ListDistroScripts\`" "*"
 complete -W "\`ListDistroScripts\`" "which"
 complete -W "\`ListDistroScripts --completion\`" "Require"
 complete -W "\`ListDistroScripts --completion\`" "Distro"
+complete -W "\`ListDistroScripts --completion\`" "Deploy"
 complete -W "\`ListAllActions --completion\`"    "Action"
 
 complete -W "\`DistroListDistroScripts --type prepare\`" "Distro.Prepare"
 complete -W "\`DistroListDistroScripts --type util\`" "Distro.Util"
 
-PS1="MDUC: $PS1"
+PS1="MDDSC: \`printf "\$MDSC_INMODE"\`: $PS1"
 export PS1

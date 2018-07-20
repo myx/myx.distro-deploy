@@ -17,7 +17,7 @@ RebuildActionsFromDistro(){
 	else
 		( \
 			. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include" ; \
-			DistroShellContext --distro-default
+			DistroShellContext --distro-path-auto
 			RebuildActions "$@"
 		)
 	fi
@@ -27,7 +27,7 @@ case "$0" in
 	*/sh-scripts/RebuildActionsFromDistro.fn.sh) 
 
 		. "$( dirname $0 )/../sh-lib/DistroShellContext.include"
-		DistroShellContext --distro-default
+		DistroShellContext --distro-path-auto
 		
 		RebuildActionsFromDistro "$@"
 	;;
