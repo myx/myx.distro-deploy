@@ -15,11 +15,37 @@ fi
 Require ListDistroProvides
 
 ListSshTargets(){
-	
+
+	if [ "--internal-all-lines" = "$1" ] ; then
+		shift
+		while [ "" != "$1" ] ; do
+			ListSshTargets --internal-print-line $1
+			shift
+		done
+		return 0
+	fi
+	if [ "--internal-print-line" = "$1" ] ; then
+		shift
+		local projectName="$1" ; shift
+		local sshTarget="$1" ; shift
+		[ -z "$linePrefix" ] || printf '%s ' "$linePrefix"
+		[ ! -z "$noProject" ] || printf '%s ' "$projectName"
+		if [ -z "$noTarget" ] ; then
+			local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
+			local sshPort="`echo "$sshTarget" | sed 's,^.*/,,'`"
+			printf 'ssh %s -p %s ' "$sshHost" "$sshPort"
+		fi
+		echo -n "$extraArguments"
+		[ -z "$lineSuffix" ] || printf '%s ' "$lineSuffix"
+		echo
+		return 0
+	fi
 	local linePrefix=""
 	local lineSuffix=""
 	local noTarget=""
 	local noProject=""
+	
+	local filterProjects=""
 	
 	while true ; do
 		case "$1" in
@@ -39,31 +65,22 @@ ListSshTargets(){
 				shift
 				local noProject="true"
 				;;
+			--filter-projects)
+				shift
+				filterProjects="$filterProjects --filter-projects $1" ; shift
+				;;
 			*)
 				break
 				;;
 		esac
 	done
 
-	typeLine(){
-		local projectName="$1" ; shift
-		local sshTarget="$1" ; shift
-		[ -z "$linePrefix" ] || printf '%s ' "$linePrefix"
-		[ ! -z "$noProject" ] || printf '%s ' "$projectName"
-		if [ -z "$noTarget" ] ; then
-			local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
-			local sshPort="`echo "$sshTarget" | sed 's,^.*/,,'`"
-			printf 'ssh %s -p %s ' "$sshHost" "$sshPort"
-		fi
-		echo -n "$@"
-		[ -z "$lineSuffix" ] || printf '%s ' "$lineSuffix"
-		echo
-	}
-
-	ListDistroProvides | grep 'deploy-ssh-target\\:' | sed 's|deploy-ssh-target\\:||' \
-	| while read LINE ; do
-		typeLine $LINE "$@" 
-	done
+	local extraArguments="$@"
+	
+	eval ListSshTargets --internal-all-lines $( \
+			ListDistroProvides $filterProjects | grep 'deploy-ssh-target\\:' | sed 's|deploy-ssh-target\\:||' \
+				| myx.common lib/linesToArguments \
+		)
 }
 
 case "$0" in

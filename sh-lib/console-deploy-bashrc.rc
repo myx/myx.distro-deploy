@@ -35,16 +35,40 @@ Action(){
 }
 
 
+Deploy(){
+	local distroCommand="$1" ; shift
+	if [ -z "$distroCommand" ] ; then
+		"$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/ShowDeployInfo.fn.sh" ; return 1
+	fi
+	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+		source "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+	fi
+	( set -e ; "${distroCommand%.fn.sh}" "$@" ) || \
+		( EXITCODE=$? ; set +x ; echo "ERROR: exited with error status ($EXITCODE)" ; exit $EXITCODE )
+}
+
+
+Source(){
+	local distroCommand="$1" ; shift
+	if [ -z "$distroCommand" ] ; then
+		"$MMDAPP/source/myx/myx.distro-source/sh-scripts/ShowSourceInfo.fn.sh" ; return 1
+	fi
+	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+		source "$MMDAPP/source/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+	fi
+	( set -e ; "${distroCommand%.fn.sh}" "$@" ) || \
+		( EXITCODE=$? ; set +x ; echo "ERROR: exited with error status ($EXITCODE)" ; exit $EXITCODE )
+}
+
+
 complete -W "\`ListDistroScripts\`" "."
 complete -W "\`ListDistroScripts\`" "*"
 complete -W "\`ListDistroScripts\`" "which"
+complete -W "\`ListAllActions --completion\`"    "Action"
 complete -W "\`ListDistroScripts --completion\`" "Require"
 complete -W "\`ListDistroScripts --completion\`" "Distro"
-complete -W "\`ListDistroScripts --completion\`" "Deploy"
-complete -W "\`ListAllActions --completion\`"    "Action"
-
-complete -W "\`DistroListDistroScripts --type prepare\`" "Distro.Prepare"
-complete -W "\`DistroListDistroScripts --type util\`" "Distro.Util"
+complete -W "\`ListDistroScripts --completion --type deploy\`" "Deploy"
+complete -W "\`ListDistroScripts --completion --type source\`" "Source"
 
 PS1="MDDSC: \`printf "\$MDSC_INMODE"\`: $PS1"
 export PS1
