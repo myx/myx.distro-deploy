@@ -14,6 +14,10 @@ fi
 
 Require ListSshTargets
 
+type Prefix >/dev/null 2>&1 || \
+	. "/usr/local/share/myx.common/bin/lib/prefix"
+#	. "$( myx.common which lib/prefix )"
+
 ExecuteParallel(){
 	
 	if [ "$1" == "--project" ] ; then
@@ -22,7 +26,6 @@ ExecuteParallel(){
 		local sourceProject="$1" ; shift
 		local targetCommand="$@"
 		
-		. "$( myx.common which lib/prefix )"
 		Prefix "$sourceProject: $( echo $targetCommand | cut -d ' ' -f 2 )" $targetCommand
 		
 		return 0
@@ -35,19 +38,73 @@ ExecuteParallel(){
 
 	shift
 
-	local sshTargets="$( ListSshTargets --filter-projects "$filterProjects" --line-prefix 'ExecuteParallel --project' --line-suffix ' & ' -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "$@" )"
+	case "$1" in
+		--execute-stdin)
+			shift
+			local executeType="--execute-stdin"
+		;;
+		--execute-script)
+			shift
+			local executeType="--execute-script"
+			if [ -z "$1" ] ; then
+				echo "ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
+			fi
+			local executeScriptName="$1" ; shift
+			if [ ! -f "$executeScriptName" ] ; then
+				echo "ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
+			fi
+		;;
+		*)
+			local executeType="--execute-default"
+			local executeCommand=""
+		;;
+	esac
+
+	local targetCommand="$@"
+
+	local sshTargets="$( ListSshTargets --filter-projects "$filterProjects" --line-prefix "ExecuteParallel --project" --line-suffix ' & ' -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 $targetCommand )"
 	
 	echo "Will execute: " >&2
 	local textLine
 	echo "$sshTargets" | while read textLine ; do
-		echo "  $textLine" >&2
+		printf "  %q" $textLine >&2
 		echo >&2
 	done
-	
-	echo
-	echo "...sleeping for 5 seconds..." >&2
-	sleep 5
-	
+
+	case "$executeType" in
+		--execute-stdin)
+			echo 
+			echo "...Enter script and press CTRL+D to execute or press CTRL+C to cancel..." >&2
+			echo 
+
+			local executeCommand="`cat`"
+			local sshTargets="$(echo "$sshTargets" | while read textLine ; do 
+				echo '( echo "$executeCommand" | '${textLine%?}' ) &' 
+			done)"
+
+			echo 
+			echo "...got command, executing..." >&2
+			echo
+		;;
+		--execute-script)
+			local executeCommand="`cat "$executeScriptName"`"
+			local sshTargets="$(echo "$sshTargets" | while read textLine ; do 
+				echo '( echo "$executeCommand" | '${textLine%?}' ) &' 
+			done)"
+			
+			echo
+			echo "...got command, executing..." >&2
+			echo "...sleeping for 5 seconds..." >&2
+			sleep 5
+			echo
+		;;
+		*)
+			echo
+			echo "...sleeping for 5 seconds..." >&2
+			sleep 5
+		;;
+	esac
+
 	eval $sshTargets
 	wait
 }
@@ -64,6 +121,9 @@ case "$0" in
 		# ExecuteParallel.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
 		# ExecuteParallel.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
 		# source "`myx.common which lib/prefix`" ;  ExecuteParallel.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
+		#
+		# ExecuteParallel.fn.sh ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash 
+		# 
 		
 		ExecuteParallel "$@"
 	;;

@@ -11,8 +11,8 @@ fi
 
 DistroFromImage "$@"
 
-# ./distro/distro-image.sh --output-root ../output --import-from-cached --select-project setup.host-meloscope.kimsufi.co.nz -vv --select-required --print-selected
-# ./distro/distro-image.sh --output-root ../output --import-from-cached --select-project setup.server-ndls.dev.ndm9.xyz -vv --select-required --print-selected
+# ./distro/distro-image.sh --output-root ../output --import-from-cached --select-project myx/setup.host-meloscope.kimsufi.co.nz -vv --select-required --print-selected
+# ./distro/distro-image.sh --output-root ../output --import-from-cached --select-project ndm/setup.server-ndls.dev.ndm9.xyz -vv --select-required --print-selected
 
 # ./distro/distro-image.sh --output-root ../output --import-from-cached --select-providers java --print-selected -p "" --select-required --print-selected -p "" --unselect-project os-myx.common-ubuntu --print-selected -p "" --select-required --print-selected -p "" --unselect-providers os.ubuntu --print-selected
 # ./distro/distro-image.sh -vv --output-root ../output --import-from-cached --select-providers java --print-selected -p "" --select-required --print-selected -p "" --unselect-project os-myx.common-ubuntu --print-selected -p "" --select-required --print-selected -p "" --unselect-providers os.ubuntu --print-selected

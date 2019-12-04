@@ -75,7 +75,12 @@ ListSshTargets(){
 		esac
 	done
 
-	local extraArguments="$@"
+
+	local extraArguments="$(for argument in "$@" ; do 
+		printf '%q ' "$argument" 
+	done)"
+
+
 	
 	eval ListSshTargets --internal-all-lines $( \
 			ListDistroProvides $filterProjects | grep 'deploy-ssh-target\\:' | sed 's|deploy-ssh-target\\:||' \
