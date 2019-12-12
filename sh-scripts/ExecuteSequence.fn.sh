@@ -122,7 +122,8 @@ case "$0" in
 		# source "`myx.common which lib/prefix`" ;  ExecuteSequence.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
 		#
 		# ExecuteSequence.fn.sh ndls --execute-stdin -l root bash
-		#
+		# ExecuteSequence.fn.sh ndss- -l root "date ; ndss upgrade ; ndss restart ; sleep 300"
+		# ExecuteSequence.fn.sh ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash
 		
 		ExecuteSequence "$@"
 	;;
