@@ -95,7 +95,7 @@ case "$0" in
 		# ListSshTargets.fn.sh --no-target
 		# ListSshTargets.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
 		# ListSshTargets.fn.sh --no-project -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' ; done )
-		# source "`myx.common which lib/prefix`" ;  ListSshTargets.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
+		# source "`myx.common which lib/prefix`" ;  ListSshTargets.fn.sh --no-project | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
 		
 		ListSshTargets "$@"
 	;;
