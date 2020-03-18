@@ -20,12 +20,12 @@ DistroImageCommand(){
 	local MDSC_SOURCE="${MDSC_SOURCE:-$MMDAPP/source}"
 	local MDSC_CACHED="${MDSC_CACHED:-$MMDAPP/output/cached}"
 
-	local DIR_OUT="${MDSC_CACHED:-$MMDAPP/output/cached}/myx/myx.distro-source/java"
-	local DIR_SRC="${MDSC_SOURCE:-$MMDAPP/source}/myx/myx.distro-source/java"
+	local DIR_OUT="${MDSC_CACHED:-$MMDAPP/output/cached}/myx/myx.distro-source"
+	local DIR_SRC="${MDSC_SOURCE:-$MMDAPP/source}/myx/myx.distro-source"
 
-	local FIL_OUT="$DIR_OUT/ru/myx/distro/DistroImageCommand.class"
-	local FIL_CPL="$DIR_SRC/ru/myx/distro/DistroImageCommand.class"
-	local FIL_SRC="$DIR_SRC/ru/myx/distro/DistroImageCommand.java"
+	local FIL_OUT="$DIR_OUT/bin/ru/myx/distro/DistroImageCommand.class"
+	local FIL_CPL="$DIR_SRC/java/ru/myx/distro/DistroImageCommand.class"
+	local FIL_SRC="$DIR_SRC/java/ru/myx/distro/DistroImageCommand.java"
 	
 	local HAS_OUT=$(test -f "$FIL_OUT" && echo 'true' || true)
 	local HAS_CPL=$(test -f "$FIL_CPL" && echo 'true' || true)
@@ -53,14 +53,14 @@ DistroImageCommand(){
 		( echo "No sources available, need to fetch!" ; false )
 
 	test -z "$USE_OUT" || \
-		java -cp "$DIR_OUT" ru.myx.distro.DistroImageCommand \
+		java -cp "$DIR_OUT/bin" ru.myx.distro.DistroImageCommand \
 			--output-root "$OUTPUT_PATH" \
 			--source-root "$MDSC_SOURCE" \
 			--cached-root "$MDSC_CACHED" \
 			"$@"
 	
 	test -z "$USE_CPL" || \
-		java -cp "$DIR_SRC" ru.myx.distro.DistroImageCommand \
+		java -cp "$DIR_SRC/bin" ru.myx.distro.DistroImageCommand \
 			--output-root "$OUTPUT_PATH" \
 			--source-root "$MDSC_SOURCE" \
 			--cached-root "$MDSC_CACHED" \

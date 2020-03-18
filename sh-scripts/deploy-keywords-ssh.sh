@@ -14,7 +14,7 @@ fi
 DeployKeywordsSsh(){
 	local KWD="$1"
 	if [ -z "$KWD" ] ; then
-		echo "DeployKeywordsSsh: 'KWD' argument is required!" >&2 ; exit 1
+		echo "DeployKeywordsSsh: 'KWD' argument is required!" >&2 ; return 1
 	fi
 	
 	shift

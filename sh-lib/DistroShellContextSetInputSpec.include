@@ -74,7 +74,6 @@ case "$1" in
 	;;
 	*)
 		echo "DistroShellContextSetInputSpec: Invalid input spec: $argOption" >&2
-		return 1 
 		exit 1
 	;;
 esac

@@ -14,14 +14,14 @@ fi
 FindDistroProvides(){
 	local projectName="$1"
 	if [ -z "$projectName" ] ; then
-		echo "FindDistroProvides: 'projectName' argument is required!" >&2 ; exit 1
+		echo "FindDistroProvides: 'projectName' argument is required!" >&2 ; return 1
 	fi
 	
 	shift
 
 	local sshTarget="`ListProjectProvides "$projectName" "deploy-ssh-target"`"
 	if [ -z "$sshTarget" ] ; then
-		echo "FindDistroProvides: $projectName does not have ssh target set!" >&2 ; exit 1
+		echo "FindDistroProvides: $projectName does not have ssh target set!" >&2 ; return 1
 	fi
 	
 	local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
