@@ -90,7 +90,8 @@ ListSshTargets(){
 
 case "$0" in
 	*/sh-scripts/ListSshTargets.fn.sh)
-		# ListSshTargets.fn.sh  
+		# ListSshTargets.fn.sh
+		# ListSshTargets.fn.sh --filter-projects "l6"  
 		# ListSshTargets.fn.sh --no-project
 		# ListSshTargets.fn.sh --no-target
 		# ListSshTargets.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
