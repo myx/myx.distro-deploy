@@ -28,9 +28,10 @@ ExecuteInteractive(){
 		return 0
 	fi
 
+
 	local filterProjects="$1"
 	if [ -z "$filterProjects" ] ; then
-		echo "ERROR: ScreenTo: 'filterProjects' argument (name or keyword or substring) is required!" >&2 ; return 1
+		echo "ERROR: ExecuteInteractive: 'filterProjects' argument (name or keyword or substring) is required!" >&2 ; return 1
 	fi
 
 	shift

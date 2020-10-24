@@ -69,6 +69,10 @@ ListSshTargets(){
 				shift
 				filterProjects="$filterProjects --filter-projects $1" ; shift
 				;;
+			--filter-keywords)
+				shift
+				filterProjects="$filterProjects --filter-keywords $1" ; shift
+				;;
 			*)
 				break
 				;;
