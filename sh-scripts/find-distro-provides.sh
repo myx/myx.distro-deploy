@@ -19,13 +19,13 @@ FindDistroProvides(){
 	
 	shift
 
-	local sshTarget="`ListProjectProvides "$projectName" "deploy-ssh-target"`"
+	local sshTarget="`ListProjectProvides "$projectName" --filter "deploy-ssh-target"`"
 	if [ -z "$sshTarget" ] ; then
 		echo "FindDistroProvides: $projectName does not have ssh target set!" >&2 ; return 1
 	fi
 	
-	local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
-	local sshPort="`echo "$sshTarget" | sed 's,^.*/,,'`"
+	local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
+	local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
 	ssh $sshHost -p $sshPort "$@"
 }
 

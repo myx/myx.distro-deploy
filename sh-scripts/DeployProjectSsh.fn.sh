@@ -7,9 +7,12 @@ if [ -z "$MMDAPP" ] ; then
 	[ -d "$MMDAPP/source" ] || ( echo "expecting 'source' directory." >&2 && exit 1 )
 fi
 
-if [ "`type -t ListProjectProvides`" != "function" ] ; then
-. "$MMDAPP/source/myx/myx.distro-source/sh-scripts/ListProjectProvides.fn.sh"
+if ! type DistroShellContext >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
+	DistroShellContext --distro-path-auto
 fi
+
+Require ListProjectProvides
 
 DeployProjectSsh(){
 	local projectName="$1"
@@ -19,22 +22,28 @@ DeployProjectSsh(){
 	
 	shift
 
-	local sshTarget="`ListProjectProvides "$projectName" "deploy-ssh-target"`"
+	local sshTarget="`ListProjectProvides "$projectName" --filter "deploy-ssh-target"`"
 	if [ -z "$sshTarget" ] ; then
 		echo "DeployProjectSsh: $projectName does not have ssh target set!" >&2 ; return 1
 	fi
 	
-	local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
-	local sshPort="`echo "$sshTarget" | sed 's,^.*/,,'`"
+	local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
+	local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
 	ssh $sshHost -p $sshPort "$@"
 }
 
 case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
-		# DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l root -C "uname -a" 
-
-		. "$( dirname $0 )/../sh-lib/DistroShellContext.include"
-		DistroShellContext --distro-path-auto
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			echo "syntax: DeployProjectSsh.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
+			if [ "$1" = "--help" ] ; then
+				echo "  Examples:" >&2
+				echo "    DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
+				echo "    DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l root -C 'uname -a'" >&2
+			fi
+			exit 1
+		fi
 		
 		DeployProjectSsh "$@"
 	;;

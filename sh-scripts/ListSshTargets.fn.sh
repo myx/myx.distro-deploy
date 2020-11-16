@@ -8,7 +8,7 @@ if [ -z "$MMDAPP" ] ; then
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include"
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 	DistroShellContext --distro-path-auto
 fi
 
@@ -31,8 +31,8 @@ ListSshTargets(){
 		[ -z "$linePrefix" ] || printf '%s ' "$linePrefix"
 		[ ! -z "$noProject" ] || printf '%s ' "$projectName"
 		if [ -z "$noTarget" ] ; then
-			local sshHost="`echo "$sshTarget" | sed 's,/.*$,,'`"
-			local sshPort="`echo "$sshTarget" | sed 's,^.*/,,'`"
+			local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
+			local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
 			printf 'ssh %s -p %s ' "$sshHost" "$sshPort"
 		fi
 		echo -n "$extraArguments"
@@ -40,12 +40,41 @@ ListSshTargets(){
 		echo
 		return 0
 	fi
+
+	set -e
+
+	local filterProjects=""
+
+	while true ; do
+		case "$1" in
+			--all)
+				shift
+				local filterProjects="$filterProjects --all"
+				break
+			;;
+			--filter-projects)
+				shift
+				local filterProjects="$filterProjects --filter-projects $1" ; shift
+			;;
+			--filter-keywords)
+				shift
+				local filterProjects="$filterProjects --filter-keywords $1" ; shift
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
+	if [ -z "$filterProjects" ] ; then
+		echo "ERROR: ListSshTargets: 'filterProjects' argument (name or keyword or substring) is required!" >&2
+		return 1
+	fi
+
 	local linePrefix=""
 	local lineSuffix=""
 	local noTarget=""
 	local noProject=""
-	
-	local filterProjects=""
 	
 	while true ; do
 		case "$1" in
@@ -65,14 +94,6 @@ ListSshTargets(){
 				shift
 				local noProject="true"
 				;;
-			--filter-projects)
-				shift
-				filterProjects="$filterProjects --filter-projects $1" ; shift
-				;;
-			--filter-keywords)
-				shift
-				filterProjects="$filterProjects --filter-keywords $1" ; shift
-				;;
 			*)
 				break
 				;;
@@ -87,20 +108,32 @@ ListSshTargets(){
 
 	
 	eval ListSshTargets --internal-all-lines $( \
-			ListDistroProvides $filterProjects | grep 'deploy-ssh-target\\:' | sed 's|deploy-ssh-target\\:||' \
+			ListDistroProvides $filterProjects | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
 				| myx.common lib/linesToArguments \
 		)
 }
 
 case "$0" in
 	*/sh-scripts/ListSshTargets.fn.sh)
-		# ListSshTargets.fn.sh
-		# ListSshTargets.fn.sh --filter-projects "l6"  
-		# ListSshTargets.fn.sh --no-project
-		# ListSshTargets.fn.sh --no-target
-		# ListSshTargets.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# ListSshTargets.fn.sh --no-project -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' ; done )
-		# source "`myx.common which lib/prefix`" ;  ListSshTargets.fn.sh --no-project | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			echo "syntax: ListSshTargets.fn.sh <search> [--no-project/--no-target] [<ssh arguments>...]" >&2
+			echo "syntax: ListSshTargets.fn.sh [--help]" >&2
+			if [ "$1" = "--help" ] ; then
+				echo "  Search:" >&2
+				echo "    --all / --filter-projects <glob> / --filter-keywords <keyword>" >&2
+				echo "  Examples:" >&2
+				echo "    ListSshTargets.fn.sh --filter-projects l6" >&2
+				echo "    ListSshTargets.fn.sh --filter-keywords l6" >&2
+				echo "    ListSshTargets.fn.sh --filter-projects l6 --no-target" >&2
+				echo "    ListSshTargets.fn.sh --filter-projects l6 -l root" >&2
+				echo "    ListSshTargets.fn.sh --filter-projects l6 --no-project -l root" >&2
+				echo "    ListSshTargets.fn.sh --all --no-project" >&2
+				echo "    ListSshTargets.fn.sh --all --no-project -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || true ; done )" >&2
+				echo "    ListSshTargets.fn.sh --all --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )" >&2
+				echo "    source "`myx.common which lib/prefix`" ;  ListSshTargets.fn.sh --all --no-project | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & done ; wait )" >&2
+			fi
+			exit 1
+		fi
 		
 		ListSshTargets "$@"
 	;;
