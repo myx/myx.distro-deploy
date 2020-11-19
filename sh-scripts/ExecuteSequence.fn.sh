@@ -16,39 +16,50 @@ Require ListSshTargets
 
 type Prefix >/dev/null 2>&1 || \
 	. "/usr/local/share/myx.common/bin/lib/prefix"
-#	. "$( myx.common which lib/prefix )"
 
 ExecuteSequence(){
 	
-	if [ "$1" == "--project" ] ; then
-		shift
-		set -e
-		local internSourceProject="$1" ; shift
-		local internTargetCommand="$@"
-		
-		Prefix "$internSourceProject: $( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
-		
-		return 0
-	fi
-
 	set -e
 
-	local filterProjects=""
+	local projectsSelected=""
+	case "$1" in
+		--project)
+			shift
+			set -e
+			local internSourceProject="$1" ; shift
+			local internTargetCommand="$@"
+			Prefix "$internSourceProject: $( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
+			return 0
+		;;
+		--all-targets)
+		;;
+		--select-from-env)
+			shift
+			local projectsSelected="$MMDENVSELECTION"
+			if [ -z "$projectsSelected" ] ; then
+				echo "ERROR: ListSshTargets: no projects selected!" >&2
+				return 1
+			fi
+		;;
+		--*)
+			Require ListDistroProjects
+			ListDistroProjects --select-execute-default ExecuteSequence "$@"
+			return 0
+		;;
+	esac
+
+	local useNoCache=""
+	local useNoIndex=""
 
 	while true ; do
 		case "$1" in
-			--all)
+			--no-cache)
 				shift
-				local filterProjects="$filterProjects --all"
-				break
+				local useNoCache="--no-cache"
 			;;
-			--filter-projects)
+			--no-index)
 				shift
-				local filterProjects="$filterProjects --filter-projects $1" ; shift
-			;;
-			--filter-keywords)
-				shift
-				local filterProjects="$filterProjects --filter-keywords $1" ; shift
+				local useNoIndex="--no-index"
 			;;
 			*)
 				break
@@ -56,15 +67,10 @@ ExecuteSequence(){
 		esac
 	done
 
-	if [ -z "$filterProjects" ] ; then
-		echo "ERROR: ExecuteSequence: 'filterProjects' argument (name or keyword or substring) is required!" >&2
-		return 1
-	fi
-
 	local executeType=""
 	local executeCommand=""
 	local executeScriptName=""
-
+	
 	case "$1" in
 		--display-targets)
 			shift
@@ -88,22 +94,27 @@ ExecuteSequence(){
 		--execute-command)
 			shift
 			local executeType="--execute-command"
+			if [ -z "$1" ] ; then
+				echo "ERROR: '--execute-command' - command argument required!" >&2 ; return 1
+			fi
 			local executeCommand="$1" ; shift
-			break
-		;;
-		*)
 		;;
 	esac
 
 	local targetCommand="$@"
 
-	local sshTargets="$( ListSshTargets $filterProjects --line-prefix 'ExecuteSequence --project' --line-suffix ' ; ' -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 $targetCommand )"
+	local sshTargets="$( \
+		ListSshTargets --select-from-env \
+			--line-prefix 'ExecuteSequence --project' \
+			--line-suffix ' ; ' \
+			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
+			$targetCommand $executeCommand \
+	)"
 	
 	echo "Will execute: " >&2
 	local textLine
 	echo "$sshTargets" | while read textLine ; do
-		printf "  %q" $textLine >&2
-		echo >&2
+		echo "  $textLine" >&2
 	done
 
 	case "$executeType" in
@@ -120,9 +131,9 @@ ExecuteSequence(){
 				echo 'echo "$executeCommand" | '$textLine 
 			done )"
 
-			echo 
-			echo "...got command, executing..." >&2
-			echo
+			printf "\n%s\n" \
+				"...got command, executing..." \
+				>&2
 		;;
 		--execute-script)
 			local executeCommand="`cat "$executeScriptName"`"
@@ -130,15 +141,17 @@ ExecuteSequence(){
 				echo 'echo "$executeCommand" | '$textLine 
 			done )"
 			
-			echo
-			echo "...got command, executing..." >&2
-			echo "...sleeping for 5 seconds..." >&2
+			printf "\n%s\n%s\n" \
+				"...got command, executing..." \
+				"...sleeping for 5 seconds..." \
+				>&2
 			sleep 5
 			echo
 		;;
 		*)
-			echo
-			echo "...sleeping for 5 seconds..." >&2
+			printf "\n%s\n" \
+				"...sleeping for 5 seconds..." \
+				>&2
 			sleep 5
 		;;
 	esac
@@ -148,16 +161,6 @@ ExecuteSequence(){
 
 case "$0" in
 	*/sh-scripts/ExecuteSequence.fn.sh)
-		# ExecuteSequence.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# source "`myx.common which lib/prefix`" ; ExecuteSequence.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' ; done )
-		# ExecuteSequence.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
-		# ExecuteSequence.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
-		# source "`myx.common which lib/prefix`" ;  ExecuteSequence.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
-		#
-		# ExecuteSequence.fn.sh ndls --execute-stdin -l root bash
-		# ExecuteSequence.fn.sh ndss- -l root "date ; ndss upgrade ; ndss restart ; sleep 300"
-		# ExecuteSequence.fn.sh ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash
-
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ExecuteSequence.fn.sh <search> --execute-stdin [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteSequence.fn.sh <search> --execute-script <script-name>  [<ssh arguments>...]" >&2
@@ -166,12 +169,13 @@ case "$0" in
 			echo "syntax: ExecuteSequence.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Search:" >&2
-				echo "    --all / --filter-projects <glob> / --filter-keywords <keyword>" >&2
+				echo "    --select-{all|sequence|changed|none} " >&2
+				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
 				echo "  Examples:" >&2
-				echo "    ExecuteSequence.fn.sh --filter-projects l6 --execute-stdin -l root" >&2
-				echo "    ExecuteSequence.fn.sh --filter-keywords l6 --execute-stdin -l root" >&2
-				echo "    ExecuteSequence.fn.sh --all -l root uname -a" >&2
-				echo "    ExecuteSequence.fn.sh --filter-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
+				echo "    ExecuteSequence.fn.sh --select-projects l6 --execute-stdin -l root" >&2
+				echo "    ExecuteSequence.fn.sh --select-merged-keywords l6 --execute-stdin -l root bash" >&2
+				echo "    ExecuteSequence.fn.sh --select-all uname -a" >&2
+				echo "    ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
 			fi
 			exit 1
 		fi

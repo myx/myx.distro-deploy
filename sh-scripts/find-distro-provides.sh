@@ -19,7 +19,7 @@ FindDistroProvides(){
 	
 	shift
 
-	local sshTarget="`ListProjectProvides "$projectName" --filter "deploy-ssh-target"`"
+	local sshTarget="`ListProjectProvides "$projectName" --print-provides-only --filter-and-cut deploy-ssh-target`"
 	if [ -z "$sshTarget" ] ; then
 		echo "FindDistroProvides: $projectName does not have ssh target set!" >&2 ; return 1
 	fi

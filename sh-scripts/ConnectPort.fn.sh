@@ -49,7 +49,7 @@ ConnectPort(){
 
 	# set -x
 	
-	local targets="$( ListSshTargets --filter-projects "$filterProject" "$@" | LinesToArguments )"
+	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | LinesToArguments )"
 
 	if [ -z "$targets" ] ; then
 		echo "ERROR: ConnectPort: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2 ; return 1

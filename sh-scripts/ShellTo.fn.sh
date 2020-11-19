@@ -50,7 +50,7 @@ ShellTo(){
 
 	# set -x
 	
-	local targets="$( ListSshTargets --filter-projects "$filterProject" "$@" | LinesToArguments )"
+	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | LinesToArguments )"
 
 	# set +x
 

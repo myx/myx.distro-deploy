@@ -16,77 +16,80 @@ Require ListSshTargets
 
 type Prefix >/dev/null 2>&1 || \
 	. "/usr/local/share/myx.common/bin/lib/prefix"
-#	. "$( myx.common which lib/prefix )"
 
 ExecuteInteractive(){
 	
-	if [ "$1" == "--project" ] ; then
-		shift
-		set -e
-		local internSourceProject="$1" ; shift
-		local internTargetCommand="$@"
-		
-		Prefix "$internSourceProject: $( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
-		
-		return 0
-	fi
-
 	set -e
 
-	local filterProjects=""
+	local projectsSelected=""
+	case "$1" in
+		--project)
+			shift
+			set -e
+			local internSourceProject="$1" ; shift
+			local internTargetCommand="$@"
+			Prefix "$internSourceProject: $( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
+			return 0
+		;;
+		--all-targets)
+		;;
+		--select-from-env)
+			shift
+			local projectsSelected="$MMDENVSELECTION"
+			if [ -z "$projectsSelected" ] ; then
+				echo "ERROR: ListSshTargets: no projects selected!" >&2
+				return 1
+			fi
+		;;
+		--*)
+			Require ListDistroProjects
+			ListDistroProjects --select-execute-default ExecuteInteractive "$@"
+			return 0
+		;;
+	esac
+
+	local useNoCache=""
+	local useNoIndex=""
 
 	while true ; do
 		case "$1" in
-			--all)
+			--no-cache)
 				shift
-				local filterProjects="$filterProjects --all"
-				break
+				local useNoCache="--no-cache"
 			;;
-			--filter-projects)
+			--no-index)
 				shift
-				local filterProjects="$filterProjects --filter-projects $1" ; shift
-			;;
-			--filter-keywords)
-				shift
-				local filterProjects="$filterProjects --filter-keywords $1" ; shift
+				local useNoIndex="--no-index"
 			;;
 			*)
 				break
 			;;
 		esac
 	done
-
-	if [ -z "$filterProjects" ] ; then
-		echo "ERROR: ExecuteInteractive: 'filterProjects' argument (name or keyword or substring) is required!" >&2
-		return 1
-	fi
-
-	local sshTargets="$( ListSshTargets $filterProjects --line-prefix 'ExecuteInteractive --project' --line-suffix ' ;' -t "$@" )"
+	
+	local sshTargets="$( \
+		ListSshTargets --select-from-env \
+			--line-prefix 'ExecuteInteractive --project' \
+			--line-suffix ' ;' \
+			-t "$@" \
+	)"
 	
 	echo "Will execute: " >&2
 	local textLine
 	echo "$sshTargets" | while read textLine ; do
-		printf "  %q" $textLine >&2
-		echo >&2
+		echo "  $textLine" >&2
 	done
-	
-	echo
-	echo "...sleeping for 5 seconds..." >&2
+
+	printf "\n%s\n" \
+		"...sleeping for 5 seconds..." \
+		>&2
 	sleep 5
-	
+
 	eval $sshTargets
 }
 
 case "$0" in
 	*/sh-scripts/ExecuteInteractive.fn.sh)
-		# ExecuteInteractive.fn.sh --select-keyword ndss --intersect-keyword ndns --remove-keyword live -l root 'myx.common install/updates'
-		#
-		# ExecuteInteractive.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# source "`myx.common which lib/prefix`" ; ExecuteInteractive.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' ; done )
-		# ExecuteInteractive.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
-		# ExecuteInteractive.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
-		# source "`myx.common which lib/prefix`" ;  ExecuteInteractive.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
-
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-stdin [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-script <script-name>  [<ssh arguments>...]" >&2
@@ -95,12 +98,13 @@ case "$0" in
 			echo "syntax: ExecuteInteractive.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Search:" >&2
-				echo "    --all / --filter-projects <glob> / --filter-keywords <keyword>" >&2
+				echo "    --select-{all|sequence|changed|none} " >&2
+				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
 				echo "  Examples:" >&2
-				echo "    ExecuteInteractive.fn.sh --filter-projects l6 -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --filter-keywords l6 -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --filter-provides deploy-ssh-target -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --all -l root uname -a" >&2
+				echo "    ExecuteInteractive.fn.sh --select-projects l6 -l root uname -a" >&2
+				echo "    ExecuteInteractive.fn.sh --select-merged-keywords l6 -l root uname -a" >&2
+				echo "    ExecuteInteractive.fn.sh --select-provides deploy-ssh-target: -l root uname -a" >&2
+				echo "    ExecuteInteractive.fn.sh --select-all -l root uname -a" >&2
 			fi
 			exit 1
 		fi
