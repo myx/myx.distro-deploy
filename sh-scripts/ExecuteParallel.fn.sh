@@ -27,7 +27,7 @@ ExecuteParallel(){
 			set -e
 			local internSourceProject="$1" ; shift
 			local internTargetCommand="$@"
-			Prefix "$internSourceProject: $( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
+			Prefix "$( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
 			return 0
 		;;
 		--all-targets)
