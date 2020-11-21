@@ -21,7 +21,6 @@ ExecuteInteractive(){
 	
 	set -e
 
-	local projectsSelected=""
 	case "$1" in
 		--project)
 			shift
@@ -35,8 +34,7 @@ ExecuteInteractive(){
 		;;
 		--select-from-env)
 			shift
-			local projectsSelected="$MMDENVSELECTION"
-			if [ -z "$projectsSelected" ] ; then
+			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
 				echo "ERROR: ListSshTargets: no projects selected!" >&2
 				return 1
 			fi

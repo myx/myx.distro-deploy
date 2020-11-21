@@ -16,12 +16,10 @@ Require ListDistroProvides
 
 ListSshTargets(){
 	
-	[ -z "$MDSC_DETAIL" ] || echo ">>> ListSshTargets $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> ListSshTargets $@" >&2
 
 	set -e
 
-	local projectsSelected=""
-	
 	case "$1" in
 		--internal-print-line)
 			printf '%s' "$linePrefix"
@@ -38,8 +36,7 @@ ListSshTargets(){
 		;;
 		--select-from-env)
 			shift
-			local projectsSelected="$MMDENVSELECTION"
-			if [ -z "$projectsSelected" ] ; then
+			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
 				echo "ERROR: ListSshTargets: no projects selected!" >&2
 				return 1
 			fi
