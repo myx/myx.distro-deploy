@@ -1,0 +1,8 @@
+echo "Syntax: Distro <commandName> ...<arguments>" >&2
+echo "	Info:" >&2
+echo "		distro folder: $MMDAPP" >&2
+echo "		MDSC_OPTION: ${MDSC_OPTION:-"Not Set"}" >&2
+echo "		MDSC_SOURCE: ${MDSC_SOURCE:-"Not Set"}" >&2
+echo "		MDSC_CACHED: ${MDSC_CACHED:-"Not Set"}" >&2
+echo "		MDSC_OUTPUT: ${MDSC_OUTPUT:-"Not Set"}" >&2
+return 1

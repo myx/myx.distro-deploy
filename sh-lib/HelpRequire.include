@@ -1,0 +1,2 @@
+echo "Syntax: Require <distroCommandName>" >&2
+return 1

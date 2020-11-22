@@ -62,15 +62,6 @@ ConnectPort(){
 case "$0" in
 	*/sh-scripts/ConnectPort.fn.sh)
 		# ConnectPort.fn.sh  
-		# ConnectPort.fn.sh --no-project
-		# ConnectPort.fn.sh --no-target
-		# ConnectPort.fn.sh --select-keyword ndss --intersect-keyword ndns --remove-keyword live -l root 'myx.common install/updates'
-		#
-		# ConnectPort.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# source "`myx.common which lib/prefix`" ; ConnectPort.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' ; done )
-		# ConnectPort.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
-		# ConnectPort.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
-		# source "`myx.common which lib/prefix`" ;  ConnectPort.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
 		
 		ConnectPort "$@"
 	;;

@@ -8,7 +8,7 @@ if [ -z "$MMDAPP" ] ; then
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include"
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 	DistroShellContext --distro-path-auto
 fi
 
@@ -67,16 +67,15 @@ ScreenTo(){
 
 case "$0" in
 	*/sh-scripts/ScreenTo.fn.sh)
-		# ScreenTo.fn.sh  
-		# ScreenTo.fn.sh --no-project
-		# ScreenTo.fn.sh --no-target
-		# ScreenTo.fn.sh --select-keyword ndss --intersect-keyword ndns --remove-keyword live -l root 'myx.common install/updates'
-		#
-		# ScreenTo.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# source "`myx.common which lib/prefix`" ; ScreenTo.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' ; done )
-		# ScreenTo.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
-		# ScreenTo.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
-		# source "`myx.common which lib/prefix`" ;  ScreenTo.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			echo "syntax: ScreenTo.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "syntax: ScreenTo.fn.sh [--help]" >&2
+			if [ "$1" = "--help" ] ; then
+				echo "  Examples:" >&2
+				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
+			fi
+			exit 1
+		fi
 		
 		ScreenTo "$@"
 	;;

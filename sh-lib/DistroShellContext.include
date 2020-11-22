@@ -49,18 +49,19 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	Require(){
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
-			ShowDistroInfo.fn.sh ; return 1
+			. "$MDSC_SOURCE/myx/myx.distro-deploy/sh-lib/HelpRequire.include"
+			return 1
 		fi
 		if type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 			return 0
 		fi
 		
 		if [ -f "$MDSC_SOURCE/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-			source "$MDSC_SOURCE/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			. "$MDSC_SOURCE/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 			return 0
 		fi
 		if [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-			source "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			. "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 			return 0
 		fi
 		source "${distroCommand%.fn.sh}.fn.sh"
@@ -71,10 +72,11 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	Distro(){
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
-			ShowDistroInfo.fn.sh ; return 1
+			. "$MDSC_SOURCE/myx/myx.distro-deploy/sh-lib/HelpDistro.include"
+			return 1
 		fi
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-			source "${distroCommand%.fn.sh}.fn.sh"
+			. "${distroCommand%.fn.sh}.fn.sh"
 		fi
 		"${distroCommand%.fn.sh}" "$@"
 	}

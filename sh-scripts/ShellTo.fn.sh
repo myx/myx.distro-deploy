@@ -65,15 +65,6 @@ ShellTo(){
 case "$0" in
 	*/sh-scripts/ShellTo.fn.sh)
 		# ShellTo.fn.sh  
-		# ShellTo.fn.sh --no-project
-		# ShellTo.fn.sh --no-target
-		# ShellTo.fn.sh --select-keyword ndss --intersect-keyword ndns --remove-keyword live -l root 'myx.common install/updates'
-		#
-		# ShellTo.fn.sh --no-project | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )
-		# source "`myx.common which lib/prefix`" ; ShellTo.fn.sh --no-project -l root | ( while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' ; done )
-		# ShellTo.fn.sh --no-project -l root | ( source "`myx.common which lib/async`" ;  while read -r sshCommand ; do Async -2 $sshCommand 'uname -a' ; wait ; done )
-		# ShellTo.fn.sh --no-project -l root | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait )
-		# source "`myx.common which lib/prefix`" ;  ShellTo.fn.sh --no-project -l root | while read -r sshCommand ; do Prefix -2 $sshCommand 'whoami' & done ; wait
 		
 		ShellTo "$@"
 	;;
