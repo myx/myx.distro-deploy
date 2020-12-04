@@ -64,6 +64,14 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 			. "$MMDAPP/source/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 			return 0
 		fi
+		if [ -f "$MDSC_SOURCE/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			. "$MDSC_SOURCE/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			return 0
+		fi
+		if [ -f "$MMDAPP/source/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			. "$MMDAPP/source/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			return 0
+		fi
 		source "${distroCommand%.fn.sh}.fn.sh"
 		return 0
 	}

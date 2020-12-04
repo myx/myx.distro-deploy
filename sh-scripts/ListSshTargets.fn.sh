@@ -99,6 +99,7 @@ case "$0" in
 				echo "  Search:" >&2
 				echo "    --select-{all|sequence|changed|none} " >&2
 				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
+				echo "    --{select|filter|remove}-repository-projects <repositoryName>" >&2
 				echo "  Examples:" >&2
 				echo "    ListSshTargets.fn.sh --all-targets" >&2
 

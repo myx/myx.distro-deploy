@@ -1,0 +1,2 @@
+echo "Syntax: Deploy <distroCommandName>" >&2
+return 1

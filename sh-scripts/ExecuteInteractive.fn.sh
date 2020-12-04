@@ -98,6 +98,7 @@ case "$0" in
 				echo "  Search:" >&2
 				echo "    --select-{all|sequence|changed|none} " >&2
 				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
+				echo "    --{select|filter|remove}-repository-projects <repositoryName>" >&2
 				echo "  Examples:" >&2
 				echo "    ExecuteInteractive.fn.sh --select-projects l6 -l root uname -a" >&2
 				echo "    ExecuteInteractive.fn.sh --select-merged-keywords l6 -l root uname -a" >&2
