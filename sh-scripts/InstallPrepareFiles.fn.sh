@@ -163,7 +163,7 @@ InstallPrepareFiles(){
 					return 1
 				fi
 				mkdir -p "$targetPath/$mergePath"
-				rsync -r --chmod=ug+rw --omit-dir-times "$fileName/" "$targetPath/$mergePath/"
+				rsync -rt --chmod=ug+rw --omit-dir-times "$fileName/" "$targetPath/$mergePath/"
 			done
 			return 0
 		;;
@@ -176,7 +176,7 @@ InstallPrepareFiles(){
 			fi
 			InstallPrepareFiles "$projectName" --print-files \
 			| while read  -r sourceBase sourcePath mergePath ; do
-				rsync "$sourceBase/$sourcePath/" "$targetPath/$mergePath/$sourcePath/"
+				rsync -t "$sourceBase/$sourcePath/" "$targetPath/$mergePath/$sourcePath/"
 			done
 			return 1
 		;;
@@ -188,6 +188,7 @@ InstallPrepareFiles(){
 			trap "rm -rf $tempDirectory" EXIT
 
 			( cd "$tempDirectory" ; find "." -type f | sort ) 
+			return 0 
 		;;
 		--to-temp2)
 			local tempDirectory="`mktemp -d -t "MDSC_IPF"`"
@@ -196,7 +197,16 @@ InstallPrepareFiles(){
 			echo "InstallPrepareFiles: temp prepared" >&2
 			trap "rm -rf $tempDirectory" EXIT
 
-			( cd "$tempDirectory" ; find "." -type f | sort ) 
+			( cd "$tempDirectory" ; find "." -type f | sort )
+			return 0 
+		;;
+		--to-deploy-output)
+			if [ ! -d "$MMDAPP/output" ] ; then
+				echo "ERROR: InstallPrepareFiles: deploy-output directory is missing: $MMDAPP/output" >&2; 
+				return 1
+			fi
+			InstallPrepareFiles "$projectName" --to-directory "$MMDAPP/output/deploy/$projectName"
+			return 0
 		;;
 	esac
 

@@ -17,7 +17,8 @@ Require ListProjectProvides
 DeployProjectSsh(){
 	local projectName="$1" ; shift
 	if [ -z "$projectName" ] ; then
-		echo "DeployProjectSsh: 'projectName' argument is required!" >&2 ; return 1
+		echo "ERROR: DeployProjectSsh: 'projectName' argument is required!" >&2
+		return 1
 	fi
 	
 	local doFiles
@@ -67,8 +68,8 @@ DeployProjectSsh(){
 		InstallPrepareFiles "$projectName" --to-directory "$cacheFolder/sync"
 	fi
 	if [ ! -z "$doScripts" ] ; then
-		Require InstallPrepareScripts
-		InstallPrepareScripts "$projectName" --to-file "$cacheFolder/exec"
+		Require InstallPrepareScript
+		InstallPrepareScript "$projectName" --to-file "$cacheFolder/exec"
 	fi
 	
 	# ssh $sshHost -p $sshPort "$@"
