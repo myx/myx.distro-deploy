@@ -17,6 +17,8 @@ Require ListProjectProvides
 DeployProjectSsh(){
 	set -e
 
+	[ -z "$MDSC_DETAIL" ] || echo "> DeployProjectSsh $@" >&2
+
 	if [ ! -d "$MMDAPP/output" ] ; then
 		echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
 		return 1
@@ -212,18 +214,24 @@ DeployProjectSsh(){
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
 						if [ "true" = "$doSleep" ] ; then
-							echo 'echo "... sleeping for 5 seconds ..." >&2'
+							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
 							echo 'sleep 5'
 						fi
+
+						echo 'echo "ImageDeploy: uploading..." >&2'
 
 						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 						tar zcf - -C "$MMDAPP/output/deploy/$projectName/sync/" . | uuencode -m packed.tgz 
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
 
+						echo 'echo "ImageDeploy: syncing files..." >&2'
+
 						DeployProjectSsh --project "$projectName" --print-sync-tasks | while read -r sourcePath targetPath ; do
 							echo "mkdir -p -m 770 '$targetPath'"
 							echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times './$sourcePath/' '$targetPath'"
 						done
+
+						echo 'echo "ImageDeploy: task finished." >&2'
 
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
 					) | $sshTarget sudo bash 
@@ -243,20 +251,28 @@ DeployProjectSsh(){
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
 						if [ "true" = "$doSleep" ] ; then
-							echo 'echo "... sleeping for 5 seconds ..." >&2'
+							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
 							echo 'sleep 5'
 						fi
+
+						echo 'echo "ImageDeploy: uploading..." >&2'
 
 						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 						tar zcf - -C "$MMDAPP/output/deploy/$projectName/" . | uuencode -m packed.tgz 
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
 
+						echo 'echo "ImageDeploy: syncing files..." >&2'
+
 						DeployProjectSsh --project "$projectName" --print-sync-tasks | while read -r sourcePath targetPath ; do
 							echo "mkdir -p -m 770 '$targetPath'"
 							echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times './sync/$sourcePath/' '$targetPath'"
 						done
-						
+
+						echo 'echo "ImageDeploy: executing scripts..." >&2'
+
 						echo 'bash ./exec'
+
+						echo 'echo "ImageDeploy: task finished." >&2'
 
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
 					) | $sshTarget sudo bash 

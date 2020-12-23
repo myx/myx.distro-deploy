@@ -2,14 +2,33 @@
 
 # Image Deploy Remote Host Script prefix
 
-IMAGE_START_DATE="$(date +%s)"
+MDSC_DEPLOY_STARTED="$(date +%s)"
 
-IMAGE_UNPACK_DIR="$(mktemp -d)"
-echo "ImageDeploy: hostname $(hostname), user $(whoami), using temporary directory: $IMAGE_UNPACK_DIR" >&2
+MDSC_IMAGE_UNPACK_DIR="$(mktemp -d)"
+echo "ImageDeploy: hostname $(hostname), user $(whoami), using temporary directory: $MDSC_IMAGE_UNPACK_DIR" >&2
 
-# mount -t tmpfs tmpfs "$IMAGE_UNPACK_DIR"
-# trap 'cd / ; umount -f "$IMAGE_UNPACK_DIR" ; rm -fR "$IMAGE_UNPACK_DIR"' EXIT
 
-trap 'cd / ; rm -fR "$IMAGE_UNPACK_DIR"' EXIT
+DeployTaskCleanup(){
+	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: leaving directory..." >&2
+	cd /
+	
+	if [ "true" = "$IMAGE_USE_TEMPFS" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: unmounting tempfs..." >&2
+		umount -f "$MDSC_IMAGE_UNPACK_DIR"
+	fi
+	
+	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: removing temporaries..." >&2
+	rm -fR "$MDSC_IMAGE_UNPACK_DIR"
 
-cd "$IMAGE_UNPACK_DIR"
+	echo "ImageDeploy: cleaned up." >&2
+}
+
+trap DeployTaskCleanup EXIT
+
+if mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" ; then
+	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: tmpfs mounted" >&2
+	IMAGE_USE_TEMPFS=true
+fi
+
+cd "$MDSC_IMAGE_UNPACK_DIR"
+

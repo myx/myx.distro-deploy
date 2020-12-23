@@ -1,1 +1,1 @@
-echo "ImageDeploy: Done. Took: $( echo "$(date +%s)-$IMAGE_START_DATE" | bc ) seconds." >&2
+echo "ImageDeploy: Done. Took: $( echo "$(date +%s)-$MDSC_DEPLOY_STARTED" | bc ) seconds." >&2
