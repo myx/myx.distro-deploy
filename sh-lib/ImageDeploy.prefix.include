@@ -1,0 +1,15 @@
+#!/bin/sh
+
+# Image Deploy Remote Host Script prefix
+
+IMAGE_START_DATE="$(date +%s)"
+
+IMAGE_UNPACK_DIR="$(mktemp -d)"
+echo "ImageDeploy: hostname $(hostname), user $(whoami), using temporary directory: $IMAGE_UNPACK_DIR" >&2
+
+# mount -t tmpfs tmpfs "$IMAGE_UNPACK_DIR"
+# trap 'cd / ; umount -f "$IMAGE_UNPACK_DIR" ; rm -fR "$IMAGE_UNPACK_DIR"' EXIT
+
+trap 'cd / ; rm -fR "$IMAGE_UNPACK_DIR"' EXIT
+
+cd "$IMAGE_UNPACK_DIR"
