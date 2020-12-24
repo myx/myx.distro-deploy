@@ -15,9 +15,9 @@ fi
 Require ListProjectProvides
 
 DeployProjectSsh(){
-	set -e
-
 	[ -z "$MDSC_DETAIL" ] || echo "> DeployProjectSsh $@" >&2
+
+	set -e
 
 	if [ ! -d "$MMDAPP/output" ] ; then
 		echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
@@ -36,53 +36,51 @@ DeployProjectSsh(){
 		return 1
 	fi
 
-	local doFiles="${doFiles:-auto}" 
-	local doScripts="${doScripts:-auto}"
-	local doSshHost="${doSshHost:-}"
-	local doSshPort="${doSshPort:-}"
-	local doSshUser="${doSshUser:-}"
-	local doSshClient="${doSshClient:-}"
-	local doSleep="${doSleep:-true}"
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshClient="${useSshClient:-}"
+
+	local prepareFiles="${prepareFiles:-auto}" 
+	local prepareScripts="${prepareScripts:-auto}"
+
+	local executeSleep="${executeSleep:-true}"
 	
 	while true ; do
 		case "$1" in
+			--ssh-host)
+				shift ; useSshHost="$1" ; shift
+			;;
+			--ssh-port)
+				shift ; useSshPort="$1" ; shift
+			;;
+			--ssh-user)
+				shift ; useSshUser="$1" ; shift
+			;;
+			--ssh-client)
+				shift ; useSshClient="$1" ; shift
+			;;
 			--prepare-exec)
 				shift
-				local doScripts="true"
+				local prepareScripts="true"
 			;;
 			--prepare-sync)
 				shift
-				local doFiles="true"
+				local prepareFiles="true"
 			;;
 			--prepare-full)
 				shift
-				local doFiles="true"
-				local doScripts="true"
+				local prepareFiles="true"
+				local prepareScripts="true"
 			;;
 			--prepare-none)
 				shift
-				local doFiles="false"
-				local doScripts="false"
+				local prepareFiles="false"
+				local prepareScripts="false"
 			;;
 			--no-sleep)
 				shift
-				doSleep="false"
-			;;
-			--ssh-host)
-				shift
-				doSshHost="$1" ; shift
-			;;
-			--ssh-port)
-				shift
-				doSshPort="$1" ; shift
-			;;
-			--ssh-user)
-				shift
-				doSshUser="$1" ; shift
-			;;
-			--ssh-client)
-				shift
-				doSshClient="$1" ; shift
+				executeSleep="false"
 			;;
 			*)
 				break
@@ -94,17 +92,17 @@ DeployProjectSsh(){
 	
 	mkdir -p "$cacheFolder"
 	
-	if [ "true" = "$doFiles" ] ; then
+	if [ "true" = "$prepareFiles" ] ; then
 		echo "DeployProjectSsh: --prepare-sync" >&2
 		Require InstallPrepareFiles
 		InstallPrepareFiles "$projectName" --to-directory "$cacheFolder/sync"
-		local doFiles="auto" 
+		local prepareFiles="auto" 
 	fi
-	if [ "true" = "$doScripts" ] ; then
+	if [ "true" = "$prepareScripts" ] ; then
 		echo "DeployProjectSsh: --prepare-exec" >&2
 		Require InstallPrepareScript
 		InstallPrepareScript "$projectName" --to-file "$cacheFolder/exec"
-		local doScripts="auto"
+		local prepareScripts="auto"
 	fi
 	
 	while true ; do
@@ -124,7 +122,7 @@ DeployProjectSsh(){
 					return 1
 				fi
 				local outputPath="$MMDAPP/output/deploy/$projectName/sync"
-				if [ "true" = "$doFiles" ] || [ "auto" = "$doFiles" -a  ! -d "$outputPath"  ] ; then
+				if [ "true" = "$prepareFiles" ] || [ "auto" = "$prepareFiles" -a  ! -d "$outputPath"  ] ; then
 					require InstallPrepareFiles
 					InstallPrepareFiles "$projectName" --to-directory "$outputPath"
 				fi
@@ -166,7 +164,7 @@ DeployProjectSsh(){
 					return 1
 				fi
 				local outputPath="$MMDAPP/output/deploy/$projectName/exec"
-				if [ "true" = "$doScripts" ] || [ "auto" = "$doScripts" -a  ! -f "$outputPath"  ] ; then
+				if [ "true" = "$prepareScripts" ] || [ "auto" = "$prepareScripts" -a  ! -f "$outputPath"  ] ; then
 					Require InstallPrepareScript
 					InstallPrepareScript "$projectName" --to-file "$outputPath"
 				fi
@@ -186,9 +184,9 @@ DeployProjectSsh(){
 				
 				ListProjectProvides "$projectName" | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r sshTarget ; do
 					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
-					local sshUser="${doSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-					local sshHost="${doSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-					local sshPort="${doSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
+					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
+					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
 					printf 'ssh %s -p %s -l %s\n' "$sshHost" "$sshPort" "${sshUser:-root}"
 				done
 				return 0
@@ -213,7 +211,7 @@ DeployProjectSsh(){
 					( \
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
-						if [ "true" = "$doSleep" ] ; then
+						if [ "true" = "$executeSleep" ] ; then
 							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
 							echo 'sleep 5'
 						fi
@@ -250,7 +248,7 @@ DeployProjectSsh(){
 					( \
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
-						if [ "true" = "$doSleep" ] ; then
+						if [ "true" = "$executeSleep" ] ; then
 							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
 							echo 'sleep 5'
 						fi
@@ -290,16 +288,8 @@ DeployProjectSsh(){
 		esac
 	done
 
-	local sshTarget="`ListProjectProvides "$projectName" --print-provides-only --filter-and-cut deploy-ssh-target`"
-	if [ -z "$sshTarget" ] ; then
-		echo "ERROR: DeployProjectSsh: $projectName does not have ssh target set!" >&2
-		return 1
-	fi
-	
-	local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
-	local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
-	
-	# ssh $sshHost -p $sshPort "$@"
+	echo "ERROR: DeployProjectSsh: oops, not supposed to get here!" >&2
+	return 1
 }
 
 case "$0" in

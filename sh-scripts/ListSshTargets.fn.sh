@@ -40,11 +40,34 @@ ListSshTargets(){
 	local useNoCache=""
 	local useNoIndex=""
 
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshClient="${useSshClient:-}"
+
 	local linePrefix=""
 	local lineSuffix=""
 	
 	while true ; do
 		case "$1" in
+			--no-cache)
+				shift ; local useNoCache="--no-cache"
+			;;
+			--no-index)
+				shift ; local useNoIndex="--no-index"
+			;;
+			--ssh-host)
+				shift ; useSshHost="$1" ; shift
+			;;
+			--ssh-port)
+				shift ; useSshPort="$1" ; shift
+			;;
+			--ssh-user)
+				shift ; useSshUser="$1" ; shift
+			;;
+			--ssh-client)
+				shift ; useSshClient="$1" ; shift
+			;;
 			--all-targets)
 				shift
 				if [ ! -z "$1" ] ; then
@@ -53,9 +76,11 @@ ListSshTargets(){
 				fi
 				
 				ListDistroProvides --all-provides | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r projectName sshTarget ; do
-					local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
-					local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
-					printf '%s%s ssh %s -p %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "$extraArguments" "$lineSuffix"
+					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
+					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
+					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
+					printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
 				done
 				return 0
 			;;
@@ -67,21 +92,15 @@ ListSshTargets(){
 				shift
 				local lineSuffix="$1" ; shift
 			;;
-			--no-cache)
-				shift
-				local useNoCache="--no-cache"
-			;;
-			--no-index)
-				shift
-				local useNoIndex="--no-index"
-			;;
 			*)
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 			
 				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r projectName sshTarget ; do
-					local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
-					local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
-					printf '%s%s ssh %s -p %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "$extraArguments" "$lineSuffix"
+					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
+					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
+					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
+					printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
 				done
 				return 0
 			;;
