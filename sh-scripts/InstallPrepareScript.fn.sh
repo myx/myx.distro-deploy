@@ -25,8 +25,8 @@ InstallPrepareScript(){
 	case "$1" in
 		--print-files)
 			( \
-				ListProjectProvides "$projectName" --merge-sequence --filter-and-cut deploy-install-before ;
-				ListProjectProvides "$projectName" --merge-sequence --filter-and-cut deploy-install-after | tail -r ;
+				ListProjectProvides "$projectName" --merge-sequence --filter-and-cut image-install:exec-update-before ;
+				ListProjectProvides "$projectName" --merge-sequence --filter-and-cut image-install:exec-update-after | tail -r ;
 			) \
 			| while read -r projectName scriptPath ; do
 				local fileName="$MDSC_SOURCE/$projectName/$scriptPath"
