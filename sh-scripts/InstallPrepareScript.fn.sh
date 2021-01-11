@@ -101,8 +101,8 @@ case "$0" in
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    InstallPrepareScript.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz --print-script" >&2
-				echo "    InstallPrepareScript.fn.sh prv/hosts/setup.host-l6b2h1.myx.co.nz --print-files" >&2
-				echo "    InstallPrepareScript.fn.sh prv/hosts/setup.host-l6b2h1.myx.co.nz --print-script" >&2
+				echo "    InstallPrepareScript.fn.sh prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-files" >&2
+				echo "    InstallPrepareScript.fn.sh prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-script" >&2
 			fi
 			exit 1
 		fi
