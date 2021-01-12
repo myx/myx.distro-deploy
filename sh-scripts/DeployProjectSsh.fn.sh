@@ -201,10 +201,11 @@ DeployProjectSsh(){
 				fi
 				return 0
 			;;
-			--deploy-sync)
+			--deploy-sync|--deploy-exec|--deploy-full)
+				local deployType="${1#--deploy-}"
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-sync option ($@)" >&2
+					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-$deployType option ($@)" >&2
 					return 1
 				fi
 
@@ -224,167 +225,77 @@ DeployProjectSsh(){
 						echo 'echo "ImageDeploy: uploading..." >&2'
 
 						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-						tar zcf - -C "$MMDAPP/output/deploy/$projectName/sync/" . | uuencode -m packed.tgz 
+						tar zcf - -C "$MMDAPP/output/deploy/$projectName/" "` echo "$deployType" | sed 's|full|.|' `" | uuencode -m packed.tgz 
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
 
-						echo 'echo "ImageDeploy: syncing files..." >&2'
-
-						# DeployProjectSsh --project "$projectName" --print-sync-tasks \
-					
-						echo "$mergedProvides" \
-						| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
-						| while read -r declaredAt sourcePath targetPath ; do
-							local fileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath"
-							if [ ! -d "$fileName" ] ; then
-								echo "ERROR: DeployProjectSsh: directory is missing: $fileName, declared at $declaredAt" >&2 
-								return 1
-							fi
-							echo "$sourcePath" "$targetPath"
-						done \
-						| awk '!x[$0]++' \
-						| while read -r sourcePath targetPath ; do
-
+						if [ "$deployType" != "exec" ] ; then
+							echo 'echo "ImageDeploy: syncing files..." >&2'
+	
+							# DeployProjectSsh --project "$projectName" --print-sync-tasks \
+						
 							echo "$mergedProvides" \
-							| grep " image-install:clone-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
-							| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
-								local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
-								if [ ! -f "$localFileName" ] ; then
-									echo "ERROR: DeployProjectSsh: file is missing: $localFileName, declared at $declaredAt" >&2 
+							| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
+							| while read -r declaredAt sourcePath targetPath ; do
+								local fileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath"
+								if [ ! -d "$fileName" ] ; then
+									echo "ERROR: DeployProjectSsh: directory is missing: $fileName, declared at $declaredAt" >&2 
 									return 1
 								fi
-								if [ -z "$useVariable" ] ; then
-									echo rsync -rltoD --delete --chmod=ug+rw "'$sourcePath/$filePath/$fileName'" "'$sourcePath/$filePath/$targetPattern'"
+								echo "$sourcePath" "$targetPath"
+							done \
+							| awk '!x[$0]++' \
+							| while read -r sourcePath targetPath ; do
+	
+								echo "$mergedProvides" \
+								| grep " image-install:patch-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
+								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
+									local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
+									if [ ! -f "$localFileName" ] ; then
+										echo "ERROR: DeployProjectSsh: file is missing: $localFileName, declared at $declaredAt" >&2 
+										return 1
+									fi
+									if [ -z "$useVariable" ] ; then
+										echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/$targetPattern'"
+									else
+										local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+										for useValue in $useValues ; do
+											echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
+										done
+									fi
+								done
+	
+								echo "$mergedProvides" \
+								| grep " image-install:clone-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
+								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
+									local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
+									if [ ! -f "$localFileName" ] ; then
+										echo "ERROR: DeployProjectSsh: file is missing: $localFileName, declared at $declaredAt" >&2 
+										return 1
+									fi
+									if [ -z "$useVariable" ] ; then
+										echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/$targetPattern'"
+									else
+										local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+										for useValue in $useValues ; do
+											echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
+										done
+									fi
+								done
+	
+								if [ -d "$MMDAPP/output/deploy/$projectName/sync/$sourcePath" ] ; then
+									echo "mkdir -p -m 770 '$targetPath'"
+									echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath'"
 								else
-									local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
-									for useValue in $useValues ; do
-										echo rsync -rltoD --delete --chmod=ug+rw "'$sourcePath/$filePath/$fileName'" "'$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
-									done
+									echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath'"
 								fi
+	
 							done
-
-							if [ -d "$MMDAPP/output/deploy/$projectName/sync/$sourcePath" ] ; then
-								echo "mkdir -p -m 770 '$targetPath'"
-								echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times './$sourcePath/' '$targetPath'"
-							else
-								echo "rsync -iprltoD --delete --chmod=ug+rw './$sourcePath' '$targetPath'"
-							fi
-
-						done
-
-						echo 'echo "ImageDeploy: task finished." >&2'
-
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
-					) | $sshTarget sudo bash 
-				done
-				return 0
-			;;
-			--deploy-full)
-				shift
-				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-full option ($@)" >&2
-					return 1
-				fi
-
-				Require ListDistroProvides
-				local mergedProvides="` ListDistroProvides --all-provides-merged | grep "^$projectName " | cut -d" " -f2,3 `"
-
-				DeployProjectSsh --project "$projectName" --print-ssh-targets | while read -r sshTarget ; do
-					echo "DeployProjectSsh: --deploy-full, using ssh: $sshTarget" >&2
-					( \
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
-
-						if [ "true" = "$executeSleep" ] ; then
-							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
-							echo 'sleep 5'
 						fi
 
-						echo 'echo "ImageDeploy: uploading..." >&2'
-
-						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-						tar zcf - -C "$MMDAPP/output/deploy/$projectName/" . | uuencode -m packed.tgz 
-						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
-
-						echo 'echo "ImageDeploy: syncing files..." >&2'
-
-						# DeployProjectSsh --project "$projectName" --print-sync-tasks \
-					
-						echo "$mergedProvides" \
-						| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
-						| while read -r declaredAt sourcePath targetPath ; do
-							local fileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath"
-							if [ ! -d "$fileName" ] ; then
-								echo "ERROR: DeployProjectSsh: directory is missing: $fileName, declared at $declaredAt" >&2 
-								return 1
-							fi
-							echo "$sourcePath" "$targetPath"
-						done \
-						| awk '!x[$0]++' \
-						| while read -r sourcePath targetPath ; do
-
-							echo "$mergedProvides" \
-							| grep " image-install:clone-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
-							| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
-								local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
-								if [ ! -f "$localFileName" ] ; then
-									echo "ERROR: DeployProjectSsh: file is missing: $localFileName, declared at $declaredAt" >&2 
-									return 1
-								fi
-								if [ -z "$useVariable" ] ; then
-									echo rsync -rltoD --delete --chmod=ug+rw "'$sourcePath/$filePath/$fileName'" "'$sourcePath/$filePath/$targetPattern'"
-								else
-									local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
-									for useValue in $useValues ; do
-										echo rsync -rltoD --delete --chmod=ug+rw "'$sourcePath/$filePath/$fileName'" "'$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
-									done
-								fi
-							done
-
-							if [ -d "$MMDAPP/output/deploy/$projectName/sync/$sourcePath" ] ; then
-								echo "mkdir -p -m 770 '$targetPath'"
-								echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times './$sourcePath/' '$targetPath'"
-							else
-								echo "rsync -iprltoD --delete --chmod=ug+rw './$sourcePath' '$targetPath'"
-							fi
-
-						done
-
-						echo 'echo "ImageDeploy: executing scripts..." >&2'
-
-						echo 'bash ./exec'
-
-						echo 'echo "ImageDeploy: task finished." >&2'
-
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
-					) | $sshTarget sudo bash 
-				done
-				return 0
-			;;
-			--deploy-exec)
-				shift
-				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-full option ($@)" >&2
-					return 1
-				fi
-
-				DeployProjectSsh --project "$projectName" --print-ssh-targets | while read -r sshTarget ; do
-					echo "DeployProjectSsh: --deploy-exec, using ssh: $sshTarget" >&2
-					( \
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
-
-						if [ "true" = "$executeSleep" ] ; then
-							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
-							echo 'sleep 5'
+						if [ "$deployType" != "sync" ] ; then
+							echo 'echo "ImageDeploy: executing scripts..." >&2'
+							echo 'bash ./exec'
 						fi
-
-						echo 'echo "ImageDeploy: uploading..." >&2'
-
-						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-						tar zcf - -C "$MMDAPP/output/deploy/$projectName/exec" . | uuencode -m packed.tgz 
-						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
-
-						echo 'echo "ImageDeploy: executing scripts..." >&2'
-
-						echo 'bash ./exec'
 
 						echo 'echo "ImageDeploy: task finished." >&2'
 
@@ -421,6 +332,9 @@ case "$0" in
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-sync --deploy-sync" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-sync --deploy-none" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-sync" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-exec" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-exec --deploy-exec" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --deploy-full" >&2
 				
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --print-ssh-targets" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
