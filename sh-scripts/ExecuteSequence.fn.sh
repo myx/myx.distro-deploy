@@ -174,6 +174,7 @@ case "$0" in
 				echo "    ExecuteSequence.fn.sh --select-projects l6 --execute-stdin -l root" >&2
 				echo "    ExecuteSequence.fn.sh --select-merged-keywords l6 --execute-stdin -l root bash" >&2
 				echo "    ExecuteSequence.fn.sh --select-all uname -a" >&2
+				echo "    ExecuteSequence.fn.sh --select-provides 'deploy-ssh-target:'  --execute-command 'myx.common install/myx.common-reinstall'" >&2
 				echo "    ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
 			fi
 			exit 1
