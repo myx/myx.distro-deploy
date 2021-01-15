@@ -14,6 +14,7 @@ DeployTaskCleanup(){
 	
 	if [ "true" = "$IMAGE_USE_TEMPFS" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: unmounting tempfs..." >&2
+		rm -fR "$MDSC_IMAGE_UNPACK_DIR/*" # do not leak tmpfs memory
 		umount -f "$MDSC_IMAGE_UNPACK_DIR"
 	fi
 	
@@ -25,7 +26,7 @@ DeployTaskCleanup(){
 
 trap DeployTaskCleanup EXIT
 
-if mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" ; then
+if [ "`myx.common os/getRamBytes`" -gt "4294967296" ] && mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" ; then
 	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: tmpfs mounted" >&2
 	IMAGE_USE_TEMPFS=true
 fi
