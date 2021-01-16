@@ -141,9 +141,9 @@ DeployProjectSsh(){
 				fi
 				
 				Require ListDistroProvides
-				local mergedProvides="` ListDistroProvides --all-provides-merged | grep "^$projectName " | cut -d" " -f2,3 `"
+				local projectProvides="` ListDistroProvides --all-provides-merged | grep "^$projectName " | cut -d" " -f2,3 `"
 			
-				echo "$mergedProvides" \
+				echo "$projectProvides" \
 				| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
 				| while read -r declaredAt sourcePath targetPath ; do
 					[ -z "$MDSC_DETAIL" ] || echo "DeployProjectSsh: input: $declaredAt $sourceName $sourcePath $targetPath" >&2
@@ -210,18 +210,21 @@ DeployProjectSsh(){
 				fi
 
 				Require ListDistroProvides
-				local mergedProvides="` ListDistroProvides --all-provides-merged | grep "^$projectName " | cut -d" " -f2,3 `"
+				local allProvides="$( ListDistroProvides --all-provides-merged )"
+				local projectProvides="$( echo "$allProvides" | grep "^$projectName " | cut -d" " -f2,3 )"
 
 				DeployProjectSsh --project "$projectName" --print-ssh-targets | while read -r sshTarget ; do
 					echo "DeployProjectSsh: --deploy-sync, using ssh: $sshTarget" >&2
 					( \
 						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
-
+						 
 						if [ "true" = "$executeSleep" ] ; then
 							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
 							echo 'sleep 5'
 						fi
 
+						[ -z "$MDSC_DETAIL" ] || echo 'MDSC_DETAIL=true'
+						
 						echo 'echo "ImageDeploy: uploading..." >&2'
 
 						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
@@ -232,21 +235,25 @@ DeployProjectSsh(){
 							echo 'echo "ImageDeploy: syncing files..." >&2'
 	
 							# DeployProjectSsh --project "$projectName" --print-sync-tasks \
-						
-							echo "$mergedProvides" \
-							| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
-							| while read -r declaredAt sourcePath targetPath ; do
-								local fileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath"
-								if [ ! -d "$fileName" ] ; then
-									echo "ERROR: DeployProjectSsh: directory is missing: $fileName, declared at $declaredAt" >&2 
-									return 1
-								fi
-								echo "$sourcePath" "$targetPath"
-							done \
-							| awk '!x[$0]++' \
+
+							local deploySyncFilesTasks="$(
+								echo "$projectProvides" \
+								| grep " image-install:deploy-sync-files:" | tr ':' ' ' | cut -d" " -f1,4- \
+								| while read -r declaredAt sourcePath targetPath ; do
+									local fileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath"
+									if [ ! -d "$fileName" ] ; then
+										echo "ERROR: DeployProjectSsh: directory is missing: $fileName, declared at $declaredAt" >&2 
+										return 1
+									fi
+									echo "$sourcePath" "$targetPath"
+								done \
+								| awk '!x[$0]++'
+							)"
+							
+							echo "$deploySyncFilesTasks" \
 							| while read -r sourcePath targetPath ; do
 	
-								echo "$mergedProvides" \
+								echo "$projectProvides" \
 								| grep " image-install:---patch-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
 								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
 									local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
@@ -264,7 +271,7 @@ DeployProjectSsh(){
 									fi
 								done
 	
-								echo "$mergedProvides" \
+								echo "$projectProvides" \
 								| grep " image-install:clone-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
 								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
 									local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
@@ -282,16 +289,37 @@ DeployProjectSsh(){
 									fi
 								done
 	
-								echo "$mergedProvides" \
-								| grep " image-install:---deploy-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
-								| while read -r declaredAt sourcePath scriptFile; do
-									local localFileName="$MMDAPP/output/deploy/$sourcePath/sync/$scriptFile"
-									if [ ! -f "$localFileName" ] ; then
-										echo "ERROR: DeployProjectSsh: script file is missing: $localFileName, declared at $declaredAt" >&2 
-										return 1
-									fi
-									echo "XXXX: DeployProjectSsh: declared at $declaredAt, $sourcePath, $scriptFile" >&2 
-								done
+							done
+
+							echo "$projectProvides" \
+							| grep " image-install:deploy-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+							| while read -r declaredAt sourceName scriptFile; do
+								[ -z "$MDSC_DETAIL" ] || echo "echo '* run: image-install:deploy-patch-script:$declaredAt:$sourceName:$scriptFile' >&2"
+								if [ "$sourceName" = "." ] ; then
+									local sourceName="$declaredAt"
+								fi
+								if [ -f "$MMDAPP/source/$sourceName/$scriptFile" ] ; then
+									echo "$declaredAt" "$sourceName" "$scriptFile"
+								else
+									echo "$allProvides" | grep " $sourceName$" | cut -d" " -f2 | awk '!x[$0]++' \
+									| while read -r checkProject ; do
+										if [ -f "$MMDAPP/source/$checkProject/$scriptFile" ] ; then
+											echo "$declaredAt" "$checkProject" "$scriptFile"
+										fi
+									done
+								fi
+							done \
+							| awk '!x[$0]++' \
+							| while read -r declaredAt sourceName scriptFile ; do
+								[ -z "$MDSC_DETAIL" ] || echo "echo '> run: image-install:deploy-patch-script:$declaredAt:$sourceName:$scriptFile' >&2"
+								printf "\n\n( cd sync ; uudecode -p | bash ) << 'EOF_PROJECT_SH_XXXXXXXX'\n"
+								cat "$MMDAPP/source/$sourceName/$scriptFile" | uuencode -m script.sh
+								printf '\nEOF_PROJECT_SH_XXXXXXXX\n\n'
+								[ -z "$MDSC_DETAIL" ] || echo "echo '< run: image-install:deploy-patch-script:$declaredAt:$sourceName:$scriptFile' >&2"
+							done
+
+							echo "$deploySyncFilesTasks" \
+							| while read -r sourcePath targetPath ; do
 	
 								if [ -d "$MMDAPP/output/deploy/$projectName/sync/$sourcePath" ] ; then
 									echo "mkdir -p -m 770 '$targetPath'"
