@@ -1,4 +1,4 @@
-[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+[ -z "$MMDAPP" ] && echo 'ERROR: $MMDAPP' is not set! >&2 && exit 1
 
 #
 # Runs DistroCommand by loading it's compiled code from a distro image folder 

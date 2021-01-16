@@ -1,4 +1,4 @@
-[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+[ -z "$MMDAPP" ] && echo 'ERROR: $MMDAPP' is not set! >&2 && exit 1
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
 

@@ -1,4 +1,4 @@
-[ -z "$MMDAPP" ] && echo '$MMDAPP' is not set! >&2 && exit 1
+[ -z "$MMDAPP" ] && echo 'ERROR: $MMDAPP' is not set! >&2 && exit 1
 
 # DistroShellContextSetInputSpec
 
@@ -26,11 +26,11 @@ fi
 
 if [ "$adpcChangeSpec" = "true" ] ; then
 	if [ -z "$1" ] ; then
-		echo "DistroShellContextSetInputSpec: inputSpec argument is required!" >&2
+		echo "ERROR: DistroShellContextSetInputSpec: inputSpec argument is required!" >&2
 		exit 1
 	fi
 	if ! DistroShellContext --is-spec-option "$1" ; then
-		echo "DistroShellContextSetInputSpec: inputSpec argument is invalid: $1" >&2
+		echo "ERROR: DistroShellContextSetInputSpec: inputSpec argument is invalid: $1" >&2
 		exit 1
 	fi
 fi
@@ -73,7 +73,7 @@ case "$1" in
 		MDSC_OPTION="--distro-from-distro"
 	;;
 	*)
-		echo "DistroShellContextSetInputSpec: Invalid input spec: $argOption" >&2
+		echo "ERROR: DistroShellContextSetInputSpec: Invalid input spec: $argOption" >&2
 		exit 1
 	;;
 esac

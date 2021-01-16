@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -225,7 +225,7 @@ DeployProjectSsh(){
 						echo 'echo "ImageDeploy: uploading..." >&2'
 
 						printf "\n( uudecode -p | tar zxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-						tar zcf - -C "$MMDAPP/output/deploy/$projectName/" "` echo "$deployType" | sed 's|full|.|' `" | uuencode -m packed.tgz 
+						tar zcf - -C "$MMDAPP/output/deploy/$projectName/" "` echo "$deployType" | sed 's|full|.|' `" | uuencode -m packed.tgz
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
 
 						if [ "$deployType" != "exec" ] ; then
@@ -247,7 +247,7 @@ DeployProjectSsh(){
 							| while read -r sourcePath targetPath ; do
 	
 								echo "$mergedProvides" \
-								| grep " image-install:patch-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
+								| grep " image-install:---patch-deploy-files:$sourcePath:" | tr ':' ' ' | cut -d" " -f1,4- \
 								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues ; do
 									local localFileName="$MMDAPP/output/deploy/$projectName/sync/$sourcePath/$filePath/$fileName"
 									if [ ! -f "$localFileName" ] ; then
@@ -280,6 +280,17 @@ DeployProjectSsh(){
 											echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
 										done
 									fi
+								done
+	
+								echo "$mergedProvides" \
+								| grep " image-install:---deploy-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+								| while read -r declaredAt sourcePath scriptFile; do
+									local localFileName="$MMDAPP/output/deploy/$sourcePath/sync/$scriptFile"
+									if [ ! -f "$localFileName" ] ; then
+										echo "ERROR: DeployProjectSsh: script file is missing: $localFileName, declared at $declaredAt" >&2 
+										return 1
+									fi
+									echo "XXXX: DeployProjectSsh: declared at $declaredAt, $sourcePath, $scriptFile" >&2 
 								done
 	
 								if [ -d "$MMDAPP/output/deploy/$projectName/sync/$sourcePath" ] ; then

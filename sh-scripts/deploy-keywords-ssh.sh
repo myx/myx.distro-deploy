@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if [ "`type -t ListProjectProvides`" != "function" ] ; then
@@ -14,7 +14,7 @@ fi
 DeployKeywordsSsh(){
 	local KWD="$1"
 	if [ -z "$KWD" ] ; then
-		echo "DeployKeywordsSsh: 'KWD' argument is required!" >&2 ; return 1
+		echo "ERROR: DeployKeywordsSsh: 'KWD' argument is required!" >&2 ; return 1
 	fi
 	
 	shift
