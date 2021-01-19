@@ -31,22 +31,22 @@ DistroImageCommand(){
 	local HAS_CPL=$(test -f "$FIL_CPL" && echo 'true' || true)
 	local HAS_SRC=$(test -f "$FIL_SRC" && echo 'true' || true)
 
-	local USE_OUT=$(test -n "$HAS_OUT" && \
+	local USE_OUT=$( test -n "$HAS_OUT" && \
 			test -z "$HAS_CPL" -o ! "$FIL_OUT" -ot "$FIL_CPL" && \
 			test -z "$HAS_SRC" -o ! "$FIL_OUT" -ot "$FIL_SRC" && \
-			echo "true" || true
+			echo "true" || true \
 		)
 
-	local USE_CPL=$(test -n "$HAS_CPL" -a -z "$USE_OUT" && \
+	local USE_CPL=$( test -n "$HAS_CPL" -a -z "$USE_OUT" && \
 			test -z "$HAS_OUT" -o ! "$FIL_CPL" -ot "$FIL_OUT" && \
 			test -z "$HAS_SRC" -o ! "$FIL_CPL" -ot "$FIL_SRC" && \
-			echo "true" || true
+			echo "true" || true \
 		)
 
-	local USE_SRC=$(test -n "$HAS_SRC" -a -z "$USE_OUT" -a -z "USE_CPL" && \
+	local USE_SRC=$( test -n "$HAS_SRC" -a -z "$USE_OUT" -a -z "$USE_CPL" && \
 			test -z "$HAS_OUT" -o ! "$FIL_SRC" -ot "$FIL_OUT" && \
 			test -z "$HAS_CPL" -o ! "$FIL_SRC" -ot "$FIL_CPL" && \
-			echo "true" || true
+			echo "true" || true \
 		)
 
 	test -n "$USE_SRC" -o -n "$USE_CPL" -o -n "$USE_OUT" || \
@@ -94,8 +94,6 @@ DistroImageCommand(){
 
 case "$0" in
 	*/sh-scripts/DistroImageCommand.fn.sh) 
-		DistroImageCommand \
-			"$@" \
-			--print ''
+		DistroImageCommand "$@" --print ''
 	;;
 esac
