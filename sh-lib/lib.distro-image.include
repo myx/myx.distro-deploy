@@ -1,0 +1,157 @@
+[ -z "$MDSC_DETAIL" ] || echo "+ DistroImage: library included" >&2
+
+# checks and updates MDSC_PRJ_NAME variable with project in focus
+# $3 is empty or 'local' or 'export'
+DistroSelectProject(){
+	if [ "$1" != "MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: DistroSelectProject: env name required to be MDSC_PRJ_NAME!" >&2
+		return 1
+	fi
+	if [ -z "$2" ] ; then
+		echo "ERROR: DistroSelectProject: project name required!" >&2
+		return 1
+	fi
+	if [ "$2" = "$MDSC_PRJ_NAME" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: same project ($2)" >&2
+		return 0
+	fi
+	if [ "$2" = "--reset" ] ; then
+		if [ -z "$MDSC_PRJ_NAME" ] ; then
+			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: already clean" >&2
+			return 0
+		fi
+		[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
+		export MDSC_PRJ_NAME=""
+		return 0
+	fi
+	case "$3" in
+		export)
+			export MDSC_PRJ_NAME="$2"
+			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected and exported ($2)" >&2
+			return 0
+		;;
+		'')
+			MDSC_PRJ_NAME="$2"
+			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected ($2)" >&2
+			return 0
+		;;
+		*)
+			echo "ERROR: DistroSelectProject: invalid extra option: $3" >&2
+			return 1
+		;;
+	esac
+}
+
+# sets MDSC_IDAPRV_NAME variable to all merged provides table file name
+DistroImageEnsureProvidesMergedFile(){
+	if [ "$1" != "MDSC_IDAPRV_NAME" ] ; then
+		echo "ERROR: DistroImageEnsureProvidesMergedFile: env name required to be MDSC_IDAPRV_NAME" >&2
+		return 1
+	fi
+	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: using env-cached ($MDSC_OPTION)" >&2
+		return 0
+	fi
+	if [ -f "$MDSC_CACHED/distro-merged-provides.txt" ] ; then
+		MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
+		return 0
+	fi
+	if [ -f "$MDSC_CACHED/distro-provides.txt" ] ; then
+		set -e
+		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: making index file ($MDSC_OPTION)" >&2
+		Require ListDistroProvides
+		MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
+		ListDistroProvides --explicit-noop --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
+		mv -f "$MDSC_IDAPRV_NAME.tmp" "$MDSC_IDAPRV_NAME"
+		return 0
+	fi
+	
+	echo "ERROR: DistroImageEnsureProvidesMergedFile: can't come up with a name" >&2
+	return 1
+}
+
+DistroImageSelectProjectMerged(){
+	echo "Not Implemented!" >&2
+}
+
+# echoes none/all matching folders or files
+# arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
+# output: declaredAt sourceName sourcePath <extraArguments>
+DistroImageCheckSourcePath(){
+	[ -z "$MDSC_DETAIL" ] || echo "> DistroImageCheckSourcePath $@" >&2
+
+	local checkProject
+	local projectName
+
+	while true ; do	
+		case "$1" in
+			--project)
+				shift
+				local projectName="$1" ; shift
+			;;
+			--path)
+				shift
+				local check="-d"
+			;;
+			--file)
+				shift
+				local check="-f"
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+	
+	local declaredAt="$1" ; shift
+	local sourceName="$1" ; shift
+	local sourcePath="$1" ; shift
+
+	if [ -z "$sourceName" ] ; then
+		echo "ERROR: DistroImageCheckSourcePath: arguments missing" >&2
+		return 1
+	fi
+
+	if [ "$sourceName" = "*" ] ; then
+		if [ -z "$projectName" ] ; then
+			echo "ERROR: DistroImageCheckSourcePath: '*' sourceName is not supported!" >&2
+			return 1
+		fi
+		
+		Require ListProjectSequence
+		ListProjectSequence "$projectName" \
+		| while read -r checkProject ; do
+			local checkDirectory="$MDSC_SOURCE/$checkProject/$sourcePath"
+			if [ -d "$checkDirectory" ] ; then
+				if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
+					echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
+				fi
+			fi
+		done
+		return 0
+	fi
+	
+	if [ "$sourceName" = "." ] ; then
+		local sourceName="$declaredAt"
+	fi
+	
+	if [ $check "$MDSC_SOURCE/$sourceName/$sourcePath" ] ; then
+		echo "$declaredAt" "$sourceName" "$sourcePath" "$@"
+		return 0
+	fi
+	
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+	cut -d" " -f2,3 "$MDSC_IDAPRV_NAME" | grep " $sourceName$" | cut -d" " -f1 | awk '!x[$0]++' \
+	| while read -r checkProject ; do
+		if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
+			echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
+		fi
+	done
+	return 0
+}
+
+# main shell command
+DistroImage(){
+	echo "Not Supported!" >&2
+	return 1
+}

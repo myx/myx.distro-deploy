@@ -4,5 +4,5 @@
 # Runs DistroCommand by loading it's compiled code from a distro image folder 
 #
 DistroFromImage(){
-	java -cp "$MMDAPP/output/cached/myx/myx.distro-source/java" ru.myx.distro.DistroImageCommand "$@"
+	java -cp "$MMDAPP/output/cached/myx/myx.distro-source/java" -cp "$MMDAPP/output/cached/myx/myx.distro-deploy/java" ru.myx.distro.DistroImageCommand "$@"
 }

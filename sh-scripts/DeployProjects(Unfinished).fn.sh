@@ -94,7 +94,7 @@ DeployProjectSsh(){
 				local outputPath="$MMDAPP/output/deploy/$projectName/sync"
 				if [ "true" = "$doFiles" ] || [ "auto" = "$doFiles" -a  ! -d "$outputPath"  ] ; then
 					require InstallPrepareFiles
-					InstallPrepareFiles "$projectName" --to-directory "$outputPath"
+					InstallPrepareFiles --project "$projectName" --to-directory "$outputPath"
 				fi
 				if [ ! -d "$outputPath" ] ; then
 					echo "ERROR: DeployProjectSsh: no sync folder found ($outputPath)" >&2
@@ -123,7 +123,7 @@ DeployProjectSsh(){
 				local outputPath="$MMDAPP/output/deploy/$projectName/exec"
 				if [ "true" = "$doScripts" ] || [ "auto" = "$doScripts" -a  ! -f "$outputPath"  ] ; then
 					Require InstallPrepareScript
-					InstallPrepareScript "$projectName" --to-file "$outputPath"
+					InstallPrepareScript --project "$projectName" --to-file "$outputPath"
 				fi
 				if [ ! -f "$outputPath" ] ; then
 					echo "ERROR: DeployProjectSsh: no installer script found ($outputPath)" >&2

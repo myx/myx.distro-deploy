@@ -1,0 +1,11 @@
+[ -z "$MDSC_DETAIL" ] || echo "+ ImageInstall: library included" >&2
+
+if ! type DistroImage >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+fi
+
+# main shell command
+ImageInstall(){
+	echo "Not Supported!" >&2
+	return 1
+}

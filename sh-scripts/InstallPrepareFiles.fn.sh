@@ -17,100 +17,71 @@ Require ListProjectSequence
 Require ListProjectProvides
 Require ListDistroProjects
 
+if ! type ImagePrepare >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
+fi
+
 InstallPrepareFiles(){
+
 	set -e
+
+	[ -z "$MDSC_DETAIL" ] || echo "> InstallPrepareFiles $@" >&2
+	# [ -z "$MDSC_DETAIL" ] || printf "| InstallPrepareFiles: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
-	local projectName="$1" ; shift
-	if [ -z "$projectName" ] ; then
-		echo "InstallPrepareFiles: 'projectName' argument is required!" >&2 ; return 1
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
+	
+	while true ; do
+		case "$1" in
+			--project)
+				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: InstallPrepareFiles: project is not selected!" >&2
+		return 1
 	fi
 
 	case "$1" in
 		--print-sync-folders)
-			local allProvides="`ListDistroProvides --all-provides-merged`"
+			DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+
+			local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-prepare:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
 		
-			echo "$allProvides" | grep "^$projectName " | cut -d" " -f2,3 \
+			echo "$projectProvides" \
 			| grep " image-prepare:sync-source-files:" | tr ':' ' ' | cut -d" " -f1,4- \
 			| while read -r declaredAt sourceName sourcePath mergePath ; do
 				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: input: $declaredAt $sourceName $sourcePath $mergePath" >&2
-				case "$sourceName" in
-					'*')
-						ListProjectSequence "$projectName" \
-						| while read -r checkProject ; do
-							local checkDirectory="$MDSC_SOURCE/$checkProject/$sourcePath"
-							if [ -d "$checkDirectory" ] ; then
-								if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
-									echo "$checkProject" "$sourcePath" "$mergePath"
-								fi
-							fi
-						done
-					;;
-					*)
-						if [ "$sourceName" = "." ] ; then
-							local sourceName="$declaredAt"
-						fi
-						if [ -d "$MDSC_SOURCE/$sourceName" ] ; then
-							echo "$sourceName" "$sourcePath" "$mergePath"
-						else
-							echo "$allProvides" | grep " $sourceName$" | cut -d" " -f2 | awk '!x[$0]++' \
-							| while read -r checkProject ; do
-								local checkDirectory="$MDSC_SOURCE/$checkProject/$sourcePath"
-								if [ -d "$checkDirectory" ] ; then
-									echo "$checkProject" "$sourcePath" "$mergePath"
-								fi
-							done
-						fi
-					;;
-				esac
+				DistroImageCheckSourcePath --path --project "$MDSC_PRJ_NAME" "$declaredAt" "$sourceName" "$sourcePath" "$mergePath" \
+				| cut -d" " -f2-
 			done \
 			| awk '!x[$0]++' \
-			| while read  -r sourceName sourcePath mergePath ; do
-				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: process: $sourceName $sourcePath $mergePath" >&2
+			| while read -r sourceName sourcePath mergePath ; do
+				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: process: $declaredAt $sourceName $sourcePath $mergePath" >&2
 				local fileName="$MDSC_SOURCE/$sourceName/$sourcePath"
 				if [ ! -d "$fileName" ] ; then
 					echo "ERROR: InstallPrepareFiles: directory is missing: $fileName" >&2; 
 					return 1
 				fi
 				echo "$sourceName" "$sourcePath" "$mergePath"
-			done 
+			done
 			return 0
 		;;
 		--print-clone-files)
-			local allProvides="`ListDistroProvides --all-provides-merged`"
+			DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 		
-			echo "$allProvides" | grep "^$projectName " | cut -d" " -f2,3 \
+			local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-prepare:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
+		
+			echo "$projectProvides" \
 			| grep " image-prepare:clone-source-file:" | tr ':' ' ' | cut -d" " -f1,4- \
 			| while read -r declaredAt sourceName sourcePath fileName targetPattern useVariable useValues ; do
 				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: input: $declaredAt $sourceName $sourcePath $fileName $targetPattern $useVariable $useValues" >&2
-				case "$sourceName" in
-					'*')
-						ListProjectSequence "$projectName" \
-						| while read -r checkProject ; do
-							local checkPath="$MDSC_SOURCE/$checkProject/$sourcePath/$fileName"
-							if [ -f "$checkPath" ] ; then
-								if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
-									echo "$checkProject" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues"
-								fi
-							fi
-						done
-					;;
-					*)
-						if [ "$sourceName" = "." ] ; then
-							local sourceName="$declaredAt"
-						fi
-						if [ -f "$MDSC_SOURCE/$sourceName/$fileName" ] ; then
-							echo "$sourceName" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues"
-						else
-							echo "$allProvides" | grep " $sourceName$" | cut -d" " -f2 | awk '!x[$0]++' \
-							| while read -r checkProject ; do
-								local checkPath="$MDSC_SOURCE/$checkProject/$sourcePath/$fileName"
-								if [ -f "$checkPath" ] ; then
-									echo "$checkProject" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues"
-								fi
-							done
-						fi
-					;;
-				esac
+				DistroImageCheckSourcePath --file --project "$MDSC_PRJ_NAME" "$declaredAt" "$sourceName" "$sourcePath/$fileName" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues" \
+				| cut -d" " -f2,4-
 			done \
 			| awk '!x[$0]++' \
 			| while read  -r sourceName sourcePath fileName targetPattern useVariable useValues; do
@@ -127,8 +98,8 @@ InstallPrepareFiles(){
 			return 0
 		;;
 		--print-sync-files)
-			local allSyncFolders="` InstallPrepareFiles "$projectName" --print-sync-folders `"
-			local allCloneFiles="` InstallPrepareFiles "$projectName" --print-clone-files `"
+			local allSyncFolders="$( InstallPrepareFiles --print-sync-folders )"
+			local allCloneFiles="$( InstallPrepareFiles --print-clone-files )"
 			
 			echo "$allSyncFolders" \
 			| while read  -r sourceName sourcePath mergePath ; do
@@ -162,8 +133,8 @@ InstallPrepareFiles(){
 				return 1
 			fi
 
-			local allSyncFolders="` InstallPrepareFiles "$projectName" --print-sync-folders `"
-			local allCloneFiles="` InstallPrepareFiles "$projectName" --print-clone-files `"
+			local allSyncFolders="$( InstallPrepareFiles --print-sync-folders )"
+			local allCloneFiles="$( InstallPrepareFiles --print-clone-files )"
 			
 			echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
@@ -190,7 +161,7 @@ InstallPrepareFiles(){
 			local saveDirectory="`pwd`"
 			trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
 			echo "InstallPrepareFiles: using temp: $tempDirectory" >&2
-			InstallPrepareFiles "$projectName" --to-directory "$tempDirectory"
+			InstallPrepareFiles --to-directory "$tempDirectory"
 			echo "InstallPrepareFiles: temp prepared" >&2
 
 			cd "$tempDirectory"
@@ -200,7 +171,7 @@ InstallPrepareFiles(){
 				return 0 
 			fi
 			 
-			"$@"
+			eval "$@"
 			return 0 
 		;;
 		--to-deploy-output)
@@ -208,7 +179,7 @@ InstallPrepareFiles(){
 				echo "ERROR: InstallPrepareFiles: deploy-output directory is missing: $MMDAPP/output" >&2; 
 				return 1
 			fi
-			InstallPrepareFiles "$projectName" --to-directory "$MMDAPP/output/deploy/$projectName"
+			InstallPrepareFiles --to-directory "$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
 			return 0
 		;;
 	esac
@@ -218,19 +189,19 @@ InstallPrepareFiles(){
 case "$0" in
 	*/sh-scripts/InstallPrepareFiles.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: InstallPrepareFiles.fn.sh <project> --print-sync-folders/--print-clone-files" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh <project> --print-sync-files" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh <project> --to-temp <command> [<argument...>]" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh <project> --to-directory <targetDirectory>" >&2
+			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --print-sync-folders/--print-clone-files" >&2
+			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --print-sync-files" >&2
+			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --to-temp <command> [<argument...>]" >&2
+			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --to-directory <targetDirectory>" >&2
 			echo "syntax: InstallPrepareFiles.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-sync-folders" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-clone-files" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-sync-files" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --to-temp find . | sort | grep web/default" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --to-temp 'pwd ; find . | sort'" >&2
-				echo "    InstallPrepareFiles.fn.sh ndm/cloud.ndm/setup.host-ndns011.ndm9.net --to-temp tar czvf - . > /dev/null" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-sync-folders" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-sync-files" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-clone-files" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp find . | sort | grep web/default" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp 'pwd ; find . | sort'" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp tar czvf - . > /dev/null" >&2
 			fi
 			exit 1
 		fi
