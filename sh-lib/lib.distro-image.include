@@ -22,16 +22,22 @@ DistroSelectProject(){
 		fi
 		[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
 		export MDSC_PRJ_NAME=""
+		# export MDSC_PRJ_MPRV=""
+		# export MDSC_PRJ_BSEQ=""
 		return 0
 	fi
 	case "$3" in
 		export)
 			export MDSC_PRJ_NAME="$2"
+			# export MDSC_PRJ_MPRV=""
+			# export MDSC_PRJ_BSEQ=""
 			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected and exported ($2)" >&2
 			return 0
 		;;
 		'')
 			MDSC_PRJ_NAME="$2"
+			# MDSC_PRJ_MPRV=""
+			# MDSC_PRJ_BSEQ=""
 			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected ($2)" >&2
 			return 0
 		;;
@@ -40,6 +46,35 @@ DistroSelectProject(){
 			return 1
 		;;
 	esac
+}
+
+# prints project merged provides
+DistroImageProjectProvidesMerged(){
+	#if [ ! -z "${MDSC_PRJ_MPRV:0:1}" ] ; then
+	#	echo "$MDSC_PRJ_MPRV"
+	#	return 0
+	#fi
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: DistroImageProjectProvidesMerged: project is not selected!" >&2
+		return 1
+	fi
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++'
+	return 0
+}
+
+DistroImageProjectSequence(){
+	#if [ ! -z "${MDSC_PRJ_BSEQ:0:1}" ] ; then
+	#	echo "$MDSC_PRJ_BSEQ"
+	#	return 0
+	#fi
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: DistroImageProjectSequence: project is not selected!" >&2
+		return 1
+	fi
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++'
+	return 0
 }
 
 # sets MDSC_IDAPRV_NAME variable to all merged provides table file name
@@ -74,34 +109,65 @@ DistroImageSelectProjectMerged(){
 	echo "Not Implemented!" >&2
 }
 
-# echoes none/all matching folders or files
-# arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
-# output: declaredAt sourceName sourcePath <extraArguments>
-DistroImageCheckSourcePath(){
-	[ -z "$MDSC_DETAIL" ] || echo "> DistroImageCheckSourcePath $@" >&2
+# echoes none/all matching deploy output folders or files
+# !!!arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
+# !!!output: declaredAt sourceName sourcePath <extraArguments>
+DistroImageCheckOutputPath(){
+	local MDSC_CMD='DistroImageCheckOutputPath'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	local checkProject
-	local projectName
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
 	while true ; do	
 		case "$1" in
 			--project)
-				shift
-				local projectName="$1" ; shift
-			;;
+				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
 			--path)
-				shift
-				local check="-d"
-			;;
+				shift ;	local check="-d" ; continue ;;
 			--file)
-				shift
-				local check="-f"
-			;;
+				shift ;	local check="-f" ; continue ;;
 			*)
-				break
-			;;
+				break ;;
 		esac
 	done
+
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+	
+	!!!
+	
+	return 0
+}
+
+# echoes none/all matching deploy source folders or files
+# arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
+# output: declaredAt sourceName sourcePath <extraArguments>
+DistroImageCheckSourcePath(){
+	local MDSC_CMD='DistroImageCheckSourcePath'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	local checkProject
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
+
+	while true ; do	
+		case "$1" in
+			--project)
+				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
+			--path)
+				shift ;	local check="-d" ; continue ;;
+			--file)
+				shift ;	local check="-f" ; continue ;;
+			*)
+				break ;;
+		esac
+	done
+
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
 	
 	local declaredAt="$1" ; shift
 	local sourceName="$1" ; shift
@@ -113,13 +179,8 @@ DistroImageCheckSourcePath(){
 	fi
 
 	if [ "$sourceName" = "*" ] ; then
-		if [ -z "$projectName" ] ; then
-			echo "ERROR: DistroImageCheckSourcePath: '*' sourceName is not supported!" >&2
-			return 1
-		fi
-		
 		Require ListProjectSequence
-		ListProjectSequence "$projectName" \
+		ListProjectSequence "$MDSC_PRJ_NAME" \
 		| while read -r checkProject ; do
 			local checkDirectory="$MDSC_SOURCE/$checkProject/$sourcePath"
 			if [ -d "$checkDirectory" ] ; then

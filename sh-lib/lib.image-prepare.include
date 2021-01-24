@@ -4,6 +4,137 @@ if ! type DistroImage >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 fi
 
+# prints project merged provides that are prefixed 'image-prepare:' only, see DistroImageProjectProvidesMerged for full list
+ImagePrepareProjectProvidesMerged(){
+	local MDSC_CMD='ImagePrepareProjectProvidesMerged'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+
+	DistroImageProjectProvidesMerged | grep -e "^\\S\\S* image-prepare:"
+	return 0
+	
+	# Require ListProjectProvides
+	# ListProjectProvides.fn.sh "$MDSC_PRJ_NAME" --merge-sequence | grep "^\\S\\S* image-prepare:"
+	# ListProjectProvides.fn.sh "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-prepare # cuts "image-prepare:"
+	
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+	grep -e "^$MDSC_PRJ_NAME \\S* image-prepare:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++'
+}
+
+# prints actual project's sync folders (image-prepare:sync-source-files:)
+# format: "$sourceName" "$sourcePath" "$mergePath"
+ImagePrepareProjectSyncFolders(){
+	local MDSC_CMD='ImagePrepareProjectSyncFolders'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+
+	ImagePrepareProjectProvidesMerged \
+	| grep " image-prepare:sync-source-files:" | tr ':' ' ' | cut -d" " -f1,4- \
+	| while read -r declaredAt sourceName sourcePath mergePath ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $mergePath" >&2
+		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$mergePath" \
+		| cut -d" " -f2-
+	done \
+	| awk '!x[$0]++' \
+	| while read -r sourceName sourcePath mergePath ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: queue: $sourceName $sourcePath $mergePath" >&2
+		echo "$sourceName" "$sourcePath" "$mergePath"
+	done
+	return 0
+} 
+
+ImagePrepareProjectSourcePatchScripts(){
+	local MDSC_CMD='ImagePrepareProjectSourcePatchScripts'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+
+	ImagePrepareProjectProvidesMerged \
+	| grep " image-prepare:source-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+	| while read -r declaredAt sourceName sourcePath scriptSourceName scriptName ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $scriptSourceName $scriptName" >&2
+		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$scriptSourceName" "$scriptName"
+	done \
+	| awk '!x[$0]++' \
+	| while read  -r declaredAt sourceName sourcePath scriptSourceName scriptName; do
+		DistroImageCheckSourcePath --file "$declaredAt" "$scriptSourceName" "$scriptName" "$sourceName" "$sourcePath" \
+		| cut -d" " -f2-
+	done \
+	| awk '!x[$0]++' \
+	| while read  -r scriptSourceName scriptName sourceName sourcePath; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: process: $sourceName $sourcePath $scriptSourceName $scriptName" >&2
+		echo "$sourceName" "$sourcePath" "$scriptSourceName" "$scriptName"
+	done 
+	return 0
+}
+
+ImagePrepareProjectTargetPatchScripts(){
+	local MDSC_CMD='ImagePrepareProjectTargetPatchScripts'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+
+	ImagePrepareProjectProvidesMerged \
+	| grep " image-prepare:target-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+	| while read -r declaredAt scriptSourceName scriptName targetPath ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $scriptSourceName $scriptName" >&2
+		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$scriptSourceName" "$scriptName"
+	done \
+	| awk '!x[$0]++' \
+	| while read  -r declaredAt sourceName sourcePath scriptSourceName scriptName; do
+		DistroImageCheckSourcePath --file "$declaredAt" "$scriptSourceName" "$scriptName" "$sourceName" "$sourcePath" \
+		| cut -d" " -f2-
+	done \
+	| awk '!x[$0]++' \
+	| while read  -r scriptSourceName scriptName sourceName sourcePath; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: process: $sourceName $sourcePath $scriptSourceName $scriptName" >&2
+		echo "$sourceName" "$sourcePath" "$scriptSourceName" "$scriptName"
+	done 
+	return 0
+}
+
+# prints actual project's file clone tasks (image-prepare:clone-source-file:)
+# format: "$sourceName" "$sourcePath" "$fileName" "$targetFileName"
+ImagePrepareProjectCloneFiles(){
+	local MDSC_CMD='ImagePrepareProjectCloneFiles'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		return 1
+	fi
+
+	ImagePrepareProjectProvidesMerged \
+	| grep " image-prepare:clone-source-file:" | tr ':' ' ' | cut -d" " -f1,4- \
+	| while read -r declaredAt sourceName sourcePath fileName targetPattern useVariable useValues ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $fileName $targetPattern $useVariable $useValues" >&2
+		DistroImageCheckSourcePath --file "$declaredAt" "$sourceName" "$sourcePath/$fileName" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues" \
+		| cut -d" " -f2,4-
+	done \
+	| awk '!x[$0]++' \
+	| while read  -r sourceName sourcePath fileName targetPattern useVariable useValues; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: process: $sourceName $sourcePath $targetPattern $useVariable $useValues" >&2
+		if [ -z "$useVariable" ] ; then
+			echo "$sourceName" "$sourcePath" "$fileName" "$targetPattern"
+		else
+			local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+			for useValue in $useValues ; do
+				echo "$sourceName" "$sourcePath" "$fileName" "` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `"
+			done
+		fi
+	done 
+	return 0
+}
+
 # main shell command
 ImagePrepare(){
 	echo "Not Supported!" >&2

@@ -12,6 +12,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	DistroShellContext --distro-path-auto
 fi
 
+Require ListDistroProvides
 Require ListProjectProvides
 
 InstallPrepareScript(){
