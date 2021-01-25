@@ -87,13 +87,18 @@ DistroImageEnsureProvidesMergedFile(){
 		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: using env-cached ($MDSC_OPTION)" >&2
 		return 0
 	fi
-	if [ -f "$MDSC_CACHED/distro-merged-provides.txt" ] ; then
-		MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
-		return 0
-	fi
 	if [ -f "$MDSC_CACHED/distro-provides.txt" ] ; then
+		if [ -f "$MDSC_CACHED/distro-merged-provides.txt" ] ; then
+			if [ "$( date -u -r "$MDSC_CACHED/distro-provides.txt" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$MDSC_CACHED/distro-merged-provides.txt" "+%Y%m%d%H%M%S" )" ] ; then
+				MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
+				return 0
+			fi
+			[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: stale index, making index file ($MDSC_OPTION)" >&2
+		else
+			[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: making index file ($MDSC_OPTION)" >&2
+		fi
+	
 		set -e
-		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: making index file ($MDSC_OPTION)" >&2
 		Require ListDistroProvides
 		MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
 		ListDistroProvides --explicit-noop --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
@@ -148,7 +153,6 @@ DistroImageCheckSourcePath(){
 	local MDSC_CMD='DistroImageCheckSourcePath'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	local checkProject
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
 	while true ; do	
@@ -172,6 +176,7 @@ DistroImageCheckSourcePath(){
 	local declaredAt="$1" ; shift
 	local sourceName="$1" ; shift
 	local sourcePath="$1" ; shift
+	local checkProject
 
 	if [ -z "$sourceName" ] ; then
 		echo "ERROR: DistroImageCheckSourcePath: arguments missing" >&2
@@ -179,17 +184,24 @@ DistroImageCheckSourcePath(){
 	fi
 
 	if [ "$sourceName" = "*" ] ; then
-		Require ListProjectSequence
-		ListProjectSequence "$MDSC_PRJ_NAME" \
-		| while read -r checkProject ; do
-			local checkDirectory="$MDSC_SOURCE/$checkProject/$sourcePath"
-			if [ -d "$checkDirectory" ] ; then
-				if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
-					echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
+		local commandOutput="$( \
+			Require ListProjectSequence
+			ListProjectSequence "$MDSC_PRJ_NAME" | while read -r checkProject ; do
+				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
+					if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
+						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
+					fi
 				fi
-			fi
-		done
-		return 0
+			done \
+		)"
+	
+		if [ ! -z "$commandOutput" ] ; then
+			echo "$commandOutput"
+			return 0
+		fi
+		
+		echo "WARNING: DistroImageCheckSourcePath: wild-card path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+		return 1
 	fi
 	
 	if [ "$sourceName" = "." ] ; then
@@ -200,15 +212,24 @@ DistroImageCheckSourcePath(){
 		echo "$declaredAt" "$sourceName" "$sourcePath" "$@"
 		return 0
 	fi
+
+	local commandOutput="$( \
+		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+		cut -d" " -f2,3 "$MDSC_IDAPRV_NAME" | grep " $sourceName$" | cut -d" " -f1 | awk '!x[$0]++' \
+		| while read -r checkProject ; do
+			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
+				echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
+			fi
+		done \
+	)"
 	
-	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-	cut -d" " -f2,3 "$MDSC_IDAPRV_NAME" | grep " $sourceName$" | cut -d" " -f1 | awk '!x[$0]++' \
-	| while read -r checkProject ; do
-		if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-			echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
-		fi
-	done
-	return 0
+	if [ ! -z "$commandOutput" ] ; then
+		echo "$commandOutput"
+		return 0
+	fi
+	
+	echo "WARNING: DistroImageCheckSourcePath: explicitly declared path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+	return 1
 }
 
 # main shell command

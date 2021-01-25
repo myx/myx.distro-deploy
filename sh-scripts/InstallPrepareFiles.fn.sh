@@ -72,37 +72,108 @@ InstallPrepareFiles(){
 			fi
 
 			local allSyncFolders="$( ImagePrepareProjectSyncFolders )"
+			local allSourceScripts="$( ImagePrepareProjectSourcePatchScripts )"
 			local allCloneFiles="$( ImagePrepareProjectCloneFiles )"
+			local allTargetScripts="$( ImagePrepareProjectTargetPatchScripts )"
 			
-			echo "$allSyncFolders" \
+			##
+			## sync files from source to output
+			##
+			local sourceName sourcePath mergePath
+			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
-				local sourceFullPath="$MDSC_SOURCE/$sourceName/$sourcePath"
-				local targetFullPath="$targetPath/$mergePath"
-				mkdir -p "$targetFullPath"
-				rsync -rt --chmod=ug+rw --omit-dir-times "$sourceFullPath/" "$targetFullPath/"
+				mkdir -p "$targetPath/$mergePath"
+				rsync -rt --chmod=ug+rw --omit-dir-times "$MDSC_SOURCE/$sourceName/$sourcePath/" "$targetPath/$mergePath/"
 			done
 
-			#echo "$allSyncFolders" \
-			#| while read -r sourceName sourcePath mergePath ; do
-			#	local sourceFullPath="$MDSC_SOURCE/$sourceName/$sourcePath"
-			#	local targetFullPath="$targetPath/$mergePath"
-			#
-			#	echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
-			#	| while read -r sourceName sourcePath sourceFileName targetFileName ; do
-			#		rsync -rt --chmod=ug+rw "$sourceFullPath/$sourceFileName" "$targetFullPath/$targetFileName"
-			#	done
-			#done
-
-			echo "$allSyncFolders" \
+			##
+			## execute path-related patches before processing files
+			##
+			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
-				local sourceFullPath="$MDSC_SOURCE/$sourceName/$sourcePath"
-				local targetFullPath="$targetPath/$mergePath"
+				local matchSourceName sourcePath scriptSourceName scriptName
+				[ -z "${allSourceScripts:0:1}" ] || echo "$allSourceScripts" | grep -e "^$sourceName " | cut -d" " -f2- \
+				| while read -r matchSourcePath scriptSourceName scriptName ; do
+					case "${matchSourcePath##/}/" in
+						"${sourcePath##/}/"*)
+							[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchSourcePath ?= $sourcePath" >&2
+							echo "$scriptSourceName" "$scriptName" "${mergePath%/}/${matchSourcePath#${sourcePath%/}}"
+							continue
+						;;
+					esac
+				done
+			done \
+			| awk '!x[$0]++' \
+			| while read -r scriptSourceName scriptName mergePath; do
+				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: exec: image-prepare:source-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$mergePath' >&2"
+				if ! ( cd "$targetPath/$mergePath" ; . "$MMDAPP/source/$scriptSourceName/$scriptName" ) ; then
+					echo "ERROR: InstallPrepareFiles: error running patch script: $scriptSourceName/$scriptName" >&2; 
+				fi
+				[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$mergePath' >&2"
+			done
+
+			##
+			## clone/multiply files
+			##
+			local sourceName sourcePath mergePath
+			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
+			| while read -r sourceName sourcePath mergePath ; do
+				local targetFullPath="$targetPath/${mergePath##/}"
 			
-				echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
-				| while read -r sourceName sourcePath sourceFileName targetFileName ; do
-					rsync -rt --chmod=ug+rw "$sourceFullPath/$sourceFileName" "$targetFullPath/$targetFileName"
+				local sourceName cloneSourcePath sourceFileName targetFileName
+				[ -z "${allCloneFiles:0:1}" ] || echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
+				| while read -r sourceName cloneSourcePath sourceFileName targetFileName ; do
+					rsync -rt --chmod=ug+rw "$targetFullPath/${cloneSourcePath##$sourcePath}/$sourceFileName" "$targetFullPath/$targetFileName"
 				done
 			done
+
+			##
+			## execute path-related patches after processing files
+			##
+			local sourceName sourcePath mergePath
+			local scriptSourceName scriptName matchTargetPath
+			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
+			| while read -r sourceName sourcePath mergePath ; do
+				[ -z "${allTargetScripts:0:1}" ] || echo "$allTargetScripts" \
+				| while read -r scriptSourceName scriptName matchTargetPath; do
+					case "$matchTargetPath" in
+						*'*')
+							local globTargetPath="${matchTargetPath%'*'}"
+							case "${mergePath%/}/" in
+								"${globTargetPath%/}/"*)
+									[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $mergePath" >&2
+									echo "$scriptSourceName" "$scriptName" "${mergePath%/}"
+									continue
+								;;
+							esac
+						;;
+						'*'*)
+							echo "InstallPrepareFiles: suffix search is not supported!" >&2
+							return 1
+						;;
+						*)
+							case "${matchTargetPath%/}/" in
+								"${mergePath%/}/"*)
+									[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $mergePath" >&2
+									echo "$scriptSourceName" "$scriptName" "${mergePath%/}${matchTargetPath#${mergePath%/}}"
+									continue
+								;;
+							esac
+						;;
+					esac
+				done
+			done \
+			| awk '!x[$0]++' \
+			| while read -r scriptSourceName scriptName mergePath; do
+				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: exec: image-prepare:target-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$mergePath' >&2"
+				if ! ( cd "$targetPath/$mergePath" ; . "$MMDAPP/source/$scriptSourceName/$scriptName" ) ; then
+					echo "ERROR: InstallPrepareFiles: error running patch script: $scriptSourceName/$scriptName" >&2; 
+				fi
+				[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$mergePath' >&2"
+			done
+
 			return 0
 		;;
 		--to-temp)

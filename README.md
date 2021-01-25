@@ -13,7 +13,7 @@ image-receive, image-install commands:
 	image-install:exec-update-after:host/install/common-gctmte.restart.txt
 
 	image-install:deploy-patch-script-prefix:
-	image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>
+	image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
 	image-install:deploy-patch-script-prefix:.:host/scripts/patch-on-before-deploy.txt
 
 	image-install:deploy-sync-files:
@@ -34,11 +34,10 @@ image-receive, image-install commands:
 	image-install:target-patch-script:.:host/scripts/patch-on-deploy.txt:/usr/local/ndns/settings
 
 	image-install:deploy-patch-script:
-	image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>
+	image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
 	image-install:deploy-patch-script:.:host/scripts/patch-on-deploy.txt
 	
-	
 	image-install:deploy-patch-script-suffix:
-	image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>
+	image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
 	image-install:deploy-patch-script-suffix:.:host/scripts/patch-on-after-deploy.txt
 	

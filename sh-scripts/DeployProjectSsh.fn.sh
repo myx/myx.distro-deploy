@@ -274,15 +274,15 @@ DeployProjectSsh(){
 								local scriptSourceName scriptFile matchSourcePath
 								[ -z "${deploySourcePatchScripts:0:1}" ] || echo "$deploySourcePatchScripts" \
 								| while read -r scriptSourceName scriptFile matchSourcePath; do
-									case "$sourcePath" in
-										"$matchSourcePath"*)
-											[ -z "$MDSC_DETAIL" ] || echo "path matched: $matchSourcePath ?= $sourcePath" >&2
+									case "${matchSourcePath##/}/" in
+										"${sourcePath##/}/"*)
+											[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchSourcePath ?= $sourcePath" >&2
 											[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
 											ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
 											[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
 										;;
 										*)
-											[ -z "$MDSC_DETAIL" ] || echo "path skipped: $matchSourcePath ?= $sourcePath" >&2
+											[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
 										;;
 									esac
 								done
@@ -321,15 +321,15 @@ DeployProjectSsh(){
 
 								[ -z "${deployTargetPatchScripts:0:1}" ] || echo "$deployTargetPatchScripts" \
 								| while read -r scriptSourceName scriptFile matchTargetPath; do
-									case "$sourcePath" in
-										"$matchTargetPath"*)
-											[ -z "$MDSC_DETAIL" ] || echo "path matched: $matchTargetPath ?= $targetPath" >&2
+									case "${matchTargetPath##/}/" in
+										"${targetPath##/}/"*)
+											[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $targetPath" >&2
 											[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$targetPath' >&2"
-											ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath/${matchTargetPath#$targetPath}"
+											ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
 											[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$targetPath' >&2"
 										;;
 										*)
-											[ -z "$MDSC_DETAIL" ] || echo "path skipped: $matchTargetPath ?= $targetPath" >&2
+											[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchTargetPath ?= $targetPath" >&2
 										;;
 									esac
 								done
@@ -355,10 +355,10 @@ DeployProjectSsh(){
 
 								if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
 									echo "mkdir -p -m 770 '$targetPath'"
-									echo "rsync -prltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath'"
+									echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath'"
 								else
 									echo "mkdir -p -m 770 '$( dirname $targetPath )'"
-									echo "rsync -prltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath'"
+									echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath'"
 								fi
 
 							done

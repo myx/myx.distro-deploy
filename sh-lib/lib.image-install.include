@@ -53,7 +53,7 @@ ImageInstallProjectSyncTasks(){
 	return 0
 }
 
-# call with --prefix|--suffix argument
+# call with --prefix|--suffix|--source|--target argument
 ImageInstallProjectDeployPatchScripts(){
 	local MDSC_CMD='ImageInstallProjectDeployPatchScripts'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
@@ -84,12 +84,12 @@ ImageInstallProjectDeployPatchScripts(){
 		;;
 	esac
 
-	local declaredAt scriptSourceName scriptFile sourcePath
+	local declaredAt scriptSourceName scriptFile matchPath
 	ImageInstallProjectProvidesMerged \
 	| eval $filter \
 	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r $fields ; do
-		DistroImageCheckSourcePath --file "$declaredAt" "$scriptSourceName" "$scriptFile" "$sourcePath" \
+		DistroImageCheckSourcePath --file "$declaredAt" "$scriptSourceName" "$scriptFile" "$matchPath" \
 		| cut -d" " -f2-
 	done \
 	| awk '!x[$0]++'
@@ -98,7 +98,6 @@ ImageInstallProjectDeployPatchScripts(){
 
 ImageInstallEmbedScript(){ # "1-scriptFileName" "2-changeDir"
 	[ -z "$MDSC_DETAIL" ] || echo "ImageInstallEmbedScript: '${1#$MMDAPP}' '$2'" >&2
-	echo "ImageInstallEmbedScript: '${1#$MMDAPP}' '$2'" >&2
 	printf "\n\n( cd "$2" ; uudecode -p | gunzip | bash ) << 'EOF_PROJECT_IIESSH_XXXXXXXX'\n"
 	cat "$1" | gzip | uuencode -m "$( basename "$1" )"
 	printf '\nEOF_PROJECT_IIESSH_XXXXXXXX\n\n'
