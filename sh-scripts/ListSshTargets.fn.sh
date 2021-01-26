@@ -75,7 +75,8 @@ ListSshTargets(){
 					return 1
 				fi
 				
-				ListDistroProvides --all-provides | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r projectName sshTarget ; do
+				ListDistroProvides --all-provides | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
+				| while read -r projectName sshTarget ; do
 					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
 					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
 					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
@@ -95,7 +96,8 @@ ListSshTargets(){
 			*)
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 			
-				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r projectName sshTarget ; do
+				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
+				| while read -r projectName sshTarget ; do
 					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
 					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
 					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
