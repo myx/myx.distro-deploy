@@ -3,24 +3,27 @@
 # checks and updates MDSC_PRJ_NAME variable with project in focus
 # $3 is empty or 'local' or 'export'
 DistroSelectProject(){
+	local MDSC_CMD='DistroSelectProject'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	if [ "$1" != "MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: DistroSelectProject: env name required to be MDSC_PRJ_NAME!" >&2
+		echo "ERROR: $MDSC_CMD: env name required to be MDSC_PRJ_NAME!" >&2
 		return 1
 	fi
 	if [ -z "$2" ] ; then
-		echo "ERROR: DistroSelectProject: project name required!" >&2
+		echo "ERROR: $MDSC_CMD: project name required!" >&2
 		return 1
 	fi
 	if [ "$2" = "$MDSC_PRJ_NAME" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: same project ($2)" >&2
+		[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: same project ($2)" >&2
 		return 0
 	fi
 	if [ "$2" = "--reset" ] ; then
 		if [ -z "$MDSC_PRJ_NAME" ] ; then
-			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: already clean" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: already clean" >&2
 			return 0
 		fi
-		[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
+		[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
 		export MDSC_PRJ_NAME=""
 		# export MDSC_PRJ_MPRV=""
 		# export MDSC_PRJ_BSEQ=""
@@ -31,18 +34,18 @@ DistroSelectProject(){
 			export MDSC_PRJ_NAME="$2"
 			# export MDSC_PRJ_MPRV=""
 			# export MDSC_PRJ_BSEQ=""
-			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected and exported ($2)" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected and exported ($2)" >&2
 			return 0
 		;;
 		'')
 			MDSC_PRJ_NAME="$2"
 			# MDSC_PRJ_MPRV=""
 			# MDSC_PRJ_BSEQ=""
-			[ -z "$MDSC_DETAIL" ] || echo "* DistroSelectProject: project selected ($2)" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected ($2)" >&2
 			return 0
 		;;
 		*)
-			echo "ERROR: DistroSelectProject: invalid extra option: $3" >&2
+			echo "ERROR: $MDSC_CMD: invalid extra option: $3" >&2
 			return 1
 		;;
 	esac
@@ -50,68 +53,163 @@ DistroSelectProject(){
 
 # prints project merged provides
 DistroImageProjectProvidesMerged(){
+	local MDSC_CMD='DistroImageProjectProvidesMerged'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	#if [ ! -z "${MDSC_PRJ_MPRV:0:1}" ] ; then
 	#	echo "$MDSC_PRJ_MPRV"
 	#	return 0
 	#fi
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: DistroImageProjectProvidesMerged: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
-	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++'
-	return 0
+	local checkFile="$MDSC_CACHED/distro-provides.txt"
+	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
+	if [ -f "$checkFile" ] ; then
+		if [ -f "$cacheFile" ] ; then
+			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+				cat "$cacheFile"
+				return 0
+			fi
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
+		else
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
+		fi
+	
+		set -e
+		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | tee "$cacheFile"
+		return 0
+	fi
+	
+	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	return 1
 }
 
 DistroImageProjectSequence(){
+	local MDSC_CMD='DistroImageProjectSequence'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
+
+	while true ; do	
+		case "$1" in
+			--project)
+				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
+			*)
+				break ;;
+		esac
+	done
+
 	#if [ ! -z "${MDSC_PRJ_BSEQ:0:1}" ] ; then
 	#	echo "$MDSC_PRJ_BSEQ"
 	#	return 0
 	#fi
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: DistroImageProjectSequence: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
-	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++'
-	return 0
+	local checkFile="$MDSC_CACHED/distro-provides.txt"
+	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-build-sequence.txt"
+	if [ -f "$checkFile" ] ; then
+		if [ -f "$cacheFile" ] ; then
+			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+				cat "$cacheFile"
+				return 0
+			fi
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
+		else
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
+		fi
+	
+		set -e
+		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' | tee "$cacheFile"
+		return 0
+	fi
+	
+	# Require ListProjectSequence
+	# ListProjectSequence "$MDSC_PRJ_NAME"
+	
+	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	return 1
 }
 
 # sets MDSC_IDAPRV_NAME variable to all merged provides table file name
 DistroImageEnsureProvidesMergedFile(){
+	local MDSC_CMD='DistroImageEnsureProvidesMergedFile'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	if [ "$1" != "MDSC_IDAPRV_NAME" ] ; then
-		echo "ERROR: DistroImageEnsureProvidesMergedFile: env name required to be MDSC_IDAPRV_NAME" >&2
+		echo "ERROR: $MDSC_CMD: env name required to be MDSC_IDAPRV_NAME" >&2
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: using env-cached ($MDSC_OPTION)" >&2
+		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
 		return 0
 	fi
-	if [ -f "$MDSC_CACHED/distro-provides.txt" ] ; then
-		if [ -f "$MDSC_CACHED/distro-merged-provides.txt" ] ; then
-			if [ "$( date -u -r "$MDSC_CACHED/distro-provides.txt" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$MDSC_CACHED/distro-merged-provides.txt" "+%Y%m%d%H%M%S" )" ] ; then
-				MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
+	local checkFile="$MDSC_CACHED/distro-provides.txt"
+	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
+	if [ -f "$checkFile" ] ; then
+		if [ -f "$cacheFile" ] ; then
+			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+				MDSC_IDAPRV_NAME="$cacheFile"
 				return 0
 			fi
-			[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: stale index, making index file ($MDSC_OPTION)" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
 		else
-			[ -z "$MDSC_DETAIL" ] || echo "| DistroImageEnsureProvidesMergedFile: making index file ($MDSC_OPTION)" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
 		fi
 	
 		set -e
 		Require ListDistroProvides
-		MDSC_IDAPRV_NAME="$MDSC_CACHED/distro-merged-provides.txt"
+		MDSC_IDAPRV_NAME="$cacheFile"
 		ListDistroProvides --explicit-noop --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
 		mv -f "$MDSC_IDAPRV_NAME.tmp" "$MDSC_IDAPRV_NAME"
 		return 0
 	fi
 	
-	echo "ERROR: DistroImageEnsureProvidesMergedFile: can't come up with a name" >&2
+	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
 	return 1
 }
 
-DistroImageSelectProjectMerged(){
-	echo "Not Implemented!" >&2
+# sets MDSC_IDOPRV_NAME variable to all merged provides table file name
+DistroImageEnsureProvidesOwnedFile(){
+	local MDSC_CMD='DistroImageEnsureProvidesOwnedFile'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	if [ "$1" != "MDSC_IDOPRV_NAME" ] ; then
+		echo "ERROR: $MDSC_CMD: env name required to be MDSC_IDOPRV_NAME" >&2
+		return 1
+	fi
+	if [ ! -z "${MDSC_IDOPRV_NAME:0:1}" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
+		return 0
+	fi
+	local checkFile="$MDSC_CACHED/distro-index.inf"
+	local cacheFile="$MDSC_CACHED/distro-provides.txt"
+	if [ -f "$checkFile" ] ; then
+		if [ -f "$cacheFile" ] ; then
+			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+				MDSC_IDOPRV_NAME="$cacheFile"
+				return 0
+			fi
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
+		else
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
+		fi
+	
+		set -e
+		Require ListDistroProvides
+		MDSC_IDOPRV_NAME="$cacheFile"
+		ListDistroProvides --explicit-noop --all-provides > "$MDSC_IDOPRV_NAME.tmp"
+		mv -f "$MDSC_IDOPRV_NAME.tmp" "$MDSC_IDOPRV_NAME"
+		return 0
+	fi
+	
+	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	return 1
 }
 
 # echoes none/all matching deploy output folders or files
@@ -185,10 +283,9 @@ DistroImageCheckSourcePath(){
 
 	if [ "$sourceName" = "*" ] ; then
 		local commandOutput="$( \
-			Require ListProjectSequence
-			ListProjectSequence "$MDSC_PRJ_NAME" | while read -r checkProject ; do
+			DistroImageProjectSequence | while read -r checkProject ; do
 				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-					if ListProjectSequence "$checkProject" | grep -q "$declaredAt" ; then
+					if DistroImageProjectSequence --project "$checkProject" | grep -q "$declaredAt" ; then
 						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 					fi
 				fi
@@ -213,9 +310,9 @@ DistroImageCheckSourcePath(){
 		return 0
 	fi
 
+	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	local commandOutput="$( \
-		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		cut -d" " -f2,3 "$MDSC_IDAPRV_NAME" | grep " $sourceName$" | cut -d" " -f1 | awk '!x[$0]++' \
+		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | cut -d" " -f1 | awk '!x[$0]++' \
 		| while read -r checkProject ; do
 			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
 				echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
