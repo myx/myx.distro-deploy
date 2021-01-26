@@ -12,11 +12,6 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	DistroShellContext --distro-path-auto
 fi
 
-# Require ListDistroProvides
-# Require ListProjectSequence
-# Require ListProjectProvides
-# Require ListDistroProjects
-
 if ! type ImagePrepare >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
 fi
@@ -25,8 +20,10 @@ InstallPrepareFiles(){
 
 	set -e
 
-	[ -z "$MDSC_DETAIL" ] || echo "> InstallPrepareFiles $@" >&2
-	# [ -z "$MDSC_DETAIL" ] || printf "| InstallPrepareFiles: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	local MDSC_CMD='InstallPrepareFiles'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	# [ -z "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
@@ -42,7 +39,7 @@ InstallPrepareFiles(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: InstallPrepareFiles: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
 
@@ -67,7 +64,7 @@ InstallPrepareFiles(){
 			shift
 		 	local targetPath="$1" ; shift
 			if [ -z "$targetPath" ] ; then
-				echo "ERROR: InstallPrepareFiles: 'targetDirectory' (or --no-write)  argument is required!" >&2
+				echo "ERROR: $MDSC_CMD: 'targetDirectory' (or --no-write)  argument is required!" >&2
 				return 1
 			fi
 
@@ -79,6 +76,7 @@ InstallPrepareFiles(){
 			##
 			## sync files from source to output
 			##
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: sync files from source to output" >&2
 			local sourceName sourcePath mergePath
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
@@ -89,6 +87,7 @@ InstallPrepareFiles(){
 			##
 			## execute path-related patches before processing files
 			##
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute path-related patches before processing files" >&2
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
 				local matchSourceName sourcePath scriptSourceName scriptName
@@ -96,7 +95,7 @@ InstallPrepareFiles(){
 				| while read -r matchSourcePath scriptSourceName scriptName ; do
 					case "${matchSourcePath##/}/" in
 						"${sourcePath##/}/"*)
-							[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchSourcePath ?= $sourcePath" >&2
+							[ -z "$MDSC_DETAIL" ] || echo "= $MDSC_CMD: path matched: $matchSourcePath ?= $sourcePath" >&2
 							echo "$scriptSourceName" "$scriptName" "${mergePath%/}/${matchSourcePath#${sourcePath%/}}"
 							continue
 						;;
@@ -105,10 +104,10 @@ InstallPrepareFiles(){
 			done \
 			| awk '!x[$0]++' \
 			| while read -r scriptSourceName scriptName mergePath; do
-				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: exec: image-prepare:source-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: exec: image-prepare:source-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
 				[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$mergePath' >&2"
 				if ! ( cd "$targetPath/$mergePath" ; . "$MMDAPP/source/$scriptSourceName/$scriptName" ) ; then
-					echo "ERROR: InstallPrepareFiles: error running patch script: $scriptSourceName/$scriptName" >&2; 
+					echo "ERROR: $MDSC_CMD: error running patch script: $scriptSourceName/$scriptName" >&2; 
 				fi
 				[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$mergePath' >&2"
 			done
@@ -116,6 +115,7 @@ InstallPrepareFiles(){
 			##
 			## clone/multiply files
 			##
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: clone/multiply files" >&2
 			local sourceName sourcePath mergePath
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
@@ -131,6 +131,7 @@ InstallPrepareFiles(){
 			##
 			## execute path-related patches after processing files
 			##
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute path-related patches after processing files" >&2
 			local sourceName sourcePath mergePath
 			local scriptSourceName scriptName matchTargetPath
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
@@ -142,20 +143,20 @@ InstallPrepareFiles(){
 							local globTargetPath="${matchTargetPath%'*'}"
 							case "${mergePath%/}/" in
 								"${globTargetPath%/}/"*)
-									[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $mergePath" >&2
+									[ -z "$MDSC_DETAIL" ] || echo "= $MDSC_CMD: path matched: $matchTargetPath ?= $mergePath" >&2
 									echo "$scriptSourceName" "$scriptName" "${mergePath%/}"
 									continue
 								;;
 							esac
 						;;
 						'*'*)
-							echo "InstallPrepareFiles: suffix search is not supported!" >&2
+							echo "$MDSC_CMD: suffix search is not supported!" >&2
 							return 1
 						;;
 						*)
 							case "${matchTargetPath%/}/" in
 								"${mergePath%/}/"*)
-									[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $mergePath" >&2
+									[ -z "$MDSC_DETAIL" ] || echo "= $MDSC_CMD: path matched: $matchTargetPath ?= $mergePath" >&2
 									echo "$scriptSourceName" "$scriptName" "${mergePath%/}${matchTargetPath#${mergePath%/}}"
 									continue
 								;;
@@ -166,14 +167,15 @@ InstallPrepareFiles(){
 			done \
 			| awk '!x[$0]++' \
 			| while read -r scriptSourceName scriptName mergePath; do
-				[ -z "$MDSC_DETAIL" ] || echo "InstallPrepareFiles: exec: image-prepare:target-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: exec: image-prepare:target-patch:script: $scriptSourceName:$scriptFile:$mergePath" >&2
 				[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$mergePath' >&2"
 				if ! ( cd "$targetPath/$mergePath" ; . "$MMDAPP/source/$scriptSourceName/$scriptName" ) ; then
-					echo "ERROR: InstallPrepareFiles: error running patch script: $scriptSourceName/$scriptName" >&2; 
+					echo "ERROR: $MDSC_CMD: error running patch script: $scriptSourceName/$scriptName" >&2; 
 				fi
 				[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$mergePath' >&2"
 			done
 
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: done." >&2
 			return 0
 		;;
 		--to-temp)
@@ -181,9 +183,9 @@ InstallPrepareFiles(){
 			local tempDirectory="`mktemp -d -t "MDSC_IPF"`"
 			local saveDirectory="`pwd`"
 			trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
-			echo "InstallPrepareFiles: using temp: $tempDirectory" >&2
+			echo "$MDSC_CMD: using temp: $tempDirectory" >&2
 			InstallPrepareFiles --to-directory "$tempDirectory"
-			echo "InstallPrepareFiles: temp prepared" >&2
+			echo "$MDSC_CMD: temp prepared" >&2
 
 			cd "$tempDirectory"
 			
@@ -197,7 +199,7 @@ InstallPrepareFiles(){
 		;;
 		--to-deploy-output)
 			if [ ! -d "$MMDAPP/output" ] ; then
-				echo "ERROR: InstallPrepareFiles: deploy-output directory is missing: $MMDAPP/output" >&2; 
+				echo "ERROR: $MDSC_CMD: deploy-output directory is missing: $MMDAPP/output" >&2; 
 				return 1
 			fi
 			InstallPrepareFiles --to-directory "$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
