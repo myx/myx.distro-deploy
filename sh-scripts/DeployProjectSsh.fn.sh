@@ -174,6 +174,17 @@ DeployProjectSsh(){
 				done
 				return 0
 			;;
+			--print-ssh-targets2)
+				shift
+				if [ ! -z "$1" ] ; then
+					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-targets option ($@)" >&2
+					return 1
+				fi
+				
+				DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+				DistroImageProjectSshTargets
+				return 0
+			;;
 			--deploy-none)
 				shift
 				if [ ! -z "$1" ] ; then
@@ -301,11 +312,13 @@ DeployProjectSsh(){
 										return 1
 									fi
 									if [ -z "$useVariable" ] ; then
-										echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/$targetPattern'"
+										echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
+											2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 									else
 										local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
 										for useValue in $useValues ; do
-											echo rsync -rltoD --delete --chmod=ug+rw "'sync/$sourcePath/$filePath/$fileName'" "'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `'"
+											echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
+												2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 										done
 									fi
 								done
@@ -355,10 +368,12 @@ DeployProjectSsh(){
 
 								if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
 									echo "mkdir -p -m 770 '$targetPath'"
-									echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath'"
+									echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
+										2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 								else
 									echo "mkdir -p -m 770 '$( dirname $targetPath )'"
-									echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath'"
+									echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath' \
+										2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 								fi
 
 							done
@@ -381,7 +396,7 @@ DeployProjectSsh(){
 						##
 						## remote host script end
 						##
-					) | tee "$cacheFolder/deploy-script.$deployType.txt" | bzip2 | tee "$cacheFolder/deploy-script.$deployType.txt.bz2" | $sshTarget 'bunzip2 | sudo bash' 
+					) | tee "$cacheFolder/deploy-script.$deployType.txt" | bzip2 --best | tee "$cacheFolder/deploy-script.$deployType.txt.bz2" | $sshTarget 'bunzip2 | sudo bash' 
 				done
 				return 0
 			;;

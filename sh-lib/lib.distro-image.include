@@ -51,6 +51,44 @@ DistroSelectProject(){
 	esac
 }
 
+DistroListSshTargets(){
+	echo "Not Implemented!" >&2
+}
+
+DistroImageProjectSshTargets(){
+	local MDSC_CMD='DistroImageProjectSshTargets'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "ERROR: DistroImageProjectSshTargets: project is not selected!" >&2
+		return 1
+	fi
+	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageProjectSshTargets: using env-cached ($MDSC_OPTION)" >&2
+		local sshTarget
+		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
+		| while read -r sshTarget ; do
+			local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
+			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+			local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
+			local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
+			printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$MDSC_PRJ_NAME" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
+		done
+		return 0
+	fi
+	Require ListDistroProvides
+	ListDistroProvides --select-projects "$MDSC_PRJ_NAME" | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
+	| while read -r projectName sshTarget ; do
+		local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
+		local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+		local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
+		local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
+		printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
+	done
+	return 0
+	DistroListSshTargets --select-projects "$MDSC_PRJ_NAME" "${1:'--print-table'}" "$@"
+}
+
 # prints project merged provides
 DistroImageProjectProvidesMerged(){
 	local MDSC_CMD='DistroImageProjectProvidesMerged'
@@ -68,7 +106,7 @@ DistroImageProjectProvidesMerged(){
 	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
 				cat "$cacheFile"
 				return 0
 			fi
@@ -114,7 +152,7 @@ DistroImageProjectSequence(){
 	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-build-sequence.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
 				cat "$cacheFile"
 				return 0
 			fi
@@ -153,7 +191,7 @@ DistroImageEnsureProvidesMergedFile(){
 	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
 				MDSC_IDAPRV_NAME="$cacheFile"
 				return 0
 			fi
