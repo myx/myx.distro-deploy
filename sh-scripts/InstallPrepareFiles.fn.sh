@@ -81,7 +81,8 @@ InstallPrepareFiles(){
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
 				mkdir -p "$targetPath/$mergePath"
-				rsync -rt --chmod=ug+rw --omit-dir-times "$MDSC_SOURCE/$sourceName/$sourcePath/" "$targetPath/$mergePath/"
+				rsync -rt --chmod=ug+rw --omit-dir-times "$MDSC_SOURCE/$sourceName/$sourcePath/" "$targetPath/$mergePath/" \
+					2>&1 | grep -v --fixed-strings --line-buffered '>f..t....... ' >&2
 			done
 
 			##
@@ -124,7 +125,8 @@ InstallPrepareFiles(){
 				local sourceName cloneSourcePath sourceFileName targetFileName
 				[ -z "${allCloneFiles:0:1}" ] || echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
 				| while read -r sourceName cloneSourcePath sourceFileName targetFileName ; do
-					rsync -rt --chmod=ug+rw "$targetFullPath/${cloneSourcePath##$sourcePath}/$sourceFileName" "$targetFullPath/$targetFileName"
+					rsync -rt --chmod=ug+rw "$targetFullPath/${cloneSourcePath##$sourcePath}/$sourceFileName" "$targetFullPath/$targetFileName" \
+						2>&1 | grep -v --fixed-strings --line-buffered '>f..t....... ' >&2
 				done
 			done
 
