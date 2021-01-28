@@ -164,6 +164,7 @@ DistroImageProjectSshTargets(){
 			local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
 			
 			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+			local sshHome="$useSshHome"
 
 			DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 				
@@ -177,8 +178,8 @@ DistroImageProjectSshTargets(){
 				| tr ':' ' '
 			)"
 
-			local sshHome="$useSshHome"
-			local sshUser="${sshUser:-${useSshUser}}"
+			local sshHome="${sshHome:-$useSshHome}"
+			local sshUser="${sshUser:-$useSshUser}"
 
 			if [ -z "$sshHome" ] ; then
 				sshHome="$( echo ~/.ssh )"
@@ -191,15 +192,29 @@ DistroImageProjectSshTargets(){
 
 			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: client spec parsed: $sshUser $sshHome" >&2
 			
-			printf '%s ssh %s -p %s -l %s %s -o UserKnownHostsFile=%s -F %s -i %s %s%s\n' \
+			local sshConfig="$sshHome/config-dummy.txt"
+			if [ -f "$sshConfig" ] ; then
+				sshConfig="-F $sshConfig"
+			else
+				sshConfig=""
+			fi
+			
+			local sshSecret="$sshHome/client.rsa"
+			if [ -f "$sshSecret" ] ; then
+				sshSecret="-i $sshSecret"
+			else
+				sshSecret=""
+			fi
+			
+			printf '%s ssh %s -p %s -l %s %s -o UserKnownHostsFile=%s %s %s %s%s\n' \
 				"$linePrefix" \
 				"$sshHost" \
 				"$sshPort" \
 				"${sshUser:-root}" \
 				"-o ConnectTimeout=10 -o PreferredAuthentications=publickey" \
 				"$sshHome/known_hosts" \
-				"$sshHome/config-dummy.txt" \
-				"$sshHome/client.rsa" \
+				"$sshConfig" \
+				"$sshSecret" \
 				"$extraArguments" \
 				"$lineSuffix"
 			
