@@ -175,7 +175,7 @@ DistroImageProjectSshTargets(){
 				grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
 				| grep '^deploy-ssh-client-settings:' \
 				| sed 's|^deploy-ssh-client-settings:||' \
-				| tr ':' ' '
+				| tr ':' ' ' \
 			)"
 
 			local sshHome="${sshHome:-$useSshHome}"
