@@ -26,6 +26,7 @@ ScreenTo(){
 			test ! -x "`which screen`" && sh 
 		'
 		return 0
+		# $targetCommand -N -T screen -s '$(which bash)' -q -O -U -D -R
 	fi
 	
 	if [ "--check-count" = "$1" ] ; then
