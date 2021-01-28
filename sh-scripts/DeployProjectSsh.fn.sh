@@ -22,25 +22,27 @@ DeployProjectSsh(){
 
 	set -e
 
-	[ -z "$MDSC_DETAIL" ] || echo "> DeployProjectSsh $@" >&2
-	# [ -z "$MDSC_DETAIL" ] || printf "| DeployProjectSsh: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
-
+	local MDSC_CMD='DeployProjectSsh'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
 	if [ ! -d "$MMDAPP/output" ] ; then
-		echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
+		echo "ERROR: $MDSC_CMD: output folder does not exist: $MMDAPP/output" >&2
 		return 1
 	fi
+
+	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
-	local useSshClient="${useSshClient:-}"
+	local useSshHome="${useSshHome:-}"
 
 	local prepareFiles="${prepareFiles:-auto}" 
 	local prepareScripts="${prepareScripts:-auto}"
 
 	local executeSleep="${executeSleep:-true}"
-	
-	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
 	while true ; do
 		case "$1" in
@@ -56,8 +58,8 @@ DeployProjectSsh(){
 			--ssh-user)
 				shift ; useSshUser="$1" ; shift
 			;;
-			--ssh-client)
-				shift ; useSshClient="$1" ; shift
+			--ssh-home)
+				shift ; useSshHome="$1" ; shift
 			;;
 			--prepare-exec)
 				shift
@@ -88,7 +90,7 @@ DeployProjectSsh(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: DeployProjectSsh: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
 	
@@ -97,13 +99,13 @@ DeployProjectSsh(){
 	mkdir -p "$cacheFolder"
 	
 	if [ "true" = "$prepareFiles" ] ; then
-		echo "DeployProjectSsh: --prepare-sync" >&2
+		echo "$MDSC_CMD: --prepare-sync" >&2
 		Require InstallPrepareFiles
 		InstallPrepareFiles --project "$MDSC_PRJ_NAME" --to-directory "$cacheFolder/sync"
 		local prepareFiles="auto" 
 	fi
 	if [ "true" = "$prepareScripts" ] ; then
-		echo "DeployProjectSsh: --prepare-exec" >&2
+		echo "$MDSC_CMD: --prepare-exec" >&2
 		Require InstallPrepareScript
 		InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
 		local prepareScripts="auto"
@@ -114,11 +116,11 @@ DeployProjectSsh(){
 			--print-files)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --print-files option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --print-files option ($@)" >&2
 					return 1
 				fi
 				if [ ! -d "$cacheFolder/sync" ] ; then
-					echo "ERROR: DeployProjectSsh: no sync folder found ($cacheFolder/sync)" >&2
+					echo "ERROR: $MDSC_CMD: no sync folder found ($cacheFolder/sync)" >&2
 					return 1
 				fi
 				find "$cacheFolder/sync" -type f | sed "s|^$cacheFolder/sync/||"
@@ -127,7 +129,7 @@ DeployProjectSsh(){
 			--print-sync-tasks)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --print-sync-tasks option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --print-sync-tasks option ($@)" >&2
 					return 1
 				fi
 
@@ -142,7 +144,7 @@ DeployProjectSsh(){
 			--print-installer)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --print-installer option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --print-installer option ($@)" >&2
 					return 1
 				fi
 				local outputPath="$cacheFolder/exec"
@@ -151,7 +153,7 @@ DeployProjectSsh(){
 					InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$outputPath"
 				fi
 				if [ ! -f "$outputPath" ] ; then
-					echo "ERROR: DeployProjectSsh: no installer script found ($outputPath)" >&2
+					echo "ERROR: $MDSC_CMD: no installer script found ($outputPath)" >&2
 					return 1
 				fi
 				cat "$outputPath"
@@ -160,24 +162,7 @@ DeployProjectSsh(){
 			--print-ssh-targets)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-targets option ($@)" >&2
-					return 1
-				fi
-				
-				ListProjectProvides "$MDSC_PRJ_NAME" | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-				| while read -r sshTarget ; do
-					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
-					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
-					printf 'ssh %s -p %s -l %s\n' "$sshHost" "$sshPort" "${sshUser:-root}"
-				done
-				return 0
-			;;
-			--print-ssh-targets2)
-				shift
-				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-targets option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --print-ssh-targets option ($@)" >&2
 					return 1
 				fi
 				
@@ -188,7 +173,7 @@ DeployProjectSsh(){
 			--deploy-none)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-none option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-none option ($@)" >&2
 					return 1
 				fi
 				return 0
@@ -197,17 +182,18 @@ DeployProjectSsh(){
 				local deployType="${1#--deploy-}"
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: DeployProjectSsh: no options allowed after --deploy-$deployType option ($@)" >&2
+					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-$deployType option ($@)" >&2
 					return 1
 				fi
 
-				local projectSshTargets="$( DeployProjectSsh --print-ssh-targets )"
+				DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+
+				local projectSshTargets="$( DistroImageProjectSshTargets )"
 				if [ -z "${projectSshTargets:0:1}" ] ; then
-					echo "ERROR: DeployProjectSsh: no ssh targets found!" >&2
+					echo "ERROR: $MDSC_CMD: no ssh targets found!" >&2
 					return 1
 				fi
 
-				# DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 				# local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-install:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
 				local projectProvides="$( ImageInstallProjectProvidesMerged )"
 				
@@ -220,12 +206,12 @@ DeployProjectSsh(){
 					local deployTargetPatchScripts="$( ImageInstallProjectDeployPatchScripts --target )"
 				fi
 
-				[ -z "$MDSC_DETAIL" ] || echo "DeployProjectSsh: building remote script" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
 
 				local sshTarget
 				echo "$projectSshTargets" \
 				| while read -r sshTarget; do
-					echo "DeployProjectSsh: using ssh: $sshTarget" >&2
+					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
 					( \
 						##
 						## remote host script start
@@ -249,7 +235,7 @@ DeployProjectSsh(){
 						##
 						## embed files needed
 						##
-						[ -z "$MDSC_DETAIL" ] || echo "DeployProjectSsh: pack deploy files from $cacheFolder/" >&2
+						[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
 						printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 						tar jcf - -C "$cacheFolder/" "` echo "$deployType" | sed 's|full|sync exec|' `" | uuencode -m packed.tgz
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
@@ -258,7 +244,7 @@ DeployProjectSsh(){
 						## check do sync
 						##
 						if [ "$deployType" != "exec" ] ; then
-							[ -z "$MDSC_DETAIL" ] || echo "DeployProjectSsh: building sync script" >&2
+							[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building sync script" >&2
 							echo 'echo "ImageDeploy: syncing files..." >&2'
 
 							##
@@ -308,7 +294,7 @@ DeployProjectSsh(){
 								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
 									local localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
 									if [ ! -f "$localFileName" ] ; then
-										echo "ERROR: DeployProjectSsh: file is missing: $localFileName, declared at $declaredAt" >&2 
+										echo "ERROR: $MDSC_CMD: file is missing: $localFileName, declared at $declaredAt" >&2 
 										return 1
 									fi
 									if [ -z "$useVariable" ] ; then
@@ -383,7 +369,7 @@ DeployProjectSsh(){
 						## check do exec
 						##
 						if [ "$deployType" != "sync" ] ; then
-							[ -z "$MDSC_DETAIL" ] || echo "DeployProjectSsh: building exec script" >&2
+							[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building exec script" >&2
 							echo 'echo "ImageDeploy: executing scripts..." >&2'
 							echo 'bash ./exec'
 						fi
@@ -396,22 +382,22 @@ DeployProjectSsh(){
 						##
 						## remote host script end
 						##
-					) | tee "$cacheFolder/deploy-script.$deployType.txt" | bzip2 --best | tee "$cacheFolder/deploy-script.$deployType.txt.bz2" | $sshTarget 'bunzip2 | sudo bash' 
+					) | tee "$cacheFolder/deploy-script.$deployType.txt" | bzip2 --best | tee "$cacheFolder/deploy-script.$deployType.txt.bz2" | $sshTarget 'bunzip2 | bash' 
 				done
 				return 0
 			;;
 			'')
-				echo "ERROR: DeployProjectSsh: --do-XXXX option must be specified" >&2
+				echo "ERROR: $MDSC_CMD: --do-XXXX option must be specified" >&2
 				return 1
 			;;
 			*)
-				echo "ERROR: DeployProjectSsh: invalid option: $1" >&2
+				echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
 				return 1
 			;;
 		esac
 	done
 
-	echo "ERROR: DeployProjectSsh: oops, not supposed to get here!" >&2
+	echo "ERROR: $MDSC_CMD: oops, not supposed to get here!" >&2
 	return 1
 }
 

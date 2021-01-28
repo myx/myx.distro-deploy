@@ -43,7 +43,7 @@ ListSshTargets(){
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
-	local useSshClient="${useSshClient:-}"
+	local useSshHome="${useSshHome:-}"
 
 	local linePrefix=""
 	local lineSuffix=""
@@ -65,8 +65,8 @@ ListSshTargets(){
 			--ssh-user)
 				shift ; useSshUser="$1" ; shift
 			;;
-			--ssh-client)
-				shift ; useSshClient="$1" ; shift
+			--ssh-home)
+				shift ; useSshHome="$1" ; shift
 			;;
 			--all-targets)
 				shift
@@ -134,10 +134,10 @@ case "$0" in
 				echo "    ListSshTargets.fn.sh --select-projects l6 --line-prefix prefix --line-suffix suffix" >&2
 				echo "    ListSshTargets.fn.sh --select-all --line-prefix '#' --line-suffix uname -l root" >&2
 				
-				echo "    ListSshTargets.fn.sh --select-projects l6 -l root" >&2
-				echo "    ListSshTargets.fn.sh --select-all | cut -d" " -f2-99" >&2
-				echo "    ListSshTargets.fn.sh --select-all | cut -d" " -f2-99 -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || true ; done )" >&2
-				echo "    ListSshTargets.fn.sh --select-all | cut -d" " -f2-99 | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )" >&2
+				echo '    ListSshTargets.fn.sh --select-projects l6 -l root' >&2
+				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2-' >&2
+				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || true ; done )' >&2
+				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )' >&2
 			fi
 			exit 1
 		fi

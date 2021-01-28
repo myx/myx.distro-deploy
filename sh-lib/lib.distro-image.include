@@ -55,38 +55,163 @@ DistroListSshTargets(){
 	echo "Not Implemented!" >&2
 }
 
+DistroImageParseSshOptions(){
+	[ -z "$MDSC_DETAIL" ] || echo "+ DistroImageParseSshOptions: $@" >&2
+	while true ; do
+		case "$1" in
+			--ssh-host)
+				shift ; useSshHost="$1" ; shift
+			;;
+			--ssh-port)
+				shift ; useSshPort="$1" ; shift
+			;;
+			--ssh-user)
+				shift ; useSshUser="$1" ; shift
+			;;
+			--ssh-home)
+				shift ; useSshHome="$MMDAPP/source/${1#$MMDAPP/source/}" ; shift
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+	return 0
+}
+
 DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
+	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
+
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshHome="${useSshHome:-}"
+	local linePrefix=""
+	local lineSuffix=""
+	local outputMode="deploy"
+	
+	while true ; do
+		case "$1" in
+			--project)
+				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+			;;
+			--no-cache)
+				shift ; local useNoCache="--no-cache"
+			;;
+			--no-index)
+				shift ; local useNoIndex="--no-index"
+			;;
+			--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+				DistroImageParseSshOptions "$1" "$2"
+				shift ; shift
+			;;
+			--line-prefix)
+				shift ; linePrefix="$1" ; shift
+			;;
+			--line-suffix)
+				shift ; lineSuffix="$1" ; shift
+			;;
+			--print)
+				shift ; outputMode="$1" ; shift
+			;;
+			--print-table-normal|--print-table-default|--print-normal|--print-deploy)
+				shift ; outputMode="$1" ; outputMode="${outputMode#'--print-'}" ; shift
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: DistroImageProjectSshTargets: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
-	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "| DistroImageProjectSshTargets: using env-cached ($MDSC_OPTION)" >&2
-		local sshTarget
-		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-		| while read -r sshTarget ; do
-			local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
+	
+	local sshTarget
+
+	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
+	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
+	| while read -r sshTarget ; do
+	
+		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget" >&2
+		
+		local sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
+		
+		if [ "simple" = "$outputMode" ] ; then
+			local sshHome="$useSshHome"
 			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-			local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-			local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
-			printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$MDSC_PRJ_NAME" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
-		done
-		return 0
-	fi
-	Require ListDistroProvides
-	ListDistroProvides --select-projects "$MDSC_PRJ_NAME" | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-	| while read -r projectName sshTarget ; do
-		local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
-		local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-		local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-		local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
-		printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
-	done
+			local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
+			local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+
+			printf '%s ssh %s -p %s %s%s\n' \
+				"$linePrefix" \
+				"$sshHost" \
+				"$sshPort" \
+				"$extraArguments" \
+				"$lineSuffix"
+			continue
+		fi
+		
+		if [ "deploy" = "$outputMode" ] ; then
+		
+			local clientSpec
+
+			local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
+			local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+			
+			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+
+			DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+				
+			while read -r clientSpec; do
+				[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
+				DistroImageParseSshOptions $clientSpec
+			done <<< "$( \
+				grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
+				| grep '^deploy-ssh-client-settings:' \
+				| sed 's|^deploy-ssh-client-settings:||' \
+				| tr ':' ' '
+			)"
+
+			local sshHome="$useSshHome"
+			local sshUser="${sshUser:-${useSshUser}}"
+
+			if [ -z "$sshHome" ] ; then
+				sshHome="$( echo ~/.ssh )"
+			fi
+
+			if [ ! -d "$sshHome" ] ; then
+				echo "ERROR: $MDSC_CMD: ssh home directory does not exist: $sshHome" >&2
+				return 1
+			fi
+
+			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: client spec parsed: $sshUser $sshHome" >&2
+			
+			printf '%s ssh %s -p %s -l %s %s -o UserKnownHostsFile=%s -F %s -i %s %s%s\n' \
+				"$linePrefix" \
+				"$sshHost" \
+				"$sshPort" \
+				"${sshUser:-root}" \
+				"-o ConnectTimeout=10 -o PreferredAuthentications=publickey" \
+				"$sshHome/known_hosts" \
+				"$sshHome/config-dummy.txt" \
+				"$sshHome/client.rsa" \
+				"$extraArguments" \
+				"$lineSuffix"
+			
+			continue
+			
+		fi
+		
+	done \
+	| sed -e 's|^ *||g' -e 's| *$||g'
+	
 	return 0
-	DistroListSshTargets --select-projects "$MDSC_PRJ_NAME" "${1:'--print-table'}" "$@"
+	# DistroListSshTargets --select-projects "$MDSC_PRJ_NAME" "${1:'--print-table'}" "$@"
 }
 
 # prints project merged provides

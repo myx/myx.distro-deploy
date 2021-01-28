@@ -105,6 +105,7 @@ ImagePrepareProjectTargetPatchScripts(){
 ImagePrepareProjectCloneFiles(){
 	local MDSC_CMD='ImagePrepareProjectCloneFiles'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
@@ -130,6 +131,33 @@ ImagePrepareProjectCloneFiles(){
 		fi
 	done 
 	return 0
+}
+
+ImagePrepareEmbedScript(){ # "1-scriptFileName" "2-changeDir"
+	local MDSC_CMD='ImagePrepareEmbedScript'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	local scriptFileName="$1"
+	if [ -z "$scriptFileName" ] ; then
+		echo "ERROR: $MDSC_CMD: script file name argument is expected!" >&2
+		return 1
+	fi
+	if [ ! -f "$scriptFileName" ] ; then
+		echo "ERROR: $MDSC_CMD: script file is does not exist: ${scriptFileName#$MMDAPP}" >&2
+		return 1
+	fi
+	
+	local changeDir="$2"
+	if [ -z "$changeDir" ] ; then
+		echo "ERROR: $MDSC_CMD: change directory argument is expected!" >&2
+		return 1
+	fi
+	
+	[ -z "$MDSC_DETAIL" ] || echo "ImageInstallEmbedScript: '${1#$MMDAPP}' '$2'" >&2
+	printf "\n\n( cd "$changeDir" ; bash ) << 'EOF_PROJECT_IPESSH_XXXXXXXX'\n"
+	echo "# $MDSC_CMD '${scriptFileName#$MMDAPP}' '$changeDir'"
+	cat "$scriptFileName"
+	printf '\nEOF_PROJECT_IPESSH_XXXXXXXX\n\n'
 }
 
 # main shell command
