@@ -86,9 +86,26 @@ InstallPrepareFiles(){
 			done
 
 			##
-			## execute path-related patches before processing files
+			## clone/multiply files
 			##
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute path-related patches before processing files" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: clone/multiply files" >&2
+			local sourceName sourcePath mergePath
+			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
+			| while read -r sourceName sourcePath mergePath ; do
+				local targetFullPath="$targetPath/${mergePath##/}"
+			
+				local sourceName cloneSourcePath sourceFileName targetFileName
+				[ -z "${allCloneFiles:0:1}" ] || echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
+				| while read -r sourceName cloneSourcePath sourceFileName targetFileName ; do
+					rsync -rt --chmod=ug+rw "$targetFullPath/${cloneSourcePath##$sourcePath}/$sourceFileName" "$targetFullPath/$targetFileName" 2>&1 \
+					| (grep -v --line-buffered -E '>f\.\.t\.+ ' >&2 || true)
+				done
+			done
+
+			##
+			## execute source path-related patches 
+			##
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute source path-related patches" >&2
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
 				local matchSourceName sourcePath scriptSourceName scriptName
@@ -114,26 +131,9 @@ InstallPrepareFiles(){
 			done
 
 			##
-			## clone/multiply files
+			## execute target path-related patches
 			##
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: clone/multiply files" >&2
-			local sourceName sourcePath mergePath
-			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
-			| while read -r sourceName sourcePath mergePath ; do
-				local targetFullPath="$targetPath/${mergePath##/}"
-			
-				local sourceName cloneSourcePath sourceFileName targetFileName
-				[ -z "${allCloneFiles:0:1}" ] || echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
-				| while read -r sourceName cloneSourcePath sourceFileName targetFileName ; do
-					rsync -rt --chmod=ug+rw "$targetFullPath/${cloneSourcePath##$sourcePath}/$sourceFileName" "$targetFullPath/$targetFileName" 2>&1 \
-					| (grep -v --line-buffered -E '>f\.\.t\.+ ' >&2 || true)
-				done
-			done
-
-			##
-			## execute path-related patches after processing files
-			##
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute path-related patches after processing files" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute target path-related patches" >&2
 			local sourceName sourcePath mergePath
 			local scriptSourceName scriptName matchTargetPath
 			[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
