@@ -51,10 +51,97 @@ DistroSelectProject(){
 	esac
 }
 
+#
+#
 DistroListSshTargets(){
 	echo "Not Implemented!" >&2
 }
 
+#
+#
+DistroSshConnect(){
+	local MDSC_CMD='DistroSshConnect'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	local useSshHost=""
+	local useSshPort=""
+	local useSshUser=""
+	local useSshHome=""
+
+	while true ; do
+		case "$1" in
+			--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+				DistroImageParseSshOptions "$1" "$2"
+				shift ; shift
+			;;
+			--ssh-*)
+				echo "ERROR: $MDSC_CMD: invalid --ssh-XXXX option: $1" >&2
+				return 1
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
+	local extraArguments="$@"
+	if [ -z "$useSshHome" ] ; then
+		useSshHome="$( echo ~/.ssh )"
+	fi
+	if [ -z "$useSshUser" ] ; then
+		useSshUser="$( whoami )"
+	fi
+
+	eval "$(
+		if true ; then
+			if [ ! -d "$useSshHome" ] ; then
+				echo "ERROR: $MDSC_CMD: ssh home directory does not exist: $useSshHome" >&2
+				return 1
+			fi
+	
+			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: client spec parsed: $useSshUser $useSshHome" >&2
+			
+			local sshConfig="$useSshHome/config-dummy.txt"
+			if [ -f "$sshConfig" ] ; then
+				sshConfig=" -F $sshConfig"
+			else
+				sshConfig=""
+			fi
+			
+			local sshSecret="$useSshHome/client.rsa"
+			if [ -f "$sshSecret" ] ; then
+				if [ -O "$sshSecret" ] ; then
+					chmod 600 "$sshSecret"
+				fi
+				sshSecret=" -o PreferredAuthentications=publickey -i $sshSecret"
+			else
+				sshSecret=""
+			fi
+
+			local sshHosts="$useSshHome/known_hosts" 
+			if [ -f "$sshHosts" ] ; then
+				sshHosts=" -o UserKnownHostsFile=$sshHosts"
+			else
+				sshHosts=""
+			fi
+			
+			printf 'ssh %s -p %s -l %s %s %s %s %s %s\n' \
+				"$useSshHost" \
+				"$useSshPort" \
+				"$useSshUser" \
+				"-o ConnectTimeout=10" \
+				"$sshHosts" \
+				"$sshConfig" \
+				"$sshSecret" \
+				"$extraArguments"
+		fi \
+		| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
+	)"
+	
+}
+
+#
+#
 DistroImageParseSshOptions(){
 	[ -z "$MDSC_DETAIL" ] || echo "+ DistroImageParseSshOptions: $@" >&2
 	while true ; do
@@ -79,6 +166,8 @@ DistroImageParseSshOptions(){
 	return 0
 }
 
+#
+#
 DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
@@ -91,7 +180,7 @@ DistroImageProjectSshTargets(){
 	local useSshHome="${useSshHome:-}"
 	local linePrefix=""
 	local lineSuffix=""
-	local outputMode="deploy"
+	local outputMode="normal"
 	
 	while true ; do
 		case "$1" in
@@ -118,7 +207,7 @@ DistroImageProjectSshTargets(){
 				shift ; outputMode="$1" ; shift
 			;;
 			--print-table-normal|--print-table-default|--print-normal|--print-deploy)
-				shift ; outputMode="$1" ; outputMode="${outputMode#'--print-'}" ; shift
+				outputMode="${1%\"--print-\"}" ; shift
 			;;
 			*)
 				break
@@ -131,6 +220,7 @@ DistroImageProjectSshTargets(){
 		return 1
 	fi
 	
+	local extraArguments="$@"
 	local sshTarget
 
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
@@ -141,89 +231,46 @@ DistroImageProjectSshTargets(){
 		
 		local sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
 		
-		if [ "simple" = "$outputMode" ] ; then
-			local sshHome="$useSshHome"
-			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-			local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
-			local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+		local clientSpec
 
-			printf '%s ssh %s -p %s %s%s\n' \
-				"$linePrefix" \
-				"$sshHost" \
-				"$sshPort" \
-				"$extraArguments" \
-				"$lineSuffix"
-			continue
-		fi
+		local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
+		local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
 		
-		if [ "deploy" = "$outputMode" ] ; then
-		
-			local clientSpec
+		local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+		local sshHome="$useSshHome"
 
-			local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
-			local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 			
-			local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-			local sshHome="$useSshHome"
+		while read -r clientSpec; do
+			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
+			DistroImageParseSshOptions $clientSpec
+		done <<< "$( \
+			grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
+			| grep '^deploy-ssh-client-settings:' \
+			| sed 's|^deploy-ssh-client-settings:||' \
+			| tr ':' ' ' \
+		)"
 
-			DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-				
-			while read -r clientSpec; do
-				[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
-				DistroImageParseSshOptions $clientSpec
-			done <<< "$( \
-				grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
-				| grep '^deploy-ssh-client-settings:' \
-				| sed 's|^deploy-ssh-client-settings:||' \
-				| tr ':' ' ' \
-			)"
+		local sshHome="${sshHome:-$useSshHome}"
+		local sshUser="${sshUser:-$useSshUser}"
 
-			local sshHome="${sshHome:-$useSshHome}"
-			local sshUser="${sshUser:-$useSshUser}"
-
-			if [ -z "$sshHome" ] ; then
-				sshHome="$( echo ~/.ssh )"
-			fi
-
-			if [ ! -d "$sshHome" ] ; then
-				echo "ERROR: $MDSC_CMD: ssh home directory does not exist: $sshHome" >&2
-				return 1
-			fi
-
-			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: client spec parsed: $sshUser $sshHome" >&2
-			
-			local sshConfig="$sshHome/config-dummy.txt"
-			if [ -f "$sshConfig" ] ; then
-				sshConfig="-F $sshConfig"
-			else
-				sshConfig=""
-			fi
-			
-			local sshSecret="$sshHome/client.rsa"
-			if [ -f "$sshSecret" ] ; then
-				sshSecret="-i $sshSecret"
-			else
-				sshSecret=""
-			fi
-			
-			printf '%s ssh %s -p %s -l %s %s -o UserKnownHostsFile=%s %s %s %s%s\n' \
-				"$linePrefix" \
-				"$sshHost" \
-				"$sshPort" \
-				"${sshUser:-root}" \
-				"-o ConnectTimeout=10 -o PreferredAuthentications=publickey" \
-				"$sshHome/known_hosts" \
-				"$sshConfig" \
-				"$sshSecret" \
-				"$extraArguments" \
-				"$lineSuffix"
-			
-			continue
-			
+		if [ -z "$sshHome" ] ; then
+			sshHome="$( echo ~/.ssh )"
 		fi
+
+		printf '%s --ssh-host %q --ssh-port %s --ssh-user %q --ssh-home %q %s%s\n' \
+			"$linePrefix" \
+			"$sshHost" \
+			"$sshPort" \
+			"$sshUser" \
+			"$sshHome" \
+			"$extraArguments" \
+			"$lineSuffix"
+			
+		continue
 		
 	done \
-	| sed -e 's|^ *||g' -e 's| *$||g'
+	| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
 	
 	return 0
 	# DistroListSshTargets --select-projects "$MDSC_PRJ_NAME" "${1:'--print-table'}" "$@"

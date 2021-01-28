@@ -161,13 +161,7 @@ DeployProjectSsh(){
 			;;
 			--print-ssh-targets)
 				shift
-				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --print-ssh-targets option ($@)" >&2
-					return 1
-				fi
-				
-				DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-				DistroImageProjectSshTargets
+				DistroImageProjectSshTargets "$@"
 				return 0
 			;;
 			--deploy-none)
@@ -382,7 +376,11 @@ DeployProjectSsh(){
 						##
 						## remote host script end
 						##
-					) | tee "$cacheFolder/deploy-script.$deployType.txt" | bzip2 --best | tee "$cacheFolder/deploy-script.$deployType.txt.bz2" | $sshTarget 'bunzip2 | bash' 
+					) \
+					| tee "$cacheFolder/deploy-script.$deployType.txt" \
+					| bzip2 --best \
+					| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \
+					| DistroSshConnect $sshTarget "'bunzip2 | bash'" 
 				done
 				return 0
 			;;
