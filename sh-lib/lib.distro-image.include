@@ -70,7 +70,7 @@ DistroSshConnect(){
 
 	while true ; do
 		case "$1" in
-			--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
 				DistroImageParseSshOptions "$1" "$2"
 				shift ; shift
 			;;
@@ -87,6 +87,8 @@ DistroSshConnect(){
 	local extraArguments="$@"
 	if [ -z "$useSshHome" ] ; then
 		useSshHome="$( echo ~/.ssh )"
+	elif [ "$useSshHome" = "${useSshHome#'/'}" ] ; then
+		useSshHome="$MMDAPP/source/${useSshHome#$MMDAPP/source/}"
 	fi
 	if [ -z "$useSshUser" ] ; then
 		useSshUser="$( whoami )"
@@ -146,6 +148,9 @@ DistroImageParseSshOptions(){
 	[ -z "$MDSC_DETAIL" ] || echo "+ DistroImageParseSshOptions: $@" >&2
 	while true ; do
 		case "$1" in
+			--ssh-name) # for prefix only, yet
+				shift ; shift
+			;;
 			--ssh-host)
 				shift ; useSshHost="$1" ; shift
 			;;
@@ -156,7 +161,7 @@ DistroImageParseSshOptions(){
 				shift ; useSshUser="$1" ; shift
 			;;
 			--ssh-home)
-				shift ; useSshHome="$MMDAPP/source/${1#$MMDAPP/source/}" ; shift
+				shift ; useSshHome="${1#$MMDAPP/source/}" ; shift
 			;;
 			*)
 				break
@@ -166,7 +171,7 @@ DistroImageParseSshOptions(){
 	return 0
 }
 
-#
+# prints ssh options as argument list (--ssh-host ...)
 #
 DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
@@ -180,7 +185,6 @@ DistroImageProjectSshTargets(){
 	local useSshHome="${useSshHome:-}"
 	local linePrefix=""
 	local lineSuffix=""
-	local outputMode="normal"
 	
 	while true ; do
 		case "$1" in
@@ -203,12 +207,6 @@ DistroImageProjectSshTargets(){
 			--line-suffix)
 				shift ; lineSuffix="$1" ; shift
 			;;
-			--print)
-				shift ; outputMode="$1" ; shift
-			;;
-			--print-table-normal|--print-table-default|--print-normal|--print-deploy)
-				outputMode="${1%\"--print-\"}" ; shift
-			;;
 			*)
 				break
 			;;
@@ -228,27 +226,23 @@ DistroImageProjectSshTargets(){
 	local setSshUser="${useSshUser:-}"
 	local setSshHome="${useSshHome:-}"
 
+	local sshName sshHost sshPort sshUser sshHome sshSpec clientSpec
+	
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
 	| while read -r sshTarget ; do
 	
 		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget" >&2
 		
-		local sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
+		sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
+		sshUser="${sshTarget%${sshTarget%@$sshSpec}}"
+		sshName="$( echo "$sshSpec" | sed 's,:.*$,,' )"
+		sshPort="$( echo "$sshSpec" | sed 's,^.*:,,' )"
 		
-		local clientSpec
-
-		local useSshHost="${setSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
-		local useSshPort="${setSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
-		local useSshUser="${setSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-		local useSshHome="$setSshHome"
-
-
-		local sshHost="$useSshHost"
-		local sshPort="$useSshPort"
-		
-		local sshUser="$useSshUser"
-		local sshHome="$useSshHome"
+		useSshHost="${setSshHost:-$sshName}"
+		useSshPort="${setSshPort:-$sshPort}"
+		useSshUser="${setSshUser:-$sshUser}"
+		useSshHome="$setSshHome"
 
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 			
@@ -262,10 +256,14 @@ DistroImageProjectSshTargets(){
 			| tr ':' ' ' \
 		)"
 
-		local sshHost="$useSshHost"
-		local sshPort="$useSshPort"
-		local sshHome="${sshHome:-$useSshHome}"
-		local sshUser="${sshUser:-$useSshUser}"
+		sshHost="${setSshHost:-$useSshHost}"
+		sshPort="${setSshPort:-$useSshPort}"
+		sshHome="${setSshHome:-$useSshHome}"
+		sshUser="${setSshUser:-$useSshUser}"
+		
+		if [ "$sshHost" != "$sshName" ] ; then
+			linePrefix="$linePrefix --ssh-name $( printf '%q' "$sshName" )"
+		fi
 
 		if [ -z "$sshHome" ] ; then
 			sshHome="$( echo ~/.ssh )"
@@ -306,7 +304,8 @@ DistroImageProjectProvidesMerged(){
 	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
+			# remake if it is too young (re: one second precision of -nt)
+			if [ "$cacheFile" -nt "$checkFile" ] ; then
 				cat "$cacheFile"
 				return 0
 			fi
@@ -352,7 +351,8 @@ DistroImageProjectSequence(){
 	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-build-sequence.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
+			# remake if it is too young (re: one second precision of -nt)
+			if [ "$cacheFile" -nt "$checkFile" ] ; then
 				cat "$cacheFile"
 				return 0
 			fi
@@ -391,7 +391,8 @@ DistroImageEnsureProvidesMergedFile(){
 	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ ! "$checkFile" -nt "$cacheFile" ] ; then
+			# remake if it is too young (re: one second precision of -nt)
+			if [ "$cacheFile" -nt "$checkFile" ] ; then
 				MDSC_IDAPRV_NAME="$cacheFile"
 				return 0
 			fi

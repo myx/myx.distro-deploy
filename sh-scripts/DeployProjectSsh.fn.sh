@@ -12,8 +12,6 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	DistroShellContext --distro-path-auto
 fi
 
-Require ListProjectProvides
-
 if ! type ImageInstall >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
 fi
@@ -201,6 +199,8 @@ DeployProjectSsh(){
 				fi
 
 				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
+
+				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
 
 				local sshTarget
 				echo "$projectSshTargets" \

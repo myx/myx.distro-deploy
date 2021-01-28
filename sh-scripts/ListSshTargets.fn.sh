@@ -14,19 +14,24 @@ fi
 
 Require ListDistroProvides
 
+if ! type DistroImage >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+fi
+
 ListSshTargets(){
-	
-	[ -z "$MDSC_DETAIL" ] || echo "> ListSshTargets $@" >&2
 
 	set -e
 
+	local MDSC_CMD='ListSshTargets'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
 	case "$1" in
-		--all-targets|--line-prefix|--line-suffix)
+		--all-targets|--all-targets-new|--line-prefix|--line-suffix)
 		;;
 		--select-from-env)
 			shift
 			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
-				echo "ERROR: ListSshTargets: no projects selected!" >&2
+				echo "ERROR: $MDSC_CMD: no projects selected!" >&2
 				return 1
 			fi
 		;;
@@ -71,7 +76,31 @@ ListSshTargets(){
 			--all-targets)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ListSshTargets: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
+					echo "$MDSC_CMD: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
+					return 1
+				fi
+				
+				local setSshHost="${useSshHost:-}"
+				local setSshPort="${useSshPort:-}"
+				local setSshUser="${useSshUser:-}"
+				local setSshHome="${useSshHome:-}"
+			
+				DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
+				grep -e ' deploy-ssh-target:' "$MDSC_IDOPRV_NAME" | sed 's| deploy-ssh-target:| |' | awk '!x[$0]++' \
+				| while read -r projectName sshTarget ; do
+					local useSshHost="${setSshHost:-}"
+					local useSshPort="${setSshPort:-}"
+					local useSshUser="${setSshUser:-}"
+					local useSshHome="${setSshHome:-}"
+					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix"
+					# printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$useSshHost" "$useSshPort" "$useSshUser" "$extraArguments" "$lineSuffix"
+				done
+				return 0
+			;;
+			--all-targets-old)
+				shift
+				if [ ! -z "$1" ] ; then
+					echo "$MDSC_CMD: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
 					return 1
 				fi
 				
@@ -86,14 +115,12 @@ ListSshTargets(){
 				return 0
 			;;
 			--line-prefix)
-				shift
-				local linePrefix="$1 " ; shift
+				shift ; linePrefix="$1 " ; shift
 			;;
 			--line-suffix)
-				shift
-				local lineSuffix="$1" ; shift
+				shift ; lineSuffix="$1" ; shift
 			;;
-			*)
+			--default-new)
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 			
 				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
@@ -103,6 +130,25 @@ ListSshTargets(){
 					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
 					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
 					printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
+				done
+				return 0
+			;;
+			*)
+				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+			
+				local setSshHost="${useSshHost:-}"
+				local setSshPort="${useSshPort:-}"
+				local setSshUser="${useSshUser:-}"
+				local setSshHome="${useSshHome:-}"
+			
+				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
+				| while read -r projectName sshTarget ; do
+					local useSshHost="${setSshHost:-}"
+					local useSshPort="${setSshPort:-}"
+					local useSshUser="${setSshUser:-}"
+					local useSshHome="${setSshHome:-}"
+					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix" "$extraArguments"
+					# printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$useSshHost" "$useSshPort" "$useSshUser" "$extraArguments" "$lineSuffix"
 				done
 				return 0
 			;;

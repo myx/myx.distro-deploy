@@ -17,25 +17,24 @@ Require ListSshTargets
 type Prefix >/dev/null 2>&1 || \
 	. "/usr/local/share/myx.common/bin/lib/prefix"
 
+if ! type DistroImage >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+fi
+
 ExecuteSequence(){
-	
+
 	set -e
 
+	local MDSC_CMD='ExecuteSequence'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
 	case "$1" in
-		--project)
-			shift
-			set -e
-			local internSourceProject="$1" ; shift
-			local internTargetCommand="$@"
-			Prefix "$( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
-			return 0
-		;;
 		--all-targets)
 		;;
 		--select-from-env)
 			shift
 			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
-				echo "ERROR: ListSshTargets: no projects selected!" >&2
+				echo "ERROR: $MDSC_CMD: no projects selected!" >&2
 				return 1
 			fi
 		;;
@@ -49,6 +48,11 @@ ExecuteSequence(){
 	local useNoCache=""
 	local useNoIndex=""
 
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshHome="${useSshHome:-}"
+
 	while true ; do
 		case "$1" in
 			--no-cache)
@@ -59,6 +63,14 @@ ExecuteSequence(){
 				shift
 				local useNoIndex="--no-index"
 			;;
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+				DistroImageParseSshOptions "$1" "$2"
+				shift ; shift
+			;;
+			--ssh-*)
+				echo "$MDSC_CMD: ERROR: invalid --ssh-XXXX option: $1" >&2
+				return 1
+			;;
 			*)
 				break
 			;;
@@ -68,7 +80,7 @@ ExecuteSequence(){
 	local executeType=""
 	local executeCommand=""
 	local executeScriptName=""
-	
+
 	case "$1" in
 		--display-targets)
 			shift
@@ -82,18 +94,18 @@ ExecuteSequence(){
 			shift
 			local executeType="--execute-script"
 			if [ -z "$1" ] ; then
-				echo "ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
 			fi
 			local executeScriptName="$1" ; shift
 			if [ ! -f "$executeScriptName" ] ; then
-				echo "ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
+				echo "$MDSC_CMD: ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
 			fi
 		;;
 		--execute-command)
 			shift
 			local executeType="--execute-command"
 			if [ -z "$1" ] ; then
-				echo "ERROR: '--execute-command' - command argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ERROR: '--execute-command' - command argument required!" >&2 ; return 1
 			fi
 			local executeCommand="$1" ; shift
 		;;
@@ -103,15 +115,16 @@ ExecuteSequence(){
 
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \
-			--line-prefix 'ExecuteSequence --project' \
+			--line-prefix 'Prefix -3' \
 			--line-suffix ' ; ' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
 			$targetCommand $executeCommand \
+		| cut -d" " -f 1,2,4-
 	)"
 	
-	echo "Will execute: " >&2
+	echo "Will execute ($MDSC_CMD): " >&2
 	local textLine
-	echo "$sshTargets" | while read textLine ; do
+	echo "$sshTargets" | while read -r textLine ; do
 		echo "  $textLine" >&2
 	done
 
@@ -172,8 +185,10 @@ case "$0" in
 				echo "    --{select|filter|remove}-repository-projects <repositoryName>" >&2
 				echo "  Examples:" >&2
 				echo "    ExecuteSequence.fn.sh --select-projects l6 --execute-stdin -l root" >&2
+				echo "    ExecuteSequence.fn.sh --select-projects l6 --ssh-user root --execute-stdin" >&2
 				echo "    ExecuteSequence.fn.sh --select-merged-keywords l6 --execute-stdin -l root bash" >&2
 				echo "    ExecuteSequence.fn.sh --select-all uname -a" >&2
+				echo "    ExecuteSequence.fn.sh --select-all --ssh-user root uname -a" >&2
 				echo "    ExecuteSequence.fn.sh --select-provides 'deploy-ssh-target:'  --execute-command 'myx.common install/myx.common-reinstall'" >&2
 				echo "    ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
 			fi
