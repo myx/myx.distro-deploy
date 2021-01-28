@@ -13,58 +13,50 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 fi
 
 ShellTo(){
-	if [ "--connect-ssh" = "$1" ] ; then
-		shift
-		set -e
-		# set -x
-		local sourceProject="$1" ; shift
-		local targetCommand="$@"
-		echo "Using Project: $sourceProject" >&2
-		echo "Using Command: $targetCommand" >&2
-		$targetCommand -t /bin/sh -i
-		return 0
-	fi
-	
-	if [ "--check-count" = "$1" ] ; then
-		shift
-		local sshTarget="$1"
-		
-		if [ -z "$2" ] ; then
-			shift
-			ShellTo --connect-ssh $sshTarget
-			return 0
-		fi
-		
-		echo "ERROR: ShellTo: More that one match: $@" >&2 ; return 1
-	fi
 
+	set -e
+
+	local MDSC_CMD='ShellTo'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo "ERROR: ShellTo: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
+		echo "$MDSC_CMD: ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
 	fi
 
 	shift
 
 	Require ListSshTargets
-	. "`myx.common which lib/linesToArguments`"
 
-	# set -x
-	
-	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | LinesToArguments )"
-
-	# set +x
+	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | cut -d" " -f 2- )"
 
 	if [ -z "$targets" ] ; then
-		echo "ERROR: ShellTo: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2 ; return 1
+		echo "$MDSC_CMD: ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
+		return 1
 	fi
 	
+	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
+		echo "$MDSC_CMD: ERROR: More that one match: $@" >&2
+		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
+		return 1
+	fi
+
 	set -e
-	eval ShellTo --check-count "$targets"
+	echo "$MDSC_CMD: Using Command: $targets" >&2
+	eval "$targets -t /bin/sh -i"
 }
 
 case "$0" in
 	*/sh-scripts/ShellTo.fn.sh)
-		# ShellTo.fn.sh  
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			echo "syntax: ShellTo.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "syntax: ShellTo.fn.sh [--help]" >&2
+			if [ "$1" = "--help" ] ; then
+				echo "  Examples:" >&2
+				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
+			fi
+			exit 1
+		fi
 		
 		ShellTo "$@"
 	;;
