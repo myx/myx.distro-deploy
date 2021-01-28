@@ -200,7 +200,7 @@ DeployProjectSsh(){
 
 				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
 
-				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
 				local sshTarget
 				echo "$projectSshTargets" \
