@@ -26,7 +26,7 @@ ListSshTargets(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	
 	case "$1" in
-		--all-targets|--all-targets-new|--line-prefix|--line-suffix)
+		--all-targets|--line-prefix|--line-suffix)
 		;;
 		--select-from-env)
 			shift
@@ -97,41 +97,11 @@ ListSshTargets(){
 				done
 				return 0
 			;;
-			--all-targets-old)
-				shift
-				if [ ! -z "$1" ] ; then
-					echo "$MDSC_CMD: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
-					return 1
-				fi
-				
-				ListDistroProvides --all-provides | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-				| while read -r projectName sshTarget ; do
-					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
-					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
-					printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
-				done
-				return 0
-			;;
 			--line-prefix)
 				shift ; linePrefix="$1 " ; shift
 			;;
 			--line-suffix)
 				shift ; lineSuffix="$1" ; shift
-			;;
-			--default-new)
-				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-			
-				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-				| while read -r projectName sshTarget ; do
-					local sshSpec="`echo "$sshTarget" | sed 's,^.*@,,'`"
-					local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
-					local sshHost="${useSshHost:-`echo "$sshSpec"   | sed 's,:.*$,,'`}"
-					local sshPort="${useSshPort:-`echo "$sshSpec"   | sed 's,^.*:,,'`}"
-					printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$sshHost" "$sshPort" "${sshUser:-root}" "$extraArguments" "$lineSuffix"
-				done
-				return 0
 			;;
 			*)
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
