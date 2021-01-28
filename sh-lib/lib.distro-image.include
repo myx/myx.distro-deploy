@@ -223,6 +223,11 @@ DistroImageProjectSshTargets(){
 	local extraArguments="$@"
 	local sshTarget
 
+	local setSshHost="${useSshHost:-}"
+	local setSshPort="${useSshPort:-}"
+	local setSshUser="${useSshUser:-}"
+	local setSshHome="${useSshHome:-}"
+
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
 	| while read -r sshTarget ; do
@@ -233,10 +238,16 @@ DistroImageProjectSshTargets(){
 		
 		local clientSpec
 
-		local sshHost="${useSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
-		local sshPort="${useSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+		local useSshHost="${setSshHost:-$( echo "$sshSpec" | sed 's,:.*$,,' )}"
+		local useSshPort="${setSshPort:-$( echo "$sshSpec" | sed 's,^.*:,,' )}"
+		local useSshUser="${setSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+		local useSshHome="$setSshHome"
+
+
+		local sshHost="$useSshHost"
+		local sshPort="$useSshPort"
 		
-		local sshUser="${useSshUser:-${sshTarget%${sshTarget%@$sshSpec}}}"
+		local sshUser="$useSshUser"
 		local sshHome="$useSshHome"
 
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
@@ -251,6 +262,8 @@ DistroImageProjectSshTargets(){
 			| tr ':' ' ' \
 		)"
 
+		local sshHost="$useSshHost"
+		local sshPort="$useSshPort"
 		local sshHome="${sshHome:-$useSshHome}"
 		local sshUser="${sshUser:-$useSshUser}"
 
