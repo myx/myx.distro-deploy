@@ -20,17 +20,24 @@ if ! type DistroImage >/dev/null 2>&1 ; then
 fi
 
 InstallPrepareScript(){
+
 	set -e
 
-	[ -z "$MDSC_DETAIL" ] || echo "> InstallPrepareScript $@" >&2
-	# [ -z "$MDSC_DETAIL" ] || printf "| InstallPrepareScript: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	local MDSC_CMD='InstallPrepareScript'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
+	local PROJECT_MATCH="${PROJECT_MATCH:-}"
 	
 	while true ; do
 		case "$1" in
 			--project)
 				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+			;;
+			--match)
+				shift ; PROJECT_MATCH="$PROJECT_MATCH $1" ; shift
 			;;
 			*)
 				break
@@ -39,12 +46,13 @@ InstallPrepareScript(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: InstallPrepareScript: project is not selected!" >&2
+		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
 	fi
 
 	case "$1" in
 		--print-files)
+			local match
 			( \
 				ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-before ;
 				ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-after | tail -r ;
@@ -52,8 +60,14 @@ InstallPrepareScript(){
 			| while read -r sourceName scriptPath ; do
 				local fileName="$MDSC_SOURCE/$sourceName/$scriptPath"
 				if [ ! -f "$fileName" ] ; then
-					echo "ERROR: InstallPrepareScript: file is missing: $fileName" >&2; 
+					echo "ERROR: $MDSC_CMD: file is missing: $fileName" >&2; 
 					return 1
+				fi
+				if [ ! -z "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
+					printf ' -e %q' "$m"
+				done ) )" ] ; then
+					[ -z "$MDSC_DETAIL" ] || echo "- $MDSC_CMD: skip (scripts filter): $sourceName/$scriptPath" >&2
+					continue
 				fi
 				echo "$fileName"
 			done
@@ -65,6 +79,12 @@ InstallPrepareScript(){
 			return 0
 		;;
 		--print-script)
+			local fileNames="$( InstallPrepareScript --print-files )"
+			if [ -z "$fileNames" ] ; then
+				echo "$MDSC_CMD: ERROR: no scripts selected!" >&2
+				return 1
+			fi 
+
 			echo "#!/bin/sh"
 			echo "#*- 	"
 			echo "#*- 	generated at `date -u`"
@@ -75,8 +95,6 @@ InstallPrepareScript(){
 			echo "#*- 	"
 			echo "#*- 	contents:"
 			
-			local fileNames="$( InstallPrepareScript --print-files )"
-
 			echo "$fileNames" \
 			| while read -r fileName ; do
 				echo "##**--     $fileName"
@@ -118,14 +136,14 @@ InstallPrepareScript(){
 			shift
 			local targetFile="$1"
 			if [ -z "$targetFile" ] ; then
-				echo "InstallPrepareScript: 'targetFile' argument is required!" >&2 ; return 1
+				echo "$MDSC_CMD: 'targetFile' argument is required!" >&2 ; return 1
 			fi
 			
 			InstallPrepareScript --print-script > "$targetFile"
 			return 0 
 		;;
 		*)
-			echo "ERROR: InstallPrepareScript: invalid option: $1" >&2
+			echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
 			return 1
 		;;
 	esac
@@ -134,12 +152,13 @@ InstallPrepareScript(){
 case "$0" in
 	*/sh-scripts/InstallPrepareScript.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: InstallPrepareScript.fn.sh <project> --print-files/--print-script" >&2
-			echo "syntax: InstallPrepareScript.fn.sh <project> --to-file <targetDirectory>" >&2
+			echo "syntax: InstallPrepareScript.fn.sh <project> [--match <name>...] --print-files/--print-script" >&2
+			echo "syntax: InstallPrepareScript.fn.sh <project> [--match <name>...] --to-file <targetDirectory>" >&2
 			echo "syntax: InstallPrepareScript.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    InstallPrepareScript.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz --print-script" >&2
+				echo "    InstallPrepareScript.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz --match monit --print-script" >&2
 				echo "    InstallPrepareScript.fn.sh prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-files" >&2
 				echo "    InstallPrepareScript.fn.sh prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-script" >&2
 			fi
