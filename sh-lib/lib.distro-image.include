@@ -404,7 +404,7 @@ DistroImageEnsureProvidesMergedFile(){
 		set -e
 		Require ListDistroProvides
 		MDSC_IDAPRV_NAME="$cacheFile"
-		ListDistroProvides --explicit-noop --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
+		ListDistroProvides --explicit-noop --no-cache --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
 		mv -f "$MDSC_IDAPRV_NAME.tmp" "$MDSC_IDAPRV_NAME"
 		return 0
 	fi
@@ -479,6 +479,102 @@ DistroImageCheckOutputPath(){
 	fi
 	
 	!!!
+	
+	return 0
+}
+
+#
+# call with --install|--prepare [--export|--local] argument
+DistroImageProjectContextVariables(){
+	local MDSC_CMD='DistroImageProjectContextVariables'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "$MDSC_CMD: ERROR: project is not selected!" >&2
+		return 1
+	fi
+
+	local prefix="" filter=""
+
+	while true ; do 
+		case "$1" in
+			--install)
+				shift
+				filter="grep -e \" image-install:context-variable:\""
+			;;
+			--prepare)
+				shift
+				filter="grep -e \" image-prepare:context-variable:\""
+			;;
+			--export)
+				prefix="export " ; shift
+			;;
+			--local)
+				prefix="local " ; shift
+			;;
+			'')
+				break
+			;;
+			*)
+				echo "$MDSC_CMD: ERROR: Invalid option: $1" >&2
+				return 1
+			;;
+		esac
+	done
+
+	local variableName operationType variableValue
+
+	local buildBuffer="`
+		DistroImageProjectProvidesMerged \
+		| eval $filter \
+		| tr ':' ' ' | cut -d" " -f4- \
+		| while read -r variableName operationType variableValue ; do
+			case "$operationType" in
+				insert)
+					printf '[ ! -z "$VAR_%s" ] || VAR_%s=%q # %s\n' \
+						"$variableName" "$variableName" "$variableValue" "$variableName"
+				;;
+				upsert)
+					printf 'VAR_%s=%q # %s\n' \
+						"$variableName" "$variableValue" "$variableName"
+				;;
+				update)
+					printf '[ -z "$VAR_%s" ] || VAR_%s=%q # %s\n' \
+						"$variableName" "$variableName" "$variableValue" "$variableName"
+				;;
+				delete)
+					if [ -z "$variableValue" ] ; then
+						printf 'VAR_%s="" # %s\n' \
+							"$variableName" "$variableName"
+					else
+						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=q # %s\n' \
+							"variableValue" "$variableName" "$variableName" "$variableValue" "$variableName"
+					fi
+				;;
+				*)
+					echo "$MDSC_CMD: WARNING: unknown context variable operation: $operationType:$variableName:$variableValue" >&2
+				;;
+			esac
+		done
+	`"
+	
+	if [ -z "${buildBuffer:0:1}" ] ; then
+		return 0
+	fi
+	
+	local variableNames="$( echo "$buildBuffer" | sed -e 's|^.* \# ||g' | sort | uniq )"
+	
+	local buildBuffer="`
+		for variableName in $variableNames ; do
+			printf 'local VAR_%s\n' "$variableName"
+		done
+		echo "$buildBuffer"
+		for variableName in $variableNames ; do
+			printf 'printf %s %q %s\n' "'$prefix%s=%q\n'" "$variableName" "\\\$VAR_$variableName"
+		done
+	`"
+	
+	# hope for a new process
+	echo | ( eval "$buildBuffer" )
 	
 	return 0
 }

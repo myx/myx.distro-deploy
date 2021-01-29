@@ -4,6 +4,11 @@
 
 image-receive, image-install commands:
 
+	image-install:context-variable:<variableName>:insert|upsert|update|delete[:<valueNoSpaces>]
+	image-install:context-variable:DPL_HOST_TYPE:upsert:standalone
+	image-install:context-variable:DPL_HOST_TYPE:update:standalone
+	image-install:context-variable:DPL_HOST_TYPE:delete
+
 	image-install:exec-update-before:
 	image-install:exec-update-before:host/install/<scriptName>
 	image-install:exec-update-before:host/install/common-java.sh.txt

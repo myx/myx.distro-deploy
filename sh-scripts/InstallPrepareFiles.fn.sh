@@ -60,6 +60,11 @@ InstallPrepareFiles(){
 			ImagePrepareProjectTargetPatchScripts
 			return 0
 		;;
+		--print-context-variables)
+			shift
+			DistroImageProjectContextVariables --prepare "$@"
+			return 0
+		;;
 		--to-directory)
 			shift
 		 	local targetPath="$1" ; shift
@@ -72,7 +77,13 @@ InstallPrepareFiles(){
 			local allSourceScripts="$( ImagePrepareProjectSourcePatchScripts )"
 			local allCloneFiles="$( ImagePrepareProjectCloneFiles )"
 			local allTargetScripts="$( ImagePrepareProjectTargetPatchScripts )"
-			
+
+			##
+			## set variables
+			##
+			local allContextVariables="$( DistroImageProjectContextVariables --prepare --export )"
+			[ -z "${allContextVariables:0:1}" ] || eval "$allContextVariables"
+
 			##
 			## sync files from source to output
 			##

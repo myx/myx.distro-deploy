@@ -15,6 +15,10 @@ fi
 Require ListDistroProvides
 Require ListProjectProvides
 
+if ! type DistroImage >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+fi
+
 InstallPrepareScript(){
 	set -e
 
@@ -55,6 +59,11 @@ InstallPrepareScript(){
 			done
 			return 0 
 		;;
+		--print-install-context-variables)
+			shift
+			DistroImageProjectContextVariables --install "$@"
+			return 0
+		;;
 		--print-script)
 			echo "#!/bin/sh"
 			echo "#*- 	"
@@ -75,6 +84,19 @@ InstallPrepareScript(){
 
 			echo "#*- 	"
 			echo
+			echo
+
+			##
+			## set detailed logging on remote host
+			##
+			[ -z "$MDSC_DETAIL" ] || echo 'export MDSC_DETAIL=true'
+
+			echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
+
+			[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
+			
+			DistroImageProjectContextVariables --install --export
+
 			echo
 			
 			echo "$fileNames" \

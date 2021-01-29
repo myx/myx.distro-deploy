@@ -126,17 +126,17 @@ DeployProjectSsh(){
 			;;
 			--print-sync-tasks)
 				shift
-				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --print-sync-tasks option ($@)" >&2
-					return 1
-				fi
-
-				ImageInstallProjectSyncTasks				
+				ImageInstallProjectSyncTasks "$@"
 				return 0
 			;;
 			--print-deploy-patch-scripts)
 				shift
 				ImageInstallProjectDeployPatchScripts "$@"
+				return 0
+			;;
+			--print-context-variables)
+				shift
+				DistroImageProjectContextVariables --install "$@"
 				return 0
 			;;
 			--print-installer)
@@ -221,8 +221,16 @@ DeployProjectSsh(){
 						##
 						## set detailed logging on remote host
 						##
-						[ -z "$MDSC_DETAIL" ] || echo 'MDSC_DETAIL=true'
+						[ -z "$MDSC_DETAIL" ] || echo 'export MDSC_DETAIL=true'
+
+						echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
+
 						[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
+						
+						##
+						## set variables
+						##
+						DistroImageProjectContextVariables --install --export
 
 						echo 'echo "ImageDeploy: uploading..." >&2'
 
@@ -233,7 +241,7 @@ DeployProjectSsh(){
 						printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 						tar jcf - -C "$cacheFolder/" "` echo "$deployType" | sed 's|full|sync exec|' `" | uuencode -m packed.tgz
 						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
-
+						
 						##
 						## check do sync
 						##
@@ -403,7 +411,7 @@ case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
-			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--prepare-{exec|sync|full|none}] --print-{files|sync-tasks|installer|ssh-targets}" >&2
+			echo "syntax: DeployProjectSsh.fn.sh --project <project> --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables}" >&2
 			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
@@ -415,6 +423,9 @@ case "$0" in
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-exec --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --deploy-full" >&2
+
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-deploy-patch-scripts" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-context-variables" >&2
 				
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --print-ssh-targets" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
