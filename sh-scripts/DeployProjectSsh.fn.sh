@@ -16,6 +16,246 @@ if ! type ImageInstall >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
 fi
 
+
+##
+## Internal - prints script using prepared variables
+##
+DeployProjectSshInternalPrintRemoteScript(){
+
+	set -e
+
+	local MDSC_CMD="DeployProjectSsh[--print-$deployType-script]"
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
+	##
+	## coarse-check parameters are legit
+	##
+	if [ "${cacheFolder#"$MMDAPP/output"}" = "$cacheFolder" ] ; then
+		echo "ERROR: $MDSC_CMD: invalid context: cacheFolder: $cacheFolder" >&2
+		return 1
+	fi
+
+	##
+	## check if scripts (exec) are needed
+	##
+	if [ "$deployType" != "sync" ] ; then
+		if [ "true" = "$prepareScript" ] || [ "auto" = "$prepareScript" -a  ! -f "$cacheFolder/exec"  ] ; then
+			Require InstallPrepareScript
+			InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
+		fi
+		if [ ! -f "$cacheFolder/exec" ] ; then
+			echo "ERROR: $MDSC_CMD: no installer script found ($cacheFolder/exec)" >&2
+			return 1
+		fi
+	fi
+
+	##
+	## check if files (sync) are needed
+	##
+	if [ "$deployType" != "exec" ] ; then
+		if [ "true" = "$prepareFiles" ] || [ "auto" = "$prepareFiles" -a  ! -d "$cacheFolder/sync"  ] ; then
+			Require InstallPrepareFiles
+			InstallPrepareFiles --project "$MDSC_PRJ_NAME" --to-directory "$cacheFolder/sync"
+		fi
+		if [ ! -d "$cacheFolder/sync" ] ; then
+			echo "ERROR: $MDSC_CMD: no installer files found ($cacheFolder/sync)" >&2
+			return 1
+		fi
+	fi
+
+	# local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-install:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
+	local projectProvides="$( ImageInstallProjectProvidesMerged )"
+	
+	if [ "$deployType" != "exec" ] ; then
+		##
+		## select sync tasks
+		##
+		local deploySyncFilesTasks="$( ImageInstallProjectSyncTasks )"
+		local deploySourcePatchScripts="$( ImageInstallProjectDeployPatchScripts --source )"
+		local deployTargetPatchScripts="$( ImageInstallProjectDeployPatchScripts --target )"
+	fi
+
+	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
+
+	##
+	## remote host script start
+	##
+
+	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
+
+	if [ "true" = "$executeSleep" ] ; then
+		echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
+		echo 'sleep 5'
+	fi
+
+	##
+	## set detailed logging on remote host
+	##
+	[ -z "$MDSC_DETAIL" ] || echo 'export MDSC_DETAIL=true'
+
+	echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
+
+	[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
+	
+	##
+	## set variables
+	##
+	DistroImageProjectContextVariables --install --export
+
+	echo 'echo "ImageDeploy: uploading sync files..." >&2'
+
+	##
+	## embed files needed
+	##
+	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
+	printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tgz
+	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
+	
+	##
+	## check do sync
+	##
+	if [ "$deployType" != "exec" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building sync script" >&2
+		echo 'echo "ImageDeploy: syncing files..." >&2'
+
+		##
+		## execute global patches before processing files
+		##
+		local scriptSourceName scriptFile sourcePath
+		ImageInstallProjectDeployPatchScripts --prefix \
+		| while read -r scriptSourceName scriptFile sourcePath; do
+			[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
+			[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+		done
+
+		##
+		## for every sync task
+		##
+		local sourcePath targetPath
+		echo "$deploySyncFilesTasks" \
+		| while read -r sourcePath targetPath; do
+
+			##
+			## execute path-related patches before processing files
+			##
+			local scriptSourceName scriptFile matchSourcePath
+			[ -z "${deploySourcePatchScripts:0:1}" ] || echo "$deploySourcePatchScripts" \
+			| while read -r scriptSourceName scriptFile matchSourcePath; do
+				case "${matchSourcePath##/}/" in
+					"${sourcePath##/}/"*)
+						[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchSourcePath ?= $sourcePath" >&2
+						[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+						ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
+						[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+					;;
+					*)
+						[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
+					;;
+				esac
+			done
+
+			##
+			## clone/multiply files
+			##
+			local declaredAt sourcePath filePath fileName targetPattern useVariable useValues
+			echo "$projectProvides" \
+			| grep " image-install:clone-deploy-file:$sourcePath:" \
+			| tr ':' ' ' | cut -d" " -f1,4- \
+			| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
+				local localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
+				if [ ! -f "$localFileName" ] ; then
+					echo "ERROR: $MDSC_CMD: file is missing: $localFileName, declared at $declaredAt" >&2 
+					return 1
+				fi
+				if [ -z "$useVariable" ] ; then
+					echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
+						2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+				else
+					local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+					for useValue in $useValues ; do
+						echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
+							2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+					done
+				fi
+			done
+
+		done
+
+		##
+		## execute path-related patches after processing files
+		##
+		local sourcePath targetPath scriptSourceName scriptFile matchTargetPath
+		echo "$deploySyncFilesTasks" \
+		| while read -r sourcePath targetPath; do
+
+			[ -z "${deployTargetPatchScripts:0:1}" ] || echo "$deployTargetPatchScripts" \
+			| while read -r scriptSourceName scriptFile matchTargetPath; do
+				case "${matchTargetPath##/}/" in
+					"${targetPath##/}/"*)
+						[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $targetPath" >&2
+						[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$targetPath' >&2"
+						ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
+						[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$targetPath' >&2"
+					;;
+					*)
+						[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchTargetPath ?= $targetPath" >&2
+					;;
+				esac
+			done
+
+		done
+
+		##
+		## execute global patches after processing files
+		##
+		local scriptSourceName scriptFile sourcePath
+		ImageInstallProjectDeployPatchScripts --suffix \
+		| while read -r scriptSourceName scriptFile sourcePath; do
+			[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
+			[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+		done
+
+		##
+		## sync processed files
+		##
+		echo "$deploySyncFilesTasks" \
+		| while read -r sourcePath targetPath; do
+
+			if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
+				echo "mkdir -p -m 770 '$targetPath'"
+				echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
+					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+			else
+				echo "mkdir -p -m 770 '$( dirname $targetPath )'"
+				echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath' \
+					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+			fi
+
+		done
+	fi
+
+	##
+	## check do exec
+	##
+	if [ "$deployType" != "sync" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building exec script" >&2
+		echo 'echo "ImageDeploy: executing scripts..." >&2'
+		echo 'bash ./exec'
+	fi
+
+	echo 'echo "ImageDeploy: task finished." >&2'
+
+	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
+	
+	echo 'exit 0'
+	##
+	## remote host script end
+	##
+}
+
 DeployProjectSsh(){
 
 	set -e
@@ -38,9 +278,11 @@ DeployProjectSsh(){
 	local useSshHome="${useSshHome:-}"
 
 	local prepareFiles="${prepareFiles:-auto}" 
-	local prepareScripts="${prepareScripts:-auto}"
+	local prepareScript="${prepareScript:-auto}"
 
 	local executeSleep="${executeSleep:-true}"
+	
+	local deployType=""
 	
 	while true ; do
 		case "$1" in
@@ -61,7 +303,7 @@ DeployProjectSsh(){
 			;;
 			--prepare-exec)
 				shift
-				local prepareScripts="true"
+				local prepareScript="true"
 			;;
 			--prepare-sync)
 				shift
@@ -70,12 +312,12 @@ DeployProjectSsh(){
 			--prepare-full)
 				shift
 				local prepareFiles="true"
-				local prepareScripts="true"
+				local prepareScript="true"
 			;;
 			--prepare-none)
 				shift
 				local prepareFiles="false"
-				local prepareScripts="false"
+				local prepareScript="false"
 			;;
 			--no-sleep)
 				shift
@@ -88,7 +330,12 @@ DeployProjectSsh(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ERROR: project is not selected!" >&2
+		return 1
+	fi
+	
+	if [ ! -d "$MDSC_CACHED/$MDSC_PRJ_NAME" ] ; then
+		echo "$MDSC_CMD: ERROR: project is not found: $MDSC_CACHED/$MDSC_PRJ_NAME" >&2
 		return 1
 	fi
 	
@@ -102,11 +349,11 @@ DeployProjectSsh(){
 		InstallPrepareFiles --project "$MDSC_PRJ_NAME" --to-directory "$cacheFolder/sync"
 		local prepareFiles="auto" 
 	fi
-	if [ "true" = "$prepareScripts" ] ; then
+	if [ "true" = "$prepareScript" ] ; then
 		echo "$MDSC_CMD: --prepare-exec" >&2
 		Require InstallPrepareScript
 		InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
-		local prepareScripts="auto"
+		local prepareScript="auto"
 	fi
 	
 	while true ; do
@@ -146,7 +393,7 @@ DeployProjectSsh(){
 					return 1
 				fi
 				local outputPath="$cacheFolder/exec"
-				if [ "true" = "$prepareScripts" ] || [ "auto" = "$prepareScripts" -a  ! -f "$outputPath"  ] ; then
+				if [ "true" = "$prepareScript" ] || [ "auto" = "$prepareScript" -a  ! -f "$outputPath"  ] ; then
 					Require InstallPrepareScript
 					InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$outputPath"
 				fi
@@ -170,6 +417,34 @@ DeployProjectSsh(){
 				fi
 				return 0
 			;;
+			--print-sync-script|--print-exec-script|--print-full-script)
+				deployType="${1#"--print-"}"
+				deployType="${deployType%"-script"}"
+				shift
+				if [ ! -z "$1" ] ; then
+					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-$deployType option ($@)" >&2
+					return 1
+				fi
+
+				DeployProjectSshInternalPrintRemoteScript
+				return 0
+			;;
+			--save-sync-script|--save-exec-script|--save-full-script)
+				deployType="${1#"--save-"}"
+				deployType="${deployType%"-script"}"
+				shift
+
+				local savedScriptName="$cacheFolder/deploy-script.$deployType.txt"
+				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building deploy script: $savedScriptName" >&2
+
+				DeployProjectSshInternalPrintRemoteScript > "$savedScriptName.tmp"
+				mv -f "$savedScriptName.tmp" "$savedScriptName"
+
+				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: deploy script ready: $savedScriptName" >&2
+
+				echo "$savedScriptName"
+				return 0
+			;;
 			--deploy-sync|--deploy-exec|--deploy-full)
 				local deployType="${1#--deploy-}"
 				shift
@@ -186,205 +461,13 @@ DeployProjectSsh(){
 					return 1
 				fi
 
-				# local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-install:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
-				local projectProvides="$( ImageInstallProjectProvidesMerged )"
-				
-				if [ "$deployType" != "exec" ] ; then
-					##
-					## select sync tasks
-					##
-					local deploySyncFilesTasks="$( ImageInstallProjectSyncTasks )"
-					local deploySourcePatchScripts="$( ImageInstallProjectDeployPatchScripts --source )"
-					local deployTargetPatchScripts="$( ImageInstallProjectDeployPatchScripts --target )"
-				fi
-
-				[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
-
 				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
 				local sshTarget
 				echo "$projectSshTargets" \
 				| while read -r sshTarget; do
 					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
-					( \
-						##
-						## remote host script start
-						##
-
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
-
-						if [ "true" = "$executeSleep" ] ; then
-							echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
-							echo 'sleep 5'
-						fi
-
-						##
-						## set detailed logging on remote host
-						##
-						[ -z "$MDSC_DETAIL" ] || echo 'export MDSC_DETAIL=true'
-
-						echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
-
-						[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
-						
-						##
-						## set variables
-						##
-						DistroImageProjectContextVariables --install --export
-
-						echo 'echo "ImageDeploy: uploading..." >&2'
-
-						##
-						## embed files needed
-						##
-						[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
-						printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-						tar jcf - -C "$cacheFolder/" "` echo "$deployType" | sed 's|full|sync exec|' `" | uuencode -m packed.tgz
-						printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
-						
-						##
-						## check do sync
-						##
-						if [ "$deployType" != "exec" ] ; then
-							[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building sync script" >&2
-							echo 'echo "ImageDeploy: syncing files..." >&2'
-
-							##
-							## execute global patches before processing files
-							##
-							local scriptSourceName scriptFile sourcePath
-							ImageInstallProjectDeployPatchScripts --prefix \
-							| while read -r scriptSourceName scriptFile sourcePath; do
-								[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-								ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
-								[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-							done
-
-							##
-							## for every sync task
-							##
-							local sourcePath targetPath
-							echo "$deploySyncFilesTasks" \
-							| while read -r sourcePath targetPath; do
-	
-								##
-								## execute path-related patches before processing files
-								##
-								local scriptSourceName scriptFile matchSourcePath
-								[ -z "${deploySourcePatchScripts:0:1}" ] || echo "$deploySourcePatchScripts" \
-								| while read -r scriptSourceName scriptFile matchSourcePath; do
-									case "${matchSourcePath##/}/" in
-										"${sourcePath##/}/"*)
-											[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchSourcePath ?= $sourcePath" >&2
-											[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-											ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
-											[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-										;;
-										*)
-											[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
-										;;
-									esac
-								done
-
-								##
-								## clone/multiply files
-								##
-								local declaredAt sourcePath filePath fileName targetPattern useVariable useValues
-								echo "$projectProvides" \
-								| grep " image-install:clone-deploy-file:$sourcePath:" \
-								| tr ':' ' ' | cut -d" " -f1,4- \
-								| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
-									local localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
-									if [ ! -f "$localFileName" ] ; then
-										echo "ERROR: $MDSC_CMD: file is missing: $localFileName, declared at $declaredAt" >&2 
-										return 1
-									fi
-									if [ -z "$useVariable" ] ; then
-										echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
-											2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
-									else
-										local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
-										for useValue in $useValues ; do
-											echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
-												2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
-										done
-									fi
-								done
-
-							done
-
-							##
-							## execute path-related patches after processing files
-							##
-							local sourcePath targetPath scriptSourceName scriptFile matchTargetPath
-							echo "$deploySyncFilesTasks" \
-							| while read -r sourcePath targetPath; do
-
-								[ -z "${deployTargetPatchScripts:0:1}" ] || echo "$deployTargetPatchScripts" \
-								| while read -r scriptSourceName scriptFile matchTargetPath; do
-									case "${matchTargetPath##/}/" in
-										"${targetPath##/}/"*)
-											[ -z "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path matched: $matchTargetPath ?= $targetPath" >&2
-											[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$targetPath' >&2"
-											ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
-											[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$targetPath' >&2"
-										;;
-										*)
-											[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchTargetPath ?= $targetPath" >&2
-										;;
-									esac
-								done
-
-							done
-
-							##
-							## execute global patches after processing files
-							##
-							local scriptSourceName scriptFile sourcePath
-							ImageInstallProjectDeployPatchScripts --suffix \
-							| while read -r scriptSourceName scriptFile sourcePath; do
-								[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-								ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
-								[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
-							done
-
-							##
-							## sync processed files
-							##
-							echo "$deploySyncFilesTasks" \
-							| while read -r sourcePath targetPath; do
-
-								if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
-									echo "mkdir -p -m 770 '$targetPath'"
-									echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
-										2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
-								else
-									echo "mkdir -p -m 770 '$( dirname $targetPath )'"
-									echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath' \
-										2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
-								fi
-
-							done
-						fi
-
-						##
-						## check do exec
-						##
-						if [ "$deployType" != "sync" ] ; then
-							[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building exec script" >&2
-							echo 'echo "ImageDeploy: executing scripts..." >&2'
-							echo 'bash ./exec'
-						fi
-
-						echo 'echo "ImageDeploy: task finished." >&2'
-
-						cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
-						
-						exit 0
-						##
-						## remote host script end
-						##
-					) \
+					DeployProjectSshInternalPrintRemoteScript \
 					| tee "$cacheFolder/deploy-script.$deployType.txt" \
 					| bzip2 --best \
 					| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \

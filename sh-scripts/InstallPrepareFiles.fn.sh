@@ -188,6 +188,11 @@ InstallPrepareFiles(){
 				[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$mergePath' >&2"
 			done
 
+			##
+			## Just in case there are no filestasks
+			##
+			mkdir -p "$targetPath"
+			
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: done." >&2
 			return 0
 		;;
