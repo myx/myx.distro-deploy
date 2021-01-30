@@ -528,28 +528,66 @@ DistroImageProjectContextVariables(){
 		| eval $filter \
 		| tr ':' ' ' | cut -d" " -f4- \
 		| while read -r variableName operationType variableValue ; do
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
+			printf ' ## %s\n' "$variableName"
 			case "$operationType" in
-				insert)
-					printf '[ ! -z "$VAR_%s" ] || VAR_%s=%q # %s\n' \
-						"$variableName" "$variableName" "$variableValue" "$variableName"
+			
+				# if variable is not defined - creates variable/array with given value 
+				create)
+					printf	'if [ -z "$VAR_%s" ] ; then\n' 			"$variableName"
+					printf 		'VAR_%s=%q\n' 						"$variableName" "$variableValue"
+					printf	'fi'
 				;;
-				upsert)
-					printf 'VAR_%s=%q # %s\n' \
-						"$variableName" "$variableValue" "$variableName"
-				;;
-				update)
+				
+				# if variable is defined - sets it's value to given one
+				change)
 					printf '[ -z "$VAR_%s" ] || VAR_%s=%q # %s\n' \
 						"$variableName" "$variableName" "$variableValue" "$variableName"
 				;;
-				delete)
+				
+				# if variable is not defined - creates array with given value 
+				# if variable is defined - ensures array contains given value 
+				ensure|insert)
+					printf	'if [ -z "$VAR_%s" ] ; then\n' 						"$variableName"
+					printf 		'VAR_%s=%q\n' 									"$variableName" "$variableValue"
+					printf	'else'
+					printf 		'VAR_%s="$( printf '%s\n%s' $VAR_%s %q )"\n' 	"$variableName" "$variableName" "$variableValue"
+					printf	'fi'
+				;;
+				
+				# if variable is defined - ensures array contains given value 
+				update)
+					printf	'if [ ! -z "$VAR_%s" ] ; then\n' 					"$variableName"
+					printf 		'VAR_%s="$( printf '%s\n%s' "$VAR_%s" %q )"\n' 	"$variableName" "%s" "%s" "$variableName" "$variableValue"
+					printf	'fi'
+				;;
+				
+				# if variable is defined - removes given value from array. Un-defines variable if no value given.
+				remove)
 					if [ -z "$variableValue" ] ; then
-						printf 'VAR_%s="" # %s\n' \
-							"$variableName" "$variableName"
+						printf 'VAR_%s=""\n' 									"$variableName"
 					else
-						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=q # %s\n' \
-							"variableValue" "$variableName" "$variableName" "$variableValue" "$variableName"
+						printf	'if [ ! -z "$VAR_%s" ] ; then\n' 				"$variableName"
+						printf 		'VAR_%s="$( echo "$VAR_%s" | grep -F -v %q )"\n' 	"$variableName" "$variableName" "$variableValue"
+						printf	'fi'
 					fi
 				;;
+
+				# if variable is not defined - creates variable with given value 
+				# if variable is defined - sets variable to given value (same) 
+				re-set|define|upsert)
+					printf 'VAR_%s=%q\n' 									"$variableName" "$variableValue"
+				;;
+				
+				# Un-defines variable. Only when variable value matches, if variableValue specified.
+				delete)
+					if [ -z "$variableValue" ] ; then
+						printf 'VAR_%s=""\n' 								"$variableName"
+					else
+						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=""\n' 		"$variableValue" "$variableName" "$variableName"
+					fi
+				;;
+				
 				*)
 					echo "$MDSC_CMD: WARNING: unknown context variable operation: $operationType:$variableName:$variableValue" >&2
 				;;
@@ -561,7 +599,7 @@ DistroImageProjectContextVariables(){
 		return 0
 	fi
 	
-	local variableNames="$( echo "$buildBuffer" | sed -e 's|^.* \# ||g' | sort | uniq )"
+	local variableNames="$( echo "$buildBuffer" | grep -e '^ ## ' | sed -e 's|^.* \## ||g' | sort | uniq )"
 	
 	local buildBuffer="`
 		for variableName in $variableNames ; do
