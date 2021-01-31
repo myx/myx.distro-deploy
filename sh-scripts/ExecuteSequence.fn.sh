@@ -107,18 +107,19 @@ ExecuteSequence(){
 			if [ -z "$1" ] ; then
 				echo "$MDSC_CMD: ERROR: '--execute-command' - command argument required!" >&2 ; return 1
 			fi
-			local executeCommand="$1" ; shift
+			local executeCommand="$( printf '%q' "$1" )" ; shift
 		;;
 	esac
 
-	local targetCommand="$@"
+	local argument
+	local targetCommand="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \
 			--line-prefix 'Prefix -3' \
 			--line-suffix ' ; ' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
-			$targetCommand $executeCommand \
+			$executeCommand $targetCommand \
 		| cut -d" " -f 1,2,4-
 	)"
 	

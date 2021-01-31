@@ -104,6 +104,7 @@ ListSshTargets(){
 				shift ; lineSuffix="$1" ; shift
 			;;
 			*)
+				local argument
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 			
 				local setSshHost="${useSshHost:-}"

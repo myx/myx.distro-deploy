@@ -28,7 +28,10 @@ ScreenTo(){
 
 	Require ListSshTargets
 
-	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | cut -d" " -f 2- )"
+	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+	local defaultCommand="-t 'test ! -x \"\`which screen\`\" || screen -s sh -q -O -U -D -R ; test -x \"\`which screen\`\" || /bin/sh'"
+			
+	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
@@ -43,7 +46,7 @@ ScreenTo(){
 
 	set -e
 	echo "$MDSC_CMD: Using Command: $targets" >&2
-	eval "$targets -t \"'test ! -x "`which screen`" || screen -s sh -q -O -U -D -R ; test -x "`which screen`" || /bin/sh '\""
+	eval "$targets"
 }
 
 case "$0" in

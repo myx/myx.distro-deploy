@@ -28,7 +28,11 @@ ShellTo(){
 
 	Require ListSshTargets
 
-	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | cut -d" " -f 2- )"
+	local argument
+	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+	local defaultCommand='-t /bin/sh -i'
+			
+	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
@@ -43,7 +47,7 @@ ShellTo(){
 
 	set -e
 	echo "$MDSC_CMD: Using Command: $targets" >&2
-	eval "$targets -t /bin/sh -i"
+	eval "$targets"
 }
 
 case "$0" in

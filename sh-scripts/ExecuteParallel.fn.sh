@@ -108,14 +108,15 @@ ExecuteParallel(){
 		;;
 	esac
 
-	local targetCommand="$@"
+	local argument
+	local targetCommand="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \
 			--line-prefix 'Prefix -3' \
 			--line-suffix ' & ' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
-			$targetCommand $executeCommand \
+			$executeCommand $targetCommand \
 		| cut -d" " -f 1,2,4-
 	)"
 	
