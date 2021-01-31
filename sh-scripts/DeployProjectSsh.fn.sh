@@ -227,14 +227,26 @@ DeployProjectSshInternalPrintRemoteScript(){
 			if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
 				echo "mkdir -p -m 770 '$targetPath'"
 				echo "rsync -iprltoD --delete --chmod=ug+rw --omit-dir-times --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
-					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' | tee -a 'host-files-rsync.log' >&2 || true)"
 			else
 				echo "mkdir -p -m 770 '$( dirname $targetPath )'"
 				echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath' \
-					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
+					2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' | tee -a 'host-files-rsync.log' >&2 || true)"
 			fi
 
 		done
+
+		##
+		## execute deploy after (deploy applied) script
+		##
+		#local scriptSourceName scriptFile sourcePath
+		ImageInstallProjectDeployPatchScripts --commit \
+		| while read -r scriptSourceName scriptFile sourcePath; do
+			[ -z "$MDSC_DETAIL" ] || echo "echo '> run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "."
+			[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$sourcePath' >&2"
+		done
+
 	fi
 
 	##

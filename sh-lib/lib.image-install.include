@@ -79,6 +79,10 @@ ImageInstallProjectDeployPatchScripts(){
 			local filter="grep -e \" image-install:target-patch-script:\""
 			local fields="declaredAt scriptSourceName scriptFile matchPath"
 		;;
+		--commit)
+			local filter="grep -e \" image-install:deploy-applied-script:\""
+			local fields="declaredAt scriptSourceName scriptFile matchPath"
+		;;
 		*)
 			echo "$MDSC_CMD: ERROR: '--prefix', '--suffix', '--source' or '--target' must be chosen!" >&2
 			return 1
