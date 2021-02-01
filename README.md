@@ -4,6 +4,7 @@
 
 image-receive, image-install commands:
 
+	image-install:context-variable:
 	image-install:context-variable:<variableName>:{create|change|ensure|update|remove|re-set|delete}[:<valueNoSpaces>...]
 	image-install:context-variable:<variableName>:{create|change|insert|update|remove|define|delete}[:<valueNoSpaces>...]
 	image-install:context-variable:DPL_HOST_TYPE:re-set:standalone
@@ -52,7 +53,7 @@ image-receive, image-install commands:
 	image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
 	image-install:deploy-patch-script-suffix:.:host/scripts/patch-at-remote-on-after-deploy-prepared.txt
 	
-	-image-install:deploy-applied-script:
-	-image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
-	-image-install:deploy-applied-script:.:host/scripts/at-remote-on-after-deploy.txt
+	image-install:deploy-applied-script:
+	image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
+	image-install:deploy-applied-script:.:host/scripts/at-remote-on-after-deploy.txt
 	
