@@ -537,7 +537,7 @@ DistroImageProjectContextVariables(){
 				create)
 					printf	'if [ -z "$VAR_%s" ] ; then\n' 			"$variableName"
 					printf 		'VAR_%s=%q\n' 						"$variableName" "$variableValue"
-					printf	'fi'
+					printf	'fi\n'
 				;;
 				
 				# if variable is defined - sets it's value to given one
@@ -551,16 +551,16 @@ DistroImageProjectContextVariables(){
 				ensure|insert)
 					printf	'if [ -z "$VAR_%s" ] ; then\n' 						"$variableName"
 					printf 		'VAR_%s=%q\n' 									"$variableName" "$variableValue"
-					printf	'else'
+					printf	'else\n'
 					printf 		'VAR_%s="$( printf '%s\n%s' $VAR_%s %q )"\n' 	"$variableName" "$variableName" "$variableValue"
-					printf	'fi'
+					printf	'fi\n'
 				;;
 				
 				# if variable is defined - ensures array contains given value 
 				update)
 					printf	'if [ ! -z "$VAR_%s" ] ; then\n' 					"$variableName"
 					printf 		'VAR_%s="$( printf '%s\n%s' "$VAR_%s" %q )"\n' 	"$variableName" "%s" "%s" "$variableName" "$variableValue"
-					printf	'fi'
+					printf	'fi\n'
 				;;
 				
 				# if variable is defined - removes given value from array. Un-defines variable if no value given.
@@ -570,7 +570,7 @@ DistroImageProjectContextVariables(){
 					else
 						printf	'if [ ! -z "$VAR_%s" ] ; then\n' 				"$variableName"
 						printf 		'VAR_%s="$( echo "$VAR_%s" | grep -F -v %q )"\n' 	"$variableName" "$variableName" "$variableValue"
-						printf	'fi'
+						printf	'fi\n'
 					fi
 				;;
 
