@@ -164,11 +164,10 @@ DistroImageParseSshOptions(){
 				shift ; useSshHome="${1#$MMDAPP/source/}" ; shift
 			;;
 			*)
-				break
+				return 0
 			;;
 		esac
 	done
-	return 0
 }
 
 # prints ssh options as argument list (--ssh-host ...)
@@ -246,7 +245,7 @@ DistroImageProjectSshTargets(){
 		useSshHome="$setSshHome"
 
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-			
+		
 		while read -r clientSpec; do
 			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
 			DistroImageParseSshOptions $clientSpec
