@@ -118,7 +118,7 @@ ListSshTargets(){
 					local useSshPort="${setSshPort:-}"
 					local useSshUser="${setSshUser:-}"
 					local useSshHome="${setSshHome:-}"
-					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix" "$extraArguments"
+					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
 					# printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$useSshHost" "$useSshPort" "$useSshUser" "$extraArguments" "$lineSuffix"
 				done
 				return 0

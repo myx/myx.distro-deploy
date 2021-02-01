@@ -107,7 +107,7 @@ ExecuteSequence(){
 			if [ -z "$1" ] ; then
 				echo "$MDSC_CMD: ERROR: '--execute-command' - command argument required!" >&2 ; return 1
 			fi
-			local executeCommand="$( printf '%q' "$1" )" ; shift
+			local executeCommand="$1" ; shift
 		;;
 	esac
 

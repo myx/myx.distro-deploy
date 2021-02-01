@@ -218,7 +218,7 @@ DistroImageProjectSshTargets(){
 	fi
 	
 	local argument
-	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+	local extraArguments="$( for argument in "$@" ; do printf '%s ' "$argument" ; done )"
 	local sshTarget
 
 	local setSshHost="${useSshHost:-}"
