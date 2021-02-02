@@ -5,29 +5,29 @@
 MDSC_DEPLOY_STARTED="$(date +%s)"
 
 MDSC_IMAGE_UNPACK_DIR="$(mktemp -t "mdsc-deploy-remote-" -d)"
-echo "ImageDeploy: hostname $(hostname), user $(whoami), using temporary directory: $MDSC_IMAGE_UNPACK_DIR" >&2
+echo "ImageDeploy: 🛠 hostname 💻 $(hostname), user 👤 $(whoami), using temporary directory: 📂 $MDSC_IMAGE_UNPACK_DIR" >&2
 
 
 DeployTaskCleanup(){
-	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: leaving directory..." >&2
+	[ "full" = "$MDSC_DETAIL" ] || echo "ImageDeploy: ⏫ leaving directory..." >&2
 	cd /
 	
 	if [ "true" = "$IMAGE_USE_TEMPFS" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: unmounting tempfs..." >&2
+		[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: 🗑 unmounting tempfs..." >&2
 		rm -fR "$MDSC_IMAGE_UNPACK_DIR/*" # do not leak tmpfs memory
 		umount -f "$MDSC_IMAGE_UNPACK_DIR"
 	fi
 	
-	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: removing temporaries..." >&2
+	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: 🧻 removing temporaries..." >&2
 	rm -fR "$MDSC_IMAGE_UNPACK_DIR"
 
-	echo "ImageDeploy: cleaned up." >&2
+	echo "ImageDeploy: 🧹 cleaned up." >&2
 }
 
 trap DeployTaskCleanup EXIT
 
 if [ "`myx.common os/getRamBytes`" -gt "4294967296" ] && mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" ; then
-	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: tmpfs mounted" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: 🗂 tmpfs mounted" >&2
 	IMAGE_USE_TEMPFS=true
 fi
 

@@ -132,7 +132,7 @@ ExecuteParallel(){
 		;;
 		--execute-stdin)
 			echo 
-			echo "...Enter script and press CTRL+D to execute or press CTRL+C to cancel..." >&2
+			echo "📝 ...Enter script and press CTRL+D to execute or press CTRL+C to cancel..." >&2
 			echo 
 			local executeCommand="`cat`"
 
@@ -141,7 +141,7 @@ ExecuteParallel(){
 			done )"
 
 			printf "\n%s\n" \
-				"...got command, executing..." \
+				"📋 ...got command, executing..." \
 				>&2
 		;;
 		--execute-script)
@@ -151,15 +151,15 @@ ExecuteParallel(){
 			done )"
 			
 			printf "\n%s\n%s\n" \
-				"...got command, executing..." \
-				"...sleeping for 5 seconds..." \
+				"📋 ...got command, executing..." \
+				"⏳ ...sleeping for 5 seconds..." \
 				>&2
 			sleep 5
 			echo
 		;;
 		*)
 			printf "\n%s\n" \
-				"...sleeping for 5 seconds..." \
+				"⏳ ...sleeping for 5 seconds..." \
 				>&2
 			sleep 5
 		;;

@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR:expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -31,7 +31,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	## coarse-check parameters are legit
 	##
 	if [ "${cacheFolder#"$MMDAPP/output"}" = "$cacheFolder" ] ; then
-		echo "ERROR: $MDSC_CMD: invalid context: cacheFolder: $cacheFolder" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: invalid context: cacheFolder: $cacheFolder" >&2
 		return 1
 	fi
 
@@ -44,7 +44,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 			InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
 		fi
 		if [ ! -f "$cacheFolder/exec" ] ; then
-			echo "ERROR: $MDSC_CMD: no installer script found ($cacheFolder/exec)" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($cacheFolder/exec)" >&2
 			return 1
 		fi
 	fi
@@ -58,7 +58,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 			InstallPrepareFiles --project "$MDSC_PRJ_NAME" --to-directory "$cacheFolder/sync"
 		fi
 		if [ ! -d "$cacheFolder/sync" ] ; then
-			echo "ERROR: $MDSC_CMD: no installer files found ($cacheFolder/sync)" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: no installer files found ($cacheFolder/sync)" >&2
 			return 1
 		fi
 	fi
@@ -84,7 +84,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
 	if [ "true" = "$executeSleep" ] ; then
-		echo 'echo "ImageDeploy: ... sleeping for 5 seconds ..." >&2'
+		echo 'echo "ImageDeploy: ⏳ ... sleeping for 5 seconds ..." >&2'
 		echo 'sleep 5'
 	fi
 
@@ -102,7 +102,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	DistroImageProjectContextVariables --install --export
 
-	echo 'echo "ImageDeploy: uploading sync files..." >&2'
+	echo 'echo "ImageDeploy: 📦 uploading sync files..." >&2'
 
 	##
 	## embed files needed
@@ -117,7 +117,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	if [ "$deployType" != "exec" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building sync script" >&2
-		echo 'echo "ImageDeploy: syncing files..." >&2'
+		echo 'echo "ImageDeploy: 🔁 syncing files..." >&2'
 
 		##
 		## execute global patches before processing files
@@ -166,7 +166,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 			| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
 				local localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
 				if [ ! -f "$localFileName" ] ; then
-					echo "ERROR: $MDSC_CMD: file is missing: $localFileName, declared at $declaredAt" >&2 
+					echo "$MDSC_CMD: ⛔ ERROR: file is missing: $localFileName, declared at $declaredAt" >&2 
 					return 1
 				fi
 				if [ -z "$useVariable" ] ; then
@@ -200,7 +200,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 						[ -z "$MDSC_DETAIL" ] || echo "echo '< run: $scriptSourceName:$scriptFile:$targetPath' >&2"
 					;;
 					*)
-						[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchTargetPath ?= $targetPath" >&2
+						[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: 🦠 path skipped: $matchTargetPath ?= $targetPath" >&2
 					;;
 				esac
 			done
@@ -254,11 +254,11 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	if [ "$deployType" != "sync" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building exec script" >&2
-		echo 'echo "ImageDeploy: executing scripts..." >&2'
+		echo 'echo "ImageDeploy: 🙈 executing scripts..." >&2'
 		echo 'bash ./exec'
 	fi
 
-	echo 'echo "ImageDeploy: task finished." >&2'
+	echo 'echo "ImageDeploy: 🏁 task finished." >&2'
 
 	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
 	
@@ -276,11 +276,11 @@ DeployProjectSsh(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	
 	if [ ! -d "$MMDAPP/output" ] ; then
-		echo "ERROR: $MDSC_CMD: output folder does not exist: $MMDAPP/output" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
 		return 1
 	fi
 
-	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
@@ -342,12 +342,12 @@ DeployProjectSsh(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ERROR: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR:project is not selected!" >&2
 		return 1
 	fi
 	
 	if [ ! -d "$MDSC_CACHED/$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ERROR: project is not found: $MDSC_CACHED/$MDSC_PRJ_NAME" >&2
+		echo "$MDSC_CMD: ⛔ ERROR:project is not found: $MDSC_CACHED/$MDSC_PRJ_NAME" >&2
 		return 1
 	fi
 	
@@ -373,11 +373,11 @@ DeployProjectSsh(){
 			--print-files)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --print-files option ($@)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-files option ($@)" >&2
 					return 1
 				fi
 				if [ ! -d "$cacheFolder/sync" ] ; then
-					echo "ERROR: $MDSC_CMD: no sync folder found ($cacheFolder/sync)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no sync folder found ($cacheFolder/sync)" >&2
 					return 1
 				fi
 				find "$cacheFolder/sync" -type f | sed "s|^$cacheFolder/sync/||"
@@ -401,7 +401,7 @@ DeployProjectSsh(){
 			--print-installer)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --print-installer option ($@)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-installer option ($@)" >&2
 					return 1
 				fi
 				local outputPath="$cacheFolder/exec"
@@ -410,7 +410,7 @@ DeployProjectSsh(){
 					InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$outputPath"
 				fi
 				if [ ! -f "$outputPath" ] ; then
-					echo "ERROR: $MDSC_CMD: no installer script found ($outputPath)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($outputPath)" >&2
 					return 1
 				fi
 				cat "$outputPath"
@@ -424,7 +424,7 @@ DeployProjectSsh(){
 			--deploy-none)
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-none option ($@)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-none option ($@)" >&2
 					return 1
 				fi
 				return 0
@@ -434,7 +434,7 @@ DeployProjectSsh(){
 				deployType="${deployType%"-script"}"
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-$deployType option ($@)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
 					return 1
 				fi
 
@@ -461,7 +461,7 @@ DeployProjectSsh(){
 				local deployType="${1#--deploy-}"
 				shift
 				if [ ! -z "$1" ] ; then
-					echo "ERROR: $MDSC_CMD: no options allowed after --deploy-$deployType option ($@)" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
 					return 1
 				fi
 
@@ -469,7 +469,7 @@ DeployProjectSsh(){
 
 				local projectSshTargets="$( DistroImageProjectSshTargets )"
 				if [ -z "${projectSshTargets:0:1}" ] ; then
-					echo "ERROR: $MDSC_CMD: no ssh targets found!" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no ssh targets found!" >&2
 					return 1
 				fi
 
@@ -488,17 +488,17 @@ DeployProjectSsh(){
 				return 0
 			;;
 			'')
-				echo "ERROR: $MDSC_CMD: --do-XXXX option must be specified" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: --do-XXXX option must be specified" >&2
 				return 1
 			;;
 			*)
-				echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: invalid option: $1" >&2
 				return 1
 			;;
 		esac
 	done
 
-	echo "ERROR: $MDSC_CMD: oops, not supposed to get here!" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: oops, not supposed to get here!" >&2
 	return 1
 }
 

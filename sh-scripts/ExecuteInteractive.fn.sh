@@ -79,7 +79,7 @@ ExecuteInteractive(){
 	done
 
 	printf "\n%s\n" \
-		"...sleeping for 5 seconds..." \
+		"⏳ ...sleeping for 5 seconds..." \
 		>&2
 	sleep 5
 
