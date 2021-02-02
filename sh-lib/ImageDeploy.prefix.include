@@ -5,7 +5,7 @@
 MDSC_DEPLOY_STARTED="$(date +%s)"
 
 MDSC_IMAGE_UNPACK_DIR="$(mktemp -t "mdsc-deploy-remote-" -d)"
-echo "ImageDeploy: 🛠 hostname 💻 $(hostname), user 👤 $(whoami), using temporary directory: 📂 $MDSC_IMAGE_UNPACK_DIR" >&2
+echo "ImageDeploy: 🛠 starting. 👤 $(whoami) @ $(hostname), 📂 temporary directory: $MDSC_IMAGE_UNPACK_DIR" >&2
 
 
 DeployTaskCleanup(){
