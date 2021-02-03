@@ -1,0 +1,1 @@
+echo "ImagePrepareFiles: ⏱ Done. Took: $( echo "$(date +%s)-$MDSC_BUILD_STARTED" | bc ) seconds." >&2

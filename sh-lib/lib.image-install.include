@@ -102,16 +102,30 @@ ImageInstallProjectDeployPatchScripts(){
 }
 
 ImageInstallEmbedScript(){ # "1-scriptFileName" "2-changeDir"
-	[ -z "$MDSC_DETAIL" ] || echo "ImageInstallEmbedScript: '${1#$MMDAPP}' '$2'" >&2
+	local MDSC_CMD='ImageInstallEmbedScript'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	printf "\n\n( cd "$2" ; bash ) << 'EOF_PROJECT_IIESSH_XXXXXXXX'\n"
+	if [ -z "$1" ] ; then
+		echo "ERROR: $MDSC_CMD: script file name argument is expected!" >&2
+		return 1
+	fi
+	if [ ! -f "$1" ] ; then
+		echo "ERROR: $MDSC_CMD: script file is does not exist: ${scriptFileName#$MMDAPP}" >&2
+		return 1
+	fi
+	if [ -z "$2" ] ; then
+		echo "ERROR: $MDSC_CMD: working directory argument is expected!" >&2
+		return 1
+	fi
+	
+	[ -z "$MDSC_DETAIL" ] || echo "echo '> run: ${1#$MMDAPP}:$2' >&2"
+	printf "\n\n# embedded script: %s\n\n( cd '%s' ; bash || echo '%s' >&2 ) << 'EOF_PROJECT_IIESSH_XXXXXXXX'\n" \
+		"${1#$MMDAPP}" \
+		"$2" \
+		"ImageDeploy: ⛔ ERROR: script execution failed: $( basename "$1" )"
 	cat "$1"
 	printf '\nEOF_PROJECT_IIESSH_XXXXXXXX\n\n'
-	return 0
-	
-	printf "\n\n( cd "$2" ; uudecode -p | gunzip | bash ) << 'EOF_PROJECT_IIESSH_XXXXXXXX'\n"
-	cat "$1" | gzip | uuencode -m "$( basename "$1" )"
-	printf '\nEOF_PROJECT_IIESSH_XXXXXXXX\n\n'
+	[ -z "$MDSC_DETAIL" ] || echo "echo '< run: ${1#$MMDAPP}:$2' >&2"
 	return 0
 }
 

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Image Prepare Deploy Files Script prefix
+
+MDSC_BUILD_STARTED="$(date +%s)"
+
+echo "ImagePrepareFiles: 🛠 starting: 👤 $(whoami) @ $(hostname), 📂 working directory: $(pwd)" >&2
+

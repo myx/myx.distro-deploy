@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -33,7 +33,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 	## coarse-check parameters are legit
 	##
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -45,7 +45,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 	| while read -r sourceName scriptPath ; do
 		local fileName="$MDSC_SOURCE/$sourceName/$scriptPath"
 		if [ ! -f "$fileName" ] ; then
-			echo "ERROR: $MDSC_CMD: file is missing: $fileName" >&2; 
+			echo "$MDSC_CMD: ⛔ ERROR: file is missing: $fileName" >&2; 
 			return 1
 		fi
 		if [ ! -z "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
@@ -73,13 +73,13 @@ InstallPrepareScriptInternalPrintScript(){
 	## coarse-check parameters are legit
 	##
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
 	local fileNames="$( InstallPrepareScriptInternalPrintScriptFiles )"
 	if [ -z "$fileNames" ] ; then
-		echo "$MDSC_CMD: ERROR: no scripts selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: no scripts selected!" >&2
 		return 1
 	fi 
 
@@ -162,7 +162,7 @@ InstallPrepareScript(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -191,7 +191,7 @@ InstallPrepareScript(){
 			return 0 
 		;;
 		*)
-			echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: invalid option: $1" >&2
 			return 1
 		;;
 	esac
