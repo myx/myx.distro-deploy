@@ -16,6 +16,17 @@ if ! type ImagePrepare >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
 fi
 
+##
+## Internal - prints script using prepared variables
+##
+InstallPrepareFilesInternalPrintScript(){
+
+	set -e
+
+	local MDSC_CMD="InstallPrepareFiles[--print-script]"
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+}
+
 InstallPrepareFiles(){
 
 	set -e
@@ -64,6 +75,10 @@ InstallPrepareFiles(){
 			shift
 			DistroImageProjectContextVariables --prepare "$@"
 			return 0
+		;;
+		--print-script)
+			InstallPrepareFilesInternalPrintScript
+			return 0 
 		;;
 		--to-directory)
 			shift

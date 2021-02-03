@@ -599,7 +599,7 @@ DistroImageProjectContextVariables(){
 		return 0
 	fi
 	
-	local variableNames="$( echo "$buildBuffer" | grep -e '^ ## ' | sed -e 's|^.* \## ||g' | sort | uniq )"
+	local variableNames="$( echo "$buildBuffer" | grep -e '^ ## ' | sed -e 's|^.* \## ||g' | sort -u )"
 	
 	local buildBuffer="`
 		for variableName in $variableNames ; do
@@ -650,7 +650,7 @@ DistroImageCheckSourcePath(){
 	local checkProject
 
 	if [ -z "$sourceName" ] ; then
-		echo "ERROR: DistroImageCheckSourcePath: arguments missing" >&2
+		echo "ERROR: $MDSC_CMD: arguments missing" >&2
 		return 1
 	fi
 
@@ -670,7 +670,7 @@ DistroImageCheckSourcePath(){
 			return 0
 		fi
 		
-		echo "WARNING: DistroImageCheckSourcePath: wild-card path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+		echo "WARNING: $MDSC_CMD: wild-card path is not found: $declaredAt:$sourceName:$sourcePath" >&2
 		return 1
 	fi
 	
@@ -698,7 +698,7 @@ DistroImageCheckSourcePath(){
 		return 0
 	fi
 	
-	echo "WARNING: DistroImageCheckSourcePath: explicitly declared path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+	echo "WARNING: $MDSC_CMD: explicitly declared path is not found: $declaredAt:$sourceName:$sourcePath" >&2
 	return 1
 }
 

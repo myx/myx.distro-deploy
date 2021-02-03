@@ -94,6 +94,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	[ -z "$MDSC_DETAIL" ] || echo 'export MDSC_DETAIL=true'
 
 	echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
+	echo "export MDSC_REAL_USER='${MDSC_REAL_USER:-${SUDO_USER:-$USER}}'"
 
 	[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
 	
@@ -108,9 +109,10 @@ DeployProjectSshInternalPrintRemoteScript(){
 	## embed files needed
 	##
 	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
+	
 	printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-	tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tgz
-	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n'
+	tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
+	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
 	
 	##
 	## check do sync
@@ -159,12 +161,12 @@ DeployProjectSshInternalPrintRemoteScript(){
 			##
 			## clone/multiply files
 			##
-			local declaredAt sourcePath filePath fileName targetPattern useVariable useValues
+			local declaredAt sourcePath filePath fileName targetPattern useVariable useValues localFileName
 			echo "$projectProvides" \
 			| grep " image-install:clone-deploy-file:$sourcePath:" \
 			| tr ':' ' ' | cut -d" " -f1,4- \
 			| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
-				local localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
+				localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
 				if [ ! -f "$localFileName" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: file is missing: $localFileName, declared at $declaredAt" >&2 
 					return 1
@@ -173,7 +175,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 					echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
 						2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 				else
-					local useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+					useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
 					for useValue in $useValues ; do
 						echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
 							2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
