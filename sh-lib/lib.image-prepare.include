@@ -9,7 +9,7 @@ ImagePrepareProjectProvidesMerged(){
 	local MDSC_CMD='ImagePrepareProjectProvidesMerged'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -30,7 +30,7 @@ ImagePrepareProjectSyncFolders(){
 	local MDSC_CMD='ImagePrepareProjectSyncFolders'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -53,7 +53,7 @@ ImagePrepareProjectSourcePatchScripts(){
 	local MDSC_CMD='ImagePrepareProjectSourcePatchScripts'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -80,7 +80,7 @@ ImagePrepareProjectTargetPatchScripts(){
 	local MDSC_CMD='ImagePrepareProjectTargetPatchScripts'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -107,7 +107,7 @@ ImagePrepareProjectCloneFiles(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 

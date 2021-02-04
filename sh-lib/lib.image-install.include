@@ -9,7 +9,7 @@ ImageInstallProjectProvidesMerged(){
 	local MDSC_CMD='ImageInstallProjectProvidesMerged'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -30,7 +30,7 @@ ImageInstallProjectSyncTasks(){
 	local MDSC_CMD='ImageInstallProjectSyncTasks'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -42,7 +42,7 @@ ImageInstallProjectSyncTasks(){
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $deploySourcePath $targetHostPath" >&2
 		local fileName="$MMDAPP/output/deploy/$MDSC_PRJ_NAME/sync/$deploySourcePath"
 		if [ ! -d "$fileName" ] ; then
-			echo "ERROR: $MDSC_CMD: directory is missing: $fileName, declared at $declaredAt" >&2 
+			echo "$MDSC_CMD: ⛔ ERROR: directory is missing: $fileName, declared at $declaredAt" >&2 
 			return 1
 		fi
 		
@@ -59,7 +59,7 @@ ImageInstallProjectDeployPatchScripts(){
 	local MDSC_CMD='ImageInstallProjectDeployPatchScripts'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ERROR: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 	case "$1" in
@@ -84,7 +84,7 @@ ImageInstallProjectDeployPatchScripts(){
 			local fields="declaredAt scriptSourceName scriptFile matchPath"
 		;;
 		*)
-			echo "$MDSC_CMD: ERROR: '--prefix', '--suffix', '--source' or '--target' must be chosen!" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: '--prefix', '--suffix', '--source' or '--target' must be chosen!" >&2
 			return 1
 		;;
 	esac

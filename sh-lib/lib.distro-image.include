@@ -7,11 +7,11 @@ DistroSelectProject(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ "$1" != "MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: env name required to be MDSC_PRJ_NAME!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_PRJ_NAME!" >&2
 		return 1
 	fi
 	if [ -z "$2" ] ; then
-		echo "ERROR: $MDSC_CMD: project name required!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project name required!" >&2
 		return 1
 	fi
 	if [ "$2" = "$MDSC_PRJ_NAME" ] ; then
@@ -45,7 +45,7 @@ DistroSelectProject(){
 			return 0
 		;;
 		*)
-			echo "ERROR: $MDSC_CMD: invalid extra option: $3" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: invalid extra option: $3" >&2
 			return 1
 		;;
 	esac
@@ -75,7 +75,7 @@ DistroSshConnect(){
 				shift ; shift
 			;;
 			--ssh-*)
-				echo "ERROR: $MDSC_CMD: invalid --ssh-XXXX option: $1" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
 				return 1
 			;;
 			*)
@@ -97,7 +97,7 @@ DistroSshConnect(){
 	eval "$(
 		if true ; then
 			if [ ! -d "$useSshHome" ] ; then
-				echo "ERROR: $MDSC_CMD: ssh home directory does not exist: $useSshHome" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: ssh home directory does not exist: $useSshHome" >&2
 				return 1
 			fi
 	
@@ -213,7 +213,7 @@ DistroImageProjectSshTargets(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 	
@@ -297,7 +297,7 @@ DistroImageProjectProvidesMerged(){
 	#	return 0
 	#fi
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 	local checkFile="$MDSC_CACHED/distro-provides.txt"
@@ -320,7 +320,7 @@ DistroImageProjectProvidesMerged(){
 		return 0
 	fi
 	
-	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
 	return 1
 }
 
@@ -342,7 +342,7 @@ DistroImageProjectSequenceFile(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 	local checkFile="$MDSC_CACHED/distro-provides.txt"
@@ -369,7 +369,7 @@ DistroImageProjectSequenceFile(){
 	# Require ListProjectSequence
 	# ListProjectSequence "$MDSC_PRJ_NAME"
 	
-	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
 	return 1
 }
 
@@ -379,7 +379,7 @@ DistroImageEnsureProvidesMergedFile(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ "$1" != "MDSC_IDAPRV_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: env name required to be MDSC_IDAPRV_NAME" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDAPRV_NAME" >&2
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
@@ -408,7 +408,7 @@ DistroImageEnsureProvidesMergedFile(){
 		return 0
 	fi
 	
-	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
 	return 1
 }
 
@@ -418,7 +418,7 @@ DistroImageEnsureProvidesOwnedFile(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ "$1" != "MDSC_IDOPRV_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: env name required to be MDSC_IDOPRV_NAME" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDOPRV_NAME" >&2
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDOPRV_NAME:0:1}" ] ; then
@@ -446,7 +446,7 @@ DistroImageEnsureProvidesOwnedFile(){
 		return 0
 	fi
 	
-	echo "ERROR: $MDSC_CMD: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
 	return 1
 }
 
@@ -456,7 +456,7 @@ DistroImageProjectContextVariables(){
 	local MDSC_CMD='DistroImageProjectContextVariables'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ERROR: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 
@@ -482,7 +482,7 @@ DistroImageProjectContextVariables(){
 				break
 			;;
 			*)
-				echo "$MDSC_CMD: ERROR: Invalid option: $1" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: Invalid option: $1" >&2
 				return 1
 			;;
 		esac
@@ -626,7 +626,7 @@ DistroImageCheckSourcePath(){
 	done
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		return 1
 	fi
 	
@@ -636,7 +636,7 @@ DistroImageCheckSourcePath(){
 	local checkProject commandOutput
 
 	if [ -z "$sourceName" ] ; then
-		echo "ERROR: $MDSC_CMD: arguments missing" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: arguments missing" >&2
 		return 1
 	fi
 
@@ -693,15 +693,15 @@ DistroImageEmbedScript(){ # "1-scriptFileName" "2-changeDir"
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ -z "$1" ] ; then
-		echo "ERROR: $MDSC_CMD: script file name argument is expected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: script file name argument is expected!" >&2
 		return 1
 	fi
 	if [ ! -f "$1" ] ; then
-		echo "ERROR: $MDSC_CMD: script file is does not exist: ${scriptFileName#$MMDAPP}" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: script file is does not exist: ${scriptFileName#$MMDAPP}" >&2
 		return 1
 	fi
 	if [ -z "$2" ] ; then
-		echo "ERROR: $MDSC_CMD: working directory argument is expected!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: working directory argument is expected!" >&2
 		return 1
 	fi
 	

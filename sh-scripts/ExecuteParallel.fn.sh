@@ -93,7 +93,7 @@ ExecuteParallel(){
 			if [ -z "$1" ] ; then
 				echo "$MDSC_CMD: ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
 			fi
-			local executeScriptName="$1" ; shift
+			local executeScriptName="$MMDAPP/source/${1#"$MMDAPP/source/"}" ; shift
 			if [ ! -f "$executeScriptName" ] ; then
 				echo "$MDSC_CMD: ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
 			fi
