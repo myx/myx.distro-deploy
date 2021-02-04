@@ -53,6 +53,9 @@ ExecuteSequence(){
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
 
+	local executeSleep="${executeSleep:-true}"
+	local explainTasks="${explainTasks:-true}"
+
 	while true ; do
 		case "$1" in
 			--no-cache)
@@ -62,6 +65,15 @@ ExecuteSequence(){
 			--no-index)
 				shift
 				local useNoIndex="--no-index"
+			;;
+			--no-sleep)
+				shift
+				executeSleep="false"
+			;;
+			--non-interactive)
+				shift
+				executeSleep="false"
+				explainTasks="false"
 			;;
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
 				DistroImageParseSshOptions "$1" "$2"
@@ -123,11 +135,13 @@ ExecuteSequence(){
 		| cut -d" " -f 1,2,4-
 	)"
 	
-	echo "Will execute ($MDSC_CMD): " >&2
-	local textLine
-	echo "$sshTargets" | while read -r textLine ; do
-		echo "  $textLine" >&2
-	done
+	if [ "true" = "$explainTasks" ] ; then
+		echo "Will execute ($MDSC_CMD): " >&2
+		local textLine
+		echo "$sshTargets" | while read -r textLine ; do
+			echo "  $textLine" >&2
+		done
+	fi
 
 	case "$executeType" in
 		--display-targets)

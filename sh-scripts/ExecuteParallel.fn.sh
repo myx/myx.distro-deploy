@@ -49,6 +49,9 @@ ExecuteParallel(){
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
 
+	local executeSleep="${executeSleep:-true}"
+	local explainTasks="${explainTasks:-true}"
+
 
 	while true ; do
 		case "$1" in
@@ -59,6 +62,15 @@ ExecuteParallel(){
 			--no-index)
 				shift
 				local useNoIndex="--no-index"
+			;;
+			--no-sleep)
+				shift
+				executeSleep="false"
+			;;
+			--non-interactive)
+				shift
+				executeSleep="false"
+				explainTasks="false"
 			;;
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
 				DistroImageParseSshOptions "$1" "$2"
@@ -120,14 +132,17 @@ ExecuteParallel(){
 		| cut -d" " -f 1,2,4-
 	)"
 	
-	echo "Will execute ($MDSC_CMD): " >&2
-	local textLine
-	echo "$sshTargets" | while read -r textLine ; do
-		echo "  $textLine" >&2
-	done
+	if [ "true" = "$explainTasks" ] ; then
+		echo "Will execute ($MDSC_CMD): " >&2
+		local textLine
+		echo "$sshTargets" | while read -r textLine ; do
+			echo "  $textLine" >&2
+		done
+	fi
 
 	case "$executeType" in
 		--display-targets)
+			echo "$sshTargets"
 			return 0
 		;;
 		--execute-stdin)
@@ -150,18 +165,26 @@ ExecuteParallel(){
 				echo '( echo "$executeCommand" | '${textLine%?}' ) &' 
 			done )"
 			
-			printf "\n%s\n%s\n" \
-				"📋 ...got command, executing..." \
-				"⏳ ...sleeping for 5 seconds..." \
-				>&2
-			sleep 5
+			if [ "true" = "$executeSleep" ] ; then
+				printf "\n%s\n%s\n" \
+					"📋 ...got command, executing..." \
+					"⏳ ...sleeping for 5 seconds..." \
+					>&2
+				sleep 5
+			else
+				printf "\n%s\n" \
+					"📋 ...got command, executing (--no-sleep)..." \
+					>&2
+			fi
 			echo
 		;;
 		*)
-			printf "\n%s\n" \
-				"⏳ ...sleeping for 5 seconds..." \
-				>&2
-			sleep 5
+			if [ "true" = "$executeSleep" ] ; then
+				printf "\n%s\n" \
+					"⏳ ...sleeping for 5 seconds..." \
+					>&2
+				sleep 5
+			fi
 		;;
 	esac
 
