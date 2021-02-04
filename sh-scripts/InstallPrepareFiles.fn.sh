@@ -40,7 +40,7 @@ InstallPrepareFilesInternalPrintScript(){
 	[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: select property lists" >&2
 	local allSyncFolders="$( ImagePrepareProjectSyncFolders )"
 	local allSourceScripts="$( ImagePrepareProjectSourcePatchScripts )"
-	local allCloneFiles="$( ImagePrepareProjectCloneFiles )"
+	local allCloneTasks="$( ImagePrepareProjectCloneTasks )"
 	local allTargetScripts="$( ImagePrepareProjectTargetPatchScripts )"
 
 	##
@@ -89,11 +89,32 @@ InstallPrepareFilesInternalPrintScript(){
 			echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
 				local targetFullPath="./${mergePath##/}"
-				local sourceName cloneSourcePath sourceFileName targetFileName
-				[ -z "${allCloneFiles:0:1}" ] || echo "$allCloneFiles" | grep "^$sourceName $sourcePath " \
-				| while read -r sourceName cloneSourcePath sourceFileName targetFileName ; do
-					echo "rsync -rt --chmod=ug+rw '$targetFullPath/${cloneSourcePath##$sourcePath}$sourceFileName' '$targetFullPath/$targetFileName'"
-				done
+				local sourceName cloneSourcePath sourceFileName targetPattern useVariable useValues
+				[ -z "${allCloneTasks:0:1}" ] || echo "$allCloneTasks" | grep "^$sourceName $sourcePath " \
+				| while read  -r sourceName cloneSourcePath sourceFileName targetPattern useVariable useValues; do
+					if [ -z "$useVariable" ] ; then
+						echo "cp -f '$targetFullPath/${cloneSourcePath##$sourcePath}$sourceFileName' '$targetFullPath/$targetPattern'"
+						continue
+					fi
+
+					useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+					
+					local sourceText="" editorCode=""
+					for useValue in $useValues ; do
+						sourceText="$sourceText $targetFullPath/$targetPattern"
+						editorCode="$editorCode -e 's:$useVariable:$useValue:'"
+					done
+					
+					if [ -z "$sourceText" ] ; then
+						echo "# WARNING: no targets for cloning task: '${cloneSourcePath##$sourcePath}$sourceFileName'"
+						continue
+					fi
+
+					useValues="$( echo "$sourceText" | eval sed $editorCode )"
+					
+					echo "cat '$targetFullPath/${cloneSourcePath##$sourcePath}$sourceFileName' | tee $useValues > /dev/null"
+					continue					
+				done 
 			done
 		)"
 		if [ ! -z "${executeScript:0:1}" ] ; then
@@ -214,8 +235,22 @@ InstallPrepareFiles(){
 			ImagePrepareProjectSyncFolders
 			return 0
 		;;
+		--print-clone-tasks)
+			ImagePrepareProjectCloneTasks \
+		;;
 		--print-clone-files)
-			ImagePrepareProjectCloneFiles
+			local sourceName sourcePath fileName targetPattern useVariable useValues
+			ImagePrepareProjectCloneTasks \
+			| while read  -r sourceName sourcePath fileName targetPattern useVariable useValues; do
+				if [ -z "$useVariable" ] ; then
+					echo "$sourceName" "$sourcePath" "$fileName" "$targetPattern"
+				else
+					useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
+					for useValue in $useValues ; do
+						echo "$sourceName" "$sourcePath" "$fileName" "$( echo "$targetPattern" | sed "s:$useVariable:$useValue:" )"
+					done
+				fi
+			done 
 			return 0
 		;;
 		--print-source-patch-scripts)

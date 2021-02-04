@@ -101,9 +101,9 @@ ImagePrepareProjectTargetPatchScripts(){
 }
 
 # prints actual project's file clone tasks (image-prepare:clone-source-file:)
-# format: "$sourceName" "$sourcePath" "$fileName" "$targetFileName"
-ImagePrepareProjectCloneFiles(){
-	local MDSC_CMD='ImagePrepareProjectCloneFiles'
+# format: "$sourceName" "$sourcePath" "$sourceFileName" "$targetFileName1" ...
+ImagePrepareProjectCloneTasks(){
+	local MDSC_CMD='ImagePrepareProjectCloneTasks'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
@@ -118,17 +118,7 @@ ImagePrepareProjectCloneFiles(){
 		DistroImageCheckSourcePath --file "$declaredAt" "$sourceName" "$sourcePath/$fileName" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues" \
 		| cut -d" " -f2,4-
 	done \
-	| awk '!x[$0]++' \
-	| while read  -r sourceName sourcePath fileName targetPattern useVariable useValues; do
-		if [ -z "$useVariable" ] ; then
-			echo "$sourceName" "$sourcePath" "$fileName" "$targetPattern"
-		else
-			useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
-			for useValue in $useValues ; do
-				echo "$sourceName" "$sourcePath" "$fileName" "$( echo "$targetPattern" | sed "s:$useVariable:$useValue:" )"
-			done
-		fi
-	done 
+	| awk '!x[$0]++'
 	return 0
 }
 
