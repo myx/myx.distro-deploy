@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -34,7 +34,7 @@ ExecuteSequence(){
 		--select-from-env)
 			shift
 			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
-				echo "ERROR: $MDSC_CMD: no projects selected!" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
 				return 1
 			fi
 		;;
@@ -68,7 +68,7 @@ ExecuteSequence(){
 				shift ; shift
 			;;
 			--ssh-*)
-				echo "$MDSC_CMD: ERROR: invalid --ssh-XXXX option: $1" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
 				return 1
 			;;
 			*)
@@ -94,18 +94,18 @@ ExecuteSequence(){
 			shift
 			local executeType="--execute-script"
 			if [ -z "$1" ] ; then
-				echo "$MDSC_CMD: ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
 			fi
 			local executeScriptName="$1" ; shift
 			if [ ! -f "$executeScriptName" ] ; then
-				echo "$MDSC_CMD: ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
 			fi
 		;;
 		--execute-command)
 			shift
 			local executeType="--execute-command"
 			if [ -z "$1" ] ; then
-				echo "$MDSC_CMD: ERROR: '--execute-command' - command argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-command' - command argument required!" >&2 ; return 1
 			fi
 			local executeCommand="$1" ; shift
 		;;

@@ -40,9 +40,9 @@ ShellTo(){
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: More that one match: $@" >&2
+		echo "$MDSC_CMD: 🙋 STOP: More that one match: $@" >&2
 		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
-		return 1
+		return 2
 	fi
 
 	set -e

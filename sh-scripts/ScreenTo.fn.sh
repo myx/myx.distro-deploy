@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -21,7 +21,7 @@ ScreenTo(){
 	
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo "$MDSC_CMD: ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
+		echo "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
 	fi
 
 	shift
@@ -34,14 +34,14 @@ ScreenTo(){
 	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
 	if [ -z "$targets" ] ; then
-		echo "$MDSC_CMD: ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
 		return 1
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
-		echo "$MDSC_CMD: ERROR: More that one match: $@" >&2
+		echo "$MDSC_CMD: 🙋 STOP: More that one match: $@" >&2
 		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
-		return 1
+		return 2
 	fi
 
 	set -e
