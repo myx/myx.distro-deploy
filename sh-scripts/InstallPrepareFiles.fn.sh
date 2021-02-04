@@ -124,7 +124,7 @@ InstallPrepareFilesInternalPrintScript(){
 	done \
 	| awk '!x[$0]++' \
 	| while read -r scriptSourceName scriptName mergePath; do
-		ImagePrepareEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptName" "./$mergePath"
+		DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptName" "./$mergePath"
 	done
 
 	##
@@ -166,7 +166,7 @@ InstallPrepareFilesInternalPrintScript(){
 	done \
 	| awk '!x[$0]++' \
 	| while read -r scriptSourceName scriptName mergePath; do
-		ImagePrepareEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptName" "./$mergePath"
+		DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptName" "./$mergePath"
 	done
 	
 	##

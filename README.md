@@ -5,8 +5,8 @@
 image-receive, image-install commands:
 
 	image-install:context-variable:
-	image-install:context-variable:<variableName>:{create|change|ensure|update|remove|re-set|delete}[:<valueNoSpaces>...]
-	image-install:context-variable:<variableName>:{create|change|insert|update|remove|define|delete}[:<valueNoSpaces>...]
+	image-install:context-variable:<variableName>:{create|change|ensure|insert|update|remove|re-set|delete}[:<valueNoSpaces>...]
+	image-install:context-variable:<variableName>:{create|change|ensure|append|update|remove|define|delete}[:<valueNoSpaces>...]
 	image-install:context-variable:DPL_HOST_TYPE:re-set:standalone
 	image-install:context-variable:DPL_HOST_TYPE:change:guest
 	image-install:context-variable:DPL_HOST_TYPE:delete

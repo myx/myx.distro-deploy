@@ -135,7 +135,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		local scriptSourceName scriptFile sourcePath
 		ImageInstallProjectDeployPatchScripts --prefix \
 		| while read -r scriptSourceName scriptFile sourcePath; do
-			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
+			DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
 		done
 
 		##
@@ -154,7 +154,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 				| while read -r scriptSourceName scriptFile matchSourcePath; do
 					case "${matchSourcePath##/}/" in
 						"${sourcePath##/}/"*)
-							ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
+							DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
 						;;
 						*)
 							[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
@@ -200,7 +200,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 				| while read -r scriptSourceName scriptFile matchTargetPath; do
 					case "${matchTargetPath##/}/" in
 						"${targetPath##/}/"*)
-							ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
+							DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
 						;;
 						*)
 							[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: 🦠 path skipped: $matchTargetPath ?= $targetPath" >&2
@@ -217,7 +217,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		local scriptSourceName scriptFile sourcePath
 		ImageInstallProjectDeployPatchScripts --suffix \
 		| while read -r scriptSourceName scriptFile sourcePath; do
-			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
+			DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$sourcePath"
 		done
 
 		##
@@ -244,7 +244,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		#local scriptSourceName scriptFile sourcePath
 		ImageInstallProjectDeployPatchScripts --commit \
 		| while read -r scriptSourceName scriptFile sourcePath; do
-			ImageInstallEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "."
+			DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "."
 		done
 
 	fi

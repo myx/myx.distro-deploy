@@ -324,8 +324,10 @@ DistroImageProjectProvidesMerged(){
 	return 1
 }
 
-DistroImageProjectSequence(){
-	local MDSC_CMD='DistroImageProjectSequence'
+## echoes specified or selected project sequence index file name
+##
+DistroImageProjectSequenceFile(){
+	local MDSC_CMD='DistroImageProjectSequenceFile'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
@@ -339,10 +341,6 @@ DistroImageProjectSequence(){
 		esac
 	done
 
-	#if [ ! -z "${MDSC_PRJ_BSEQ:0:1}" ] ; then
-	#	echo "$MDSC_PRJ_BSEQ"
-	#	return 0
-	#fi
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
 		return 1
@@ -353,7 +351,7 @@ DistroImageProjectSequence(){
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
 			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				cat "$cacheFile"
+				echo "$cacheFile"
 				return 0
 			fi
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
@@ -363,7 +361,8 @@ DistroImageProjectSequence(){
 	
 		set -e
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' | tee "$cacheFile"
+		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' > "$cacheFile"
+		echo "$cacheFile"
 		return 0
 	fi
 	
@@ -451,38 +450,6 @@ DistroImageEnsureProvidesOwnedFile(){
 	return 1
 }
 
-# echoes none/all matching deploy output folders or files
-# !!!arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
-# !!!output: declaredAt sourceName sourcePath <extraArguments>
-DistroImageCheckOutputPath(){
-	local MDSC_CMD='DistroImageCheckOutputPath'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
-
-	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
-
-	while true ; do	
-		case "$1" in
-			--project)
-				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
-			--path)
-				shift ;	local check="-d" ; continue ;;
-			--file)
-				shift ;	local check="-f" ; continue ;;
-			*)
-				break ;;
-		esac
-	done
-
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "ERROR: $MDSC_CMD: project is not selected!" >&2
-		return 1
-	fi
-	
-	!!!
-	
-	return 0
-}
-
 #
 # call with --install|--prepare [--export|--local] argument
 DistroImageProjectContextVariables(){
@@ -529,37 +496,52 @@ DistroImageProjectContextVariables(){
 		| tr ':' ' ' | cut -d" " -f4- \
 		| while read -r variableName operationType variableValue ; do
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
-			printf ' ## %s\n' "$variableName"
+			printf '\n## ## %s\n' "$variableName"
 			case "$operationType" in
 			
 				# if variable is not defined - creates variable/array with given value 
 				create)
-					printf	'if [ -z "$VAR_%s" ] ; then\n' 			"$variableName"
-					printf 		'VAR_%s=%q\n' 						"$variableName" "$variableValue"
-					printf	'fi\n'
+					printf	'[ ! -z "$VAR_%s" ] || VAR_%s=%q\n' \
+						"$variableName" \
+						"$variableName" "$variableValue"
 				;;
 				
 				# if variable is defined - sets it's value to given one
 				change)
-					printf '[ -z "$VAR_%s" ] || VAR_%s=%q # %s\n' \
-						"$variableName" "$variableName" "$variableValue" "$variableName"
+					printf '[ -z "$VAR_%s" ] || VAR_%s=%q\n' \
+						"$variableName" \
+						"$variableName" "$variableValue"
 				;;
 				
 				# if variable is not defined - creates array with given value 
 				# if variable is defined - ensures array contains given value 
-				ensure|insert)
-					printf	'if [ -z "$VAR_%s" ] ; then\n' 						"$variableName"
-					printf 		'VAR_%s=%q\n' 									"$variableName" "$variableValue"
-					printf	'else\n'
-					printf 		'VAR_%s="$( printf '%s\n%s' $VAR_%s %q )"\n' 	"$variableName" "$variableName" "$variableValue"
-					printf	'fi\n'
+				ensure)
+					printf	'[ -z "$VAR_%s" ] && VAR_%s=%q || echo "$VAR_%s" | grep -q -x %q || VAR_%s="$( echo "$VAR_%s" ; echo %q )"\n' \
+						"$variableName" \
+						"$variableName" "$variableValue" \
+						"$variableName" "$variableValue" \
+						"$variableName" "$variableName" "$variableValue"
+				;;
+				
+				# if variable is not defined - creates array with given value 
+				# if variable is defined - appends given value to array regardless if it's already present 
+				insert|append)
+					printf	'[ -z "$VAR_%s" ] && VAR_%s=%q || VAR_%s="$( echo "$VAR_%s" ; echo %q )"\n' \
+						"$variableName" \
+						"$variableName" "$variableValue" \
+						"$variableName" "$variableName" "$variableValue"
 				;;
 				
 				# if variable is defined - ensures array contains given value 
 				update)
-					printf	'if [ ! -z "$VAR_%s" ] ; then\n' 					"$variableName"
-					printf 		'VAR_%s="$( printf '%s\n%s' "$VAR_%s" %q )"\n' 	"$variableName" "%s" "%s" "$variableName" "$variableValue"
-					printf	'fi\n'
+					printf	'[ -z "$VAR_%s" ] || VAR_%s="$( echo "$VAR_%s" | grep -x -v %q ; echo %q )"\n'\
+						"$variableName" \
+						"$variableName" "$variableName" "$variableValue" "$variableValue"
+					continue
+					
+					printf	'[ -z "$VAR_%s" ] || VAR_%s="$( printf '%s\n%s' "$VAR_%s" %q )"\n'\
+						"$variableName" \
+						'%s' '%s' "$variableName" "$variableName" "$variableValue"
 				;;
 				
 				# if variable is defined - removes given value from array. Un-defines variable if no value given.
@@ -567,29 +549,33 @@ DistroImageProjectContextVariables(){
 					if [ -z "$variableValue" ] ; then
 						printf 'VAR_%s=""\n' 									"$variableName"
 					else
-						printf	'if [ ! -z "$VAR_%s" ] ; then\n' 				"$variableName"
-						printf 		'VAR_%s="$( echo "$VAR_%s" | grep -F -v %q )"\n' 	"$variableName" "$variableName" "$variableValue"
-						printf	'fi\n'
+						printf	'[ -z "$VAR_%s" ] || VAR_%s="$( echo "$VAR_%s" | grep -x -v %q )"\n' \
+							"$variableName" \
+							"$variableName" "$variableName" "$variableValue"
 					fi
 				;;
 
 				# if variable is not defined - creates variable with given value 
 				# if variable is defined - sets variable to given value (same) 
 				re-set|define|upsert)
-					printf 'VAR_%s=%q\n' 									"$variableName" "$variableValue"
+					printf 'VAR_%s=%q\n'\
+						"$variableName" "$variableValue"
 				;;
 				
 				# Un-defines variable. Only when variable value matches, if variableValue specified.
 				delete)
 					if [ -z "$variableValue" ] ; then
-						printf 'VAR_%s=""\n' 								"$variableName"
+						printf 'VAR_%s=""\n' \
+							"$variableName"
 					else
-						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=""\n' 		"$variableValue" "$variableName" "$variableName"
+						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=""\n' \
+							"$variableValue" "$variableName" \
+							"$variableName"
 					fi
 				;;
 				
 				*)
-					echo "$MDSC_CMD: WARNING: unknown context variable operation: $operationType:$variableName:$variableValue" >&2
+					echo "$MDSC_CMD: 🙋 WARNING: unknown context variable operation: $operationType:$variableName:$variableValue" >&2
 				;;
 			esac
 		done
@@ -599,7 +585,7 @@ DistroImageProjectContextVariables(){
 		return 0
 	fi
 	
-	local variableNames="$( echo "$buildBuffer" | grep -e '^ ## ' | sed -e 's|^.* \## ||g' | sort -u )"
+	local variableNames="$( echo "$buildBuffer" | grep -e '^## ## ' | sed -e 's|^## ## ||g' | sort -u )"
 	
 	local buildBuffer="`
 		for variableName in $variableNames ; do
@@ -629,7 +615,7 @@ DistroImageCheckSourcePath(){
 	while true ; do	
 		case "$1" in
 			--project)
-				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
+				shift ; MDSC_PRJ_NAME="$1" ; shift ; continue ;;
 			--path)
 				shift ;	local check="-d" ; continue ;;
 			--file)
@@ -647,7 +633,7 @@ DistroImageCheckSourcePath(){
 	local declaredAt="$1" ; shift
 	local sourceName="$1" ; shift
 	local sourcePath="$1" ; shift
-	local checkProject
+	local checkProject commandOutput
 
 	if [ -z "$sourceName" ] ; then
 		echo "ERROR: $MDSC_CMD: arguments missing" >&2
@@ -655,14 +641,14 @@ DistroImageCheckSourcePath(){
 	fi
 
 	if [ "$sourceName" = "*" ] ; then
-		local commandOutput="$( \
-			DistroImageProjectSequence | while read -r checkProject ; do
+		commandOutput="$( \
+			while read -r checkProject ; do
 				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-					if DistroImageProjectSequence --project "$checkProject" | grep -q "$declaredAt" ; then
+					if grep -q -x "$declaredAt" "$( DistroImageProjectSequenceFile --project "$checkProject" )" ; then
 						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 					fi
 				fi
-			done \
+			done < "$( DistroImageProjectSequenceFile )" \
 		)"
 	
 		if [ ! -z "$commandOutput" ] ; then
@@ -670,12 +656,12 @@ DistroImageCheckSourcePath(){
 			return 0
 		fi
 		
-		echo "WARNING: $MDSC_CMD: wild-card path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+		echo "$MDSC_CMD: 🙋 WARNING: wild-card path is not found: $declaredAt:$sourceName:$sourcePath" >&2
 		return 1
 	fi
 	
 	if [ "$sourceName" = "." ] ; then
-		local sourceName="$declaredAt"
+		sourceName="$declaredAt"
 	fi
 	
 	if [ $check "$MDSC_SOURCE/$sourceName/$sourcePath" ] ; then
@@ -684,7 +670,7 @@ DistroImageCheckSourcePath(){
 	fi
 
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
-	local commandOutput="$( \
+	commandOutput="$( \
 		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | cut -d" " -f1 | awk '!x[$0]++' \
 		| while read -r checkProject ; do
 			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
@@ -693,13 +679,41 @@ DistroImageCheckSourcePath(){
 		done \
 	)"
 	
-	if [ ! -z "$commandOutput" ] ; then
+	if [ ! -z "${commandOutput:0:1}" ] ; then
 		echo "$commandOutput"
 		return 0
 	fi
 	
-	echo "WARNING: $MDSC_CMD: explicitly declared path is not found: $declaredAt:$sourceName:$sourcePath" >&2
+	echo "$MDSC_CMD: 🙋 WARNING: explicitly declared path is not found: $declaredAt:$sourceName:$sourcePath" >&2
 	return 1
+}
+
+DistroImageEmbedScript(){ # "1-scriptFileName" "2-changeDir"
+	local MDSC_CMD='DistroImageEmbedScript'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	if [ -z "$1" ] ; then
+		echo "ERROR: $MDSC_CMD: script file name argument is expected!" >&2
+		return 1
+	fi
+	if [ ! -f "$1" ] ; then
+		echo "ERROR: $MDSC_CMD: script file is does not exist: ${scriptFileName#$MMDAPP}" >&2
+		return 1
+	fi
+	if [ -z "$2" ] ; then
+		echo "ERROR: $MDSC_CMD: working directory argument is expected!" >&2
+		return 1
+	fi
+	
+	[ -z "$MDSC_DETAIL" ] || echo "echo '> run: ${1#$MMDAPP}:$2' >&2"
+	printf "\n\n# embedded script: %s\n\n( cd '%s' ; bash || echo '%s' >&2 ) << 'EOF_PROJECT_DIESSH_XXXXXXXX'\n" \
+		"${1#$MMDAPP}" \
+		"$2" \
+		"ImageDeploy: ⛔ ERROR: script execution failed: $( basename "$1" )"
+	cat "$1"
+	printf '\nEOF_PROJECT_DIESSH_XXXXXXXX\n\n'
+	[ -z "$MDSC_DETAIL" ] || echo "echo '< run: ${1#$MMDAPP}:$2' >&2"
+	return 0
 }
 
 # main shell command
