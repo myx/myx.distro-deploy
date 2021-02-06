@@ -52,7 +52,6 @@ ExecuteParallel(){
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"
 
-
 	while true ; do
 		case "$1" in
 			--no-cache)
@@ -132,7 +131,7 @@ ExecuteParallel(){
 		| cut -d" " -f 1,2,4-
 	)"
 	
-	if [ "true" = "$explainTasks" ] ; then
+	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "Will execute ($MDSC_CMD): " >&2
 		local textLine
 		echo "$sshTargets" | while read -r textLine ; do
