@@ -108,7 +108,7 @@ ExecuteSequence(){
 			if [ -z "$1" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
 			fi
-			local executeScriptName="$1" ; shift
+			local executeScriptName="$MMDAPP/source/${1#"$MMDAPP/source/"}" ; shift
 			if [ ! -f "$executeScriptName" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
 			fi
@@ -135,7 +135,7 @@ ExecuteSequence(){
 		| cut -d" " -f 1,2,4-
 	)"
 	
-	if [ "true" = "$explainTasks" ] ; then
+	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "Will execute ($MDSC_CMD): " >&2
 		local textLine
 		echo "$sshTargets" | while read -r textLine ; do
@@ -145,6 +145,7 @@ ExecuteSequence(){
 
 	case "$executeType" in
 		--display-targets)
+			echo "$sshTargets"
 			return 0
 		;;
 		--execute-stdin)
@@ -167,18 +168,26 @@ ExecuteSequence(){
 				echo 'echo "$executeCommand" | '$textLine 
 			done )"
 			
-			printf "\n%s\n%s\n" \
-				"📋 ...got command, executing..." \
-				"⏳ ...sleeping for 5 seconds..." \
-				>&2
-			sleep 5
+			if [ "true" = "$executeSleep" ] ; then
+				printf "\n%s\n%s\n" \
+					"📋 ...got command, executing..." \
+					"⏳ ...sleeping for 5 seconds..." \
+					>&2
+				sleep 5
+			else
+				printf "\n%s\n" \
+					"📋 ...got command, executing (--no-sleep)..." \
+					>&2
+			fi
 			echo
 		;;
 		*)
-			printf "\n%s\n" \
-				"⏳ ...sleeping for 5 seconds..." \
-				>&2
-			sleep 5
+			if [ "true" = "$executeSleep" ] ; then
+				printf "\n%s\n" \
+					"⏳ ...sleeping for 5 seconds..." \
+					>&2
+				sleep 5
+			fi
 		;;
 	esac
 
