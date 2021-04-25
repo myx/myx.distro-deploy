@@ -67,10 +67,11 @@ DistroSshConnect(){
 	local useSshPort=""
 	local useSshUser=""
 	local useSshHome=""
+	local useSshArgs=""
 
 	while true ; do
 		case "$1" in
-			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
 				shift ; shift
 			;;
@@ -163,6 +164,9 @@ DistroImageParseSshOptions(){
 			--ssh-home)
 				shift ; useSshHome="${1#$MMDAPP/source/}" ; shift
 			;;
+			--ssh-args)
+				shift ; useSshArgs="$1" ; shift
+			;;
 			*)
 				return 0
 			;;
@@ -182,6 +186,7 @@ DistroImageProjectSshTargets(){
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
+	local useSshArgs="${useSshArgs:-}"
 	local linePrefix=""
 	local lineSuffix=""
 	
@@ -196,7 +201,7 @@ DistroImageProjectSshTargets(){
 			--no-index)
 				shift ; local useNoIndex="--no-index"
 			;;
-			--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
 				shift ; shift
 			;;
@@ -225,8 +230,9 @@ DistroImageProjectSshTargets(){
 	local setSshPort="${useSshPort:-}"
 	local setSshUser="${useSshUser:-}"
 	local setSshHome="${useSshHome:-}"
+	local setSshArgs="${useSshArgs:-}"
 
-	local sshName sshHost sshPort sshUser sshHome sshSpec clientSpec
+	local sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
 	
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
@@ -243,6 +249,7 @@ DistroImageProjectSshTargets(){
 		useSshPort="${setSshPort:-$sshPort}"
 		useSshUser="${setSshUser:-$sshUser}"
 		useSshHome="$setSshHome"
+		useSshArgs="$setSshArgs"
 
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 		
@@ -260,6 +267,7 @@ DistroImageProjectSshTargets(){
 		sshPort="${setSshPort:-$useSshPort}"
 		sshHome="${setSshHome:-$useSshHome}"
 		sshUser="${setSshUser:-$useSshUser}"
+		sshArgs="${setSshArgs:-$useSshArgs}"
 		
 		if [ "$sshHost" != "$sshName" ] ; then
 			linePrefix="$linePrefix --ssh-name $( printf '%q' "$sshName" )"
@@ -269,12 +277,13 @@ DistroImageProjectSshTargets(){
 			sshHome="$( echo ~/.ssh )"
 		fi
 
-		printf '%s --ssh-host %q --ssh-port %s --ssh-user %q --ssh-home %q %s%s\n' \
+		printf '%s --ssh-host %q --ssh-port %s --ssh-user %q --ssh-home %q %s %s%s\n' \
 			"$linePrefix" \
 			"$sshHost" \
 			"$sshPort" \
 			"$sshUser" \
 			"$sshHome" \
+			"$sshArgs" \
 			"$extraArguments" \
 			"$lineSuffix"
 			

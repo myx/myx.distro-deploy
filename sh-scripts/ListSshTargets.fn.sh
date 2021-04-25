@@ -49,6 +49,7 @@ ListSshTargets(){
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
+	local useSshArgs="${useSshArgs:-}"
 
 	local linePrefix=""
 	local lineSuffix=""
@@ -72,6 +73,9 @@ ListSshTargets(){
 			;;
 			--ssh-home)
 				shift ; useSshHome="$1" ; shift
+			;;
+			--ssh-args)
+				shift ; useSshArgs="$1" ; shift
 			;;
 			--all-targets)
 				shift

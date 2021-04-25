@@ -75,7 +75,7 @@ ExecuteSequence(){
 				executeSleep="false"
 				explainTasks="false"
 			;;
-			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home)
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
 				shift ; shift
 			;;
