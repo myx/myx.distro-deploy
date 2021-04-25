@@ -289,6 +289,7 @@ DeployProjectSsh(){
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
+	local useSshArgs="${useSshArgs:-}"
 
 	local prepareFiles="${prepareFiles:-auto}" 
 	local prepareScript="${prepareScript:-auto}"
@@ -313,6 +314,9 @@ DeployProjectSsh(){
 			;;
 			--ssh-home)
 				shift ; useSshHome="$1" ; shift
+			;;
+			--ssh-args)
+				shift ; useSshArgs="$1" ; shift
 			;;
 			--prepare-exec)
 				shift
