@@ -12,13 +12,38 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	DistroShellContext --distro-path-auto
 fi
 
+if ! type DistroImage >/dev/null 2>&1 ; then
+	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+fi
+
 ShellTo(){
 
 	set -e
 
 	local MDSC_CMD='ShellTo'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
-	
+
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshHome="${useSshHome:-}"
+
+	while true ; do
+		case "$1" in
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
+				DistroImageParseSshOptions "$1" "$2"
+				shift ; shift
+			;;
+			--ssh-*)
+				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
+				return 1
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
 		echo -e "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
