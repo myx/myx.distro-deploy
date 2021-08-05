@@ -74,7 +74,7 @@ InstallPrepareFilesInternalPrintScript(){
 			echo "$allSyncFolders" \
 			| while read -r sourceName sourcePath mergePath ; do
 				# echo "mkdir -p './$mergePath'"
-				echo "rsync -rt --chmod=ug+rw --omit-dir-times '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+				echo "rsync -rtO --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
 			done
 		echo "} 2>&1 | (grep -v --line-buffered -E '>f\.\.t\.+ ' >&2 || true)"
 	fi
