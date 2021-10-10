@@ -75,13 +75,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 		local deployTargetPatchScripts="$( ImageInstallProjectDeployPatchScripts --target )"
 	fi
 
-	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
-
-	##
-	## remote host script start
-	##
-	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
-
 	##
 	## sleep, if needed
 	##
@@ -89,6 +82,13 @@ DeployProjectSshInternalPrintRemoteScript(){
 		echo 'echo "ImageDeploy: ⏳ ... sleeping for 5 seconds ..." >&2'
 		echo 'sleep 5'
 	fi
+
+	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building remote script" >&2
+
+	##
+	## remote host script start
+	##
+	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
 	##
 	## set detailed logging on remote host
