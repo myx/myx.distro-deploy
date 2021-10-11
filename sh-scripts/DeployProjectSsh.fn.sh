@@ -118,7 +118,8 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
 	
-	printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	# replaced by linux hack: printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	printf "\n( uudecode -o /dev/stdout | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 	tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
 	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
 	
