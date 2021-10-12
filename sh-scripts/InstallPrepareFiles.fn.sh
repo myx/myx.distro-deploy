@@ -299,7 +299,7 @@ InstallPrepareFiles(){
 		;;
 		--to-temp)
 			shift
-			local tempDirectory="`mktemp -d -t "MDSC_IPF"`"
+			local tempDirectory="`mktemp -d -t "MDSC_IPF_XXXXXXXX"`"
 			local saveDirectory="`pwd`"
 			trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
 			echo "$MDSC_CMD: using temp: $tempDirectory" >&2
