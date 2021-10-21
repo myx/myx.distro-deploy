@@ -90,7 +90,7 @@ NotifySmart(){
 				|| true \
 			) <<- RESTJSON
 				{
-					"text": "$eventText", 
+					"text": "$( echo -n "$eventText" | sed -e 's/\"/\\\"/;s/\r/\\\r/;s/\n/\\\n/' )", 
 					"channel": "$slackChannel", 
 					"username": "$eventUser", 
 					"icon_emoji": "$eventEmoji"
