@@ -7,6 +7,103 @@ MDSC_DEPLOY_STARTED="$(date +%s)"
 MDSC_IMAGE_UNPACK_DIR="$(mktemp -t "mdsc-deploy-remote-XXXXXXXX" -d)"
 echo "ImageDeploy: 🛠 starting: 👤 $(whoami) @ $(hostname), 📂 temporary directory: $MDSC_IMAGE_UNPACK_DIR" >&2
 
+## from myx.common, statically inserted to reduce dependencies
+## as `myx.common cat lib/notifySmart` would do.
+
+NotifySmart(){
+
+	set -e
+
+	local eventType="unset" eventText="" eventUser="${eventUser:-$(hostname)}" eventEmoji=""
+
+	while [ "$1" != "" ] ; do
+		case "$1" in
+			--text)
+				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
+				local eventText="$2" ; shift ; shift
+			;;
+			--user)
+				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
+				local eventUser="$2" ; shift ; shift
+			;;
+			--emoji)
+				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
+				local eventEmoji="$2" ; shift ; shift
+			;;
+			--alert|--audit|--track|--debug)
+				local eventType="${1##--}" ; shift
+			;;
+			*)
+				echo "NotifySmart: invalid option: $1" >&2
+				return 1
+			;;
+		esac
+	done
+
+	if [ -z "$eventText" ] ; then
+		echo "NotifySmart: slack text message is required!" >&2
+		return 1
+	fi
+
+
+	logger -s -t "$eventType" "@${eventUser:-$(whoami)}: $eventText"
+
+	if [ ! -z "$SLACK_TOKEN" ] ; then
+		local slackBearer="${slackBearer:-$SLACK_TOKEN}" slackChannel="${slackChannel:-$SLACK_TOPIC}"
+		case "$eventType" in
+			alert)
+				local slackChannel="${SLACK_ALERT:-$SLACK_TOPIC}"
+			;;
+			audit)
+				local slackChannel="${SLACK_AUDIT:-$SLACK_TOPIC}"
+			;;
+			track)
+				local slackChannel="${SLACK_TRACK:-$SLACK_TOPIC}"
+			;;
+			debug)
+				local slackChannel="${SLACK_DEBUG:-$SLACK_TOPIC}"
+			;;
+			unset)
+			;;
+			*)
+				echo "NotifySmart: invalid event type: $eventType" >&2
+				return 1
+			;;
+		esac
+
+
+		if [ -z "$slackChannel" ] ; then
+			echo "NotifySmart: slack channel name is required!" >&2
+			return 1
+		fi
+
+		echo "📟 slack notification: 👤 $(whoami) @ $(hostname), result: $( \
+			(	\
+				curl 'https://slack.com/api/chat.postMessage' \
+					--insecure \
+					--silent \
+					--show-error \
+					--data-binary "@/dev/stdin" \
+					-H "Content-Type: application/json; charset=utf-8" \
+					-H "Authorization: Bearer ${slackBearer}" \
+					2>&1 \
+				|| true \
+			) <<- RESTJSON
+				{
+					"text": "$eventText", 
+					"channel": "$slackChannel", 
+					"username": "$eventUser", 
+					"icon_emoji": "$eventEmoji"
+				}	
+			RESTJSON
+		)" >&2
+
+	fi
+
+	return 0
+}
+
+NotifySmart --debug --text "ImageDeploy: 🛠 deploy task started: 👤 $(whoami) @ $(hostname)" --emoji "::cog::"
 
 DeployTaskCleanup(){
 	[ "full" != "$MDSC_DETAIL" ] || echo "ImageDeploy: ⏫ leaving directory..." >&2
@@ -32,4 +129,3 @@ if [ "`myx.common os/getRamBytes`" -gt "4294967296" ] && mount -t tmpfs tmpfs "$
 fi
 
 cd "$MDSC_IMAGE_UNPACK_DIR"
-

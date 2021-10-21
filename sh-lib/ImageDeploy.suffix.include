@@ -1,1 +1,22 @@
+DeployCheckResult(){
+	local EXTRA_TEXT="No change log!"
+	local CHANGE_COUNT=""
+
+	if [ -f "host-files-rsync.log" ] ; then
+		local CHANGE_COUNT="$( cat "host-files-rsync.log" | wc -l )"
+		local EXTRA_TEXT="$CHANGE_COUNT file(s) changed"
+	fi
+
+	local MESSAGE_TEXT="ImageDeploy: 🏁 task finished. Settings applied by @${MDSC_REAL_USER}.\n${EXTRA_TEXT}"
+
+	NotifySmart --track --text "$MESSAGE_TEXT" --emoji "::cog::"
+	if [ "$CHANGE_COUNT" -gt 30 ] ; then
+		NotifySmart --audit --text "$MESSAGE_TEXT\n$( head -n 30 "host-files-rsync.log" )\n..." --emoji "::cog::"
+	elif [ "$CHANGE_COUNT" -gt 0 ] ; then
+		NotifySmart --audit --text "$MESSAGE_TEXT\n$( cat "host-files-rsync.log" )" --emoji "::cog::"
+	fi
+}
+
+DeployCheckResult
+
 echo "ImageDeploy: ⏱ Done. Took: $( echo "$(date +%s)-$MDSC_DEPLOY_STARTED" | bc ) seconds." >&2
