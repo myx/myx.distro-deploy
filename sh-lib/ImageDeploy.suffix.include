@@ -7,13 +7,16 @@ DeployCheckResult(){
 		local EXTRA_TEXT="$CHANGE_COUNT file(s) changed"
 	fi
 
-	local MESSAGE_TEXT="ImageDeploy: 🏁 task finished. Settings applied by @${MDSC_REAL_USER}.\n${EXTRA_TEXT}"
-
-	NotifySmart --track --text "$MESSAGE_TEXT" --emoji ":cog:"
+	local MESSAGE_TEXT="🏁 task finished. Settings applied by @${MDSC_REAL_USER}.\n${EXTRA_TEXT}"
 	if [ "$CHANGE_COUNT" -gt 30 ] ; then
-		NotifySmart --audit --text "$MESSAGE_TEXT\n$( head -n 30 "host-files-rsync.log" )\n..." --emoji ":cog:"
+		local MESSAGE_TEXT="$MESSAGE_TEXT\n$( head -n 30 "host-files-rsync.log" )\n..."
 	elif [ "$CHANGE_COUNT" -gt 0 ] ; then
-		NotifySmart --audit --text "$MESSAGE_TEXT\n$( cat "host-files-rsync.log" )" --emoji ":cog:"
+		local MESSAGE_TEXT="$MESSAGE_TEXT\n$( cat "host-files-rsync.log" )"
+	fi
+
+	NotifySmart --track --text "ImageDeploy (track): $MESSAGE_TEXT" --emoji ":cog:"
+	if [ "$CHANGE_COUNT" -gt 0 ] ; then
+		NotifySmart --audit --text "ImageDeploy (audit): $MESSAGE_TEXT" --emoji ":cog:"
 	fi
 }
 
