@@ -103,7 +103,7 @@ NotifySmart(){
 	return 0
 }
 
-NotifySmart --debug --text "ImageDeploy: 🛠 deploy task started: 👤 $(whoami) @ $(hostname)" --emoji ":cog:"
+NotifySmart --debug --text "ImageDeploy (debug): 🛠 deploy task started: 👤 $(whoami) @ $(hostname)" --emoji ":cog:"
 
 DeployTaskCleanup(){
 	[ "full" != "$MDSC_DETAIL" ] || echo "ImageDeploy: ⏫ leaving directory..." >&2
