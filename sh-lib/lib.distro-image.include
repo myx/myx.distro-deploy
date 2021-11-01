@@ -502,7 +502,7 @@ DistroImageProjectContextVariables(){
 	local buildBuffer="`
 		DistroImageProjectProvidesMerged \
 		| eval $filter \
-		| tr ':' ' ' | cut -d" " -f4- \
+		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f4- \
 		| while read -r variableName operationType variableValue ; do
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
 			printf '\n## ## %s\n' "$variableName"
