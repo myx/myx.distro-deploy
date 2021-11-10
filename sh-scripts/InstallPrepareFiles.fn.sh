@@ -76,7 +76,7 @@ InstallPrepareFilesInternalPrintScript(){
 				# echo "mkdir -p './$mergePath'"
 				echo "rsync -rtO --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
 			done
-		echo "} 2>&1 | (grep -v --line-buffered -E '>f\.\.t\.+ ' >&2 || true)"
+		echo "} 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
 	fi
 
 	##
@@ -121,7 +121,7 @@ InstallPrepareFilesInternalPrintScript(){
 			echo '{'
 				echo 'echo "ImagePrepareFiles: 🔂 clone/multiply files..." >&2'
 				echo "$executeScript"
-			echo "} 2>&1 | (grep -v --line-buffered -E '>f\.\.t\.+ ' >&2 || true)"
+			echo "} 2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 		fi
 	fi
 
