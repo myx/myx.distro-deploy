@@ -114,7 +114,9 @@ InstallPrepareScriptInternalPrintScript(){
 	echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
 
 	[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
-	
+
+	[ "none" == "$MDSC_DETAIL" ] || echo "echo '>> deploy script start, project: $MDSC_PRJ_NAME' >&2"
+
 	DistroImageProjectContextVariables --install --export
 
 	echo
@@ -122,14 +124,18 @@ InstallPrepareScriptInternalPrintScript(){
 	echo "$fileNames" \
 	| while read -r fileName ; do
 		echo "##**--  start, $fileName"
+		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script start: $(basename "$fileName")' >&2"
 		echo
+		eval 
 		cat "$fileName"
 		echo
+		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script end: $(basename "$fileName")' >&2"
 		echo "##**--  end, $fileName"
 	done
 
 	echo
 	echo
+	[ "none" == "$MDSC_DETAIL" ] || echo "echo '>> deploy script end, project: $MDSC_PRJ_NAME' >&2"
 	echo "#*- 	EOF, generated for $MDSC_PRJ_NAME"
 
 	return 0 
