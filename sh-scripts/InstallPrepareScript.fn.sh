@@ -123,14 +123,24 @@ InstallPrepareScriptInternalPrintScript(){
 	
 	echo "$fileNames" \
 	| while read -r fileName ; do
+		local SC_HASH="BLK_$(cat "$fileName" | md5)"
+		local SC_NAME="$(basename "$fileName")"
+		echo
 		echo "##**--  start, $fileName"
-		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script start: $(basename "$fileName")' >&2"
 		echo
-		eval 
-		cat "$fileName"
+		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script start: $SC_NAME' >&2"
+		#echo "$SC_HASH=\"\`"
+		#echo "\`\""
+		echo "( eval \"\$( cat << '$SC_HASH'"
+			cat "$fileName"
+			echo
+			[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
+		echo "$SC_HASH"
+		echo ")\" )"
+		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
 		echo
-		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script end: $(basename "$fileName")' >&2"
 		echo "##**--  end, $fileName"
+		echo
 	done
 
 	echo
