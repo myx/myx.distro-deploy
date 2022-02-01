@@ -525,7 +525,7 @@ DistroImageProjectContextVariables(){
 				# if variable is not defined - creates array with given value 
 				# if variable is defined - ensures array contains given value 
 				ensure)
-					printf	'[ -z "$VAR_%s" ] && VAR_%s=%q || echo "$VAR_%s" | grep -q -x %q || VAR_%s="$( echo "$VAR_%s" ; echo %q )"\n' \
+					printf	'[ -z "$VAR_%s" ] && VAR_%s="%q" || echo "$VAR_%s" | grep -q -x "%q" || VAR_%s="$VAR_%s\\n%q"\n' \
 						"$variableName" \
 						"$variableName" "$variableValue" \
 						"$variableName" "$variableValue" \
@@ -534,8 +534,8 @@ DistroImageProjectContextVariables(){
 				
 				# if variable is not defined - creates array with given value 
 				# if variable is defined - appends given value to array regardless if it's already present 
-				insert|append)
-					printf	'[ -z "$VAR_%s" ] && VAR_%s=%q || VAR_%s="$( echo "$VAR_%s" ; echo %q )"\n' \
+				append|insert)
+					printf	'[ -z "$VAR_%s" ] && VAR_%s="%q" || VAR_%s="$VAR_%s\\n%q"\n' \
 						"$variableName" \
 						"$variableName" "$variableValue" \
 						"$variableName" "$variableName" "$variableValue"
@@ -602,7 +602,9 @@ DistroImageProjectContextVariables(){
 		done
 		echo "$buildBuffer"
 		for variableName in $variableNames ; do
-			printf 'printf %s %q %s\n' "'$prefix%s=%q\n'" "$variableName" "\\\$VAR_$variableName"
+			#printf 'printf %s %q "%s"\n' "'$prefix%s=\\"%q\\"\n'" "$variableName" "\\\$VAR_$variableName"
+			#printf 'printf %s %q "%s"\n' "'$prefix%s=\\"%s\\"\n'" "$variableName" "\\\$VAR_$variableName"
+			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=\\"%s\\"\n" "$variableName" "$variableName"
 		done
 	`"
 	
