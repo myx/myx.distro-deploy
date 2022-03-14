@@ -233,7 +233,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		##
 		## sync processed files
 		##
-		echo "$deploySyncFilesTasks" \
+		[ -z "${deploySyncFilesTasks:0:1}" ] || echo "$deploySyncFilesTasks" \
 		| while read -r sourcePath targetPath; do
 
 			if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
