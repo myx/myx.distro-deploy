@@ -286,8 +286,10 @@ DeployProjectSsh(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	
 	if [ ! -d "$MMDAPP/output" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
-		return 1
+		if [ ! -d "$MMDAPP/source" ] ; then
+			echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
+			return 1
+		fi
 	fi
 
 	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2

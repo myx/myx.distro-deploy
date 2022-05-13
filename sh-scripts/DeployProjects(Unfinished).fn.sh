@@ -16,8 +16,10 @@ Require ListProjectProvides
 
 DeployProjectSsh(){
 	if [ ! -d "$MMDAPP/output" ] ; then
-		echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
-		return 1
+		if [ ! -d "$MMDAPP/source" ] ; then
+			echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
+			return 1
+		fi
 	fi
 
 	
