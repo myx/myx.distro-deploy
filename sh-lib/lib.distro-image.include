@@ -572,7 +572,7 @@ DistroImageProjectContextVariables(){
 				;;
 
 				# define from project relative file
-				import)
+				import|source)
 					local variableValue=$( echo "$variableValue" | tr ':' ' ' \
 					| while read -r sourceName sourcePath ; do
 						[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: import: check: $declaredAt $sourceName $sourcePath" >&2
