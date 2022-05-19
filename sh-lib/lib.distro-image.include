@@ -502,8 +502,8 @@ DistroImageProjectContextVariables(){
 	local buildBuffer="`
 		DistroImageProjectProvidesMerged \
 		| eval $filter \
-		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f4- \
-		| while read -r variableName operationType variableValue ; do
+		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
+		| while read -r declaredAt variableName operationType variableValue ; do
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
 			printf '\n## ## %s\n' "$variableName"
 			case "$operationType" in
@@ -567,6 +567,22 @@ DistroImageProjectContextVariables(){
 				# if variable is not defined - creates variable with given value 
 				# if variable is defined - sets variable to given value (same) 
 				re-set|define|upsert)
+					printf 'VAR_%s=%q\n'\
+						"$variableName" "$variableValue"
+				;;
+
+				# define from project relative file
+				import)
+					local variableValue=$( echo "$variableValue" | tr ':' ' ' \
+					| while read -r sourceName sourcePath ; do
+						[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: import: check: $declaredAt $sourceName $sourcePath" >&2
+						DistroImageCheckSourcePath --file "$declaredAt" "$sourceName" "$sourcePath" \
+						| cut -d" " -f2-
+					done \
+					| while read -r sourceName scriptFile ; do
+						# [ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: import: parse: $sourceName $scriptFile" >&2
+						cat "$MMDAPP/source/$sourceName/$scriptFile"
+					done )
 					printf 'VAR_%s=%q\n'\
 						"$variableName" "$variableValue"
 				;;
