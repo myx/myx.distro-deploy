@@ -667,11 +667,11 @@ DistroImageCheckSourcePath(){
 		return 1
 	fi
 
-	if [ "$sourceName" = "*" ] ; then
+	if [ "$sourceName" = "*" -o "$sourceName" = "**" ] ; then
 		commandOutput="$( \
 			while read -r checkProject ; do
 				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-					if grep -q -x "$declaredAt" "$( DistroImageProjectSequenceFile --project "$checkProject" )" ; then
+					if [ "$sourceName" = "**" ] || grep -q -x "$declaredAt" "$( DistroImageProjectSequenceFile --project "$checkProject" )" ; then
 						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 					fi
 				fi
