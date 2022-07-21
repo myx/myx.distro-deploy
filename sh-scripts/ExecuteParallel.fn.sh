@@ -196,8 +196,8 @@ case "$0" in
 	*/sh-scripts/ExecuteParallel.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ExecuteParallel.fn.sh <search> --execute-stdin [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <search> --execute-script <script-name>  [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <search> --execute-command <command>  [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <search> --execute-script <script-name> [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <search> --execute-command <command> [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteParallel.fn.sh <search> --display-targets [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteParallel.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
@@ -214,7 +214,7 @@ case "$0" in
 				echo "    ExecuteParallel.fn.sh --select-projects l6 --execute-command 'uname -a' -l root" >&2
 				echo "    ExecuteParallel.fn.sh --select-all -l root myx.common install/myx.common-reinstall" >&2
 				echo "    ExecuteParallel.fn.sh --select-all --execute-command 'myx.common install/myx.common-reinstall' -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-provides 'deploy-ssh-target:'  --execute-command 'myx.common install/myx.common-reinstall'" >&2
+				echo "    ExecuteParallel.fn.sh --select-provides 'deploy-ssh-target:' --execute-command 'myx.common install/myx.common-reinstall'" >&2
 				echo "    ExecuteParallel.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
 			fi
 			exit 1

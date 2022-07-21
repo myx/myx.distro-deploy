@@ -90,8 +90,8 @@ case "$0" in
 	*/sh-scripts/ExecuteInteractive.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-stdin [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-script <script-name>  [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-command <command>  [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-script <script-name> [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteInteractive.fn.sh <search> --execute-command <command> [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteInteractive.fn.sh <search> --display-targets [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteInteractive.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
