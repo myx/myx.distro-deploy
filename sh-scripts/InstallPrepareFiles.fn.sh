@@ -210,6 +210,7 @@ InstallPrepareFiles(){
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	local saveScriptTo=""
+	local directoryNew=""
 	
 	while true ; do
 		case "$1" in
@@ -290,9 +291,22 @@ InstallPrepareFiles(){
 				fi
 			fi
 			
-			if ! ( set -e ; cd "$targetPath" ; eval "$executeScript" ) ; then
-				echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
+			if [ -z "$directoryNew" ] ; then
+				local tempDirectory="`mktemp -d -t "MDSC_IPF_XXXXXXXX"`"
+				local saveDirectory="`pwd`"
+				trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
+				echo "$MDSC_CMD: using temp: $tempDirectory" >&2
+				if ! ( set -e ; cd "$tempDirectory" ; eval "$executeScript" ) ; then
+					echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
+				fi
+				rsync -iprltOoD --delete --chmod=ug+rw "$tempDirectory/" "$targetPath" 2>&1 \
+					| (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)
+			else
+				if ! ( set -e ; cd "$targetPath" ; eval "$executeScript" ) ; then
+					echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
+				fi
 			fi
+
 			
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: done." >&2
 			return 0
@@ -301,6 +315,7 @@ InstallPrepareFiles(){
 			shift
 			local tempDirectory="`mktemp -d -t "MDSC_IPF_XXXXXXXX"`"
 			local saveDirectory="`pwd`"
+			local directoryNew="true"
 			trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
 			echo "$MDSC_CMD: using temp: $tempDirectory" >&2
 			InstallPrepareFiles --to-directory "$tempDirectory"
@@ -322,6 +337,14 @@ InstallPrepareFiles(){
 				return 1
 			fi
 			InstallPrepareFiles --to-directory "$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
+			return 0
+		;;
+		--to-deploy-output-clean)
+			if [ ! -d "$MMDAPP/output" ] ; then
+				echo "$MDSC_CMD: ⛔ ERROR: deploy-output directory is missing: $MMDAPP/output" >&2; 
+				return 1
+			fi
+			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rw ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
 			return 0
 		;;
 	esac
