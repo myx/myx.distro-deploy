@@ -25,7 +25,7 @@ ImagePrepareProjectProvidesMerged(){
 }
 
 # prints actual project's sync folders (image-prepare:sync-source-files:)
-# format: "$sourceName" "$sourcePath" "$mergePath"
+# format: "$sourceName" "$sourcePath" "$mergePath" "$filterGlob"
 ImagePrepareProjectSyncFolders(){
 	local MDSC_CMD='ImagePrepareProjectSyncFolders'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
@@ -34,17 +34,18 @@ ImagePrepareProjectSyncFolders(){
 		return 1
 	fi
 
+	local declaredAt sourceName sourcePath mergePath filterGlob
 	ImagePrepareProjectProvidesMerged \
 	| grep " image-prepare:sync-source-files:" | tr ':' ' ' | cut -d" " -f1,4- \
-	| while read -r declaredAt sourceName sourcePath mergePath ; do
-		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $mergePath" >&2
-		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$mergePath" \
+	| while read -r declaredAt sourceName sourcePath mergePath filterGlob ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $mergePath $filterGlob" >&2
+		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$mergePath" "$filterGlob" \
 		| cut -d" " -f2-
 	done \
 	| awk '!x[$0]++' \
-	| while read -r sourceName sourcePath mergePath ; do
-		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: queue: $sourceName $sourcePath $mergePath" >&2
-		echo "$sourceName" "$sourcePath" "$mergePath"
+	| while read -r sourceName sourcePath mergePath filterGlob ; do
+		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: queue: $sourceName $sourcePath $mergePath $filterGlob" >&2
+		echo "$sourceName" "$sourcePath" "$mergePath" "$filterGlob"
 	done
 	return 0
 } 

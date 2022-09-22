@@ -65,16 +65,20 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	## sync files from source to output
 	##
-	local sourceName sourcePath mergePath
+	local sourceName sourcePath mergePath filterGlob
 	if [ ! -z "${allSyncFolders:0:1}" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: sync files from source to output" >&2
 		echo '{'
 			echo 'echo "ImagePrepareFiles: 🔁 syncing files..." >&2'
 			echo "$allSyncFolders" | cut -d" " -f 3 | sort -u | xargs echo mkdir -p
 			echo "$allSyncFolders" \
-			| while read -r sourceName sourcePath mergePath ; do
+			| while read -r sourceName sourcePath mergePath filterGlob ; do
 				# echo "mkdir -p './$mergePath'"
-				echo "rsync -rtO --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+				if [ -z "$filterGlob" ] ; then
+					echo "rsync -rtO --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+				else
+					echo "rsync -rtO --include='$filterGlob' --exclude='*' --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+				fi
 			done
 		echo "} 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
 	fi
@@ -82,12 +86,12 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	## clone/multiply files
 	##
-	local sourceName sourcePath mergePath
+	local sourceName sourcePath mergePath filterGlob
 	if [ ! -z "${allSyncFolders:0:1}" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: clone/multiply files" >&2
 		local executeScript="$(
 			echo "$allSyncFolders" \
-			| while read -r sourceName sourcePath mergePath ; do
+			| while read -r sourceName sourcePath mergePath filterGlob ; do
 				local targetFullPath="./${mergePath##/}"
 				local sourceName cloneSourcePath sourceFileName targetPattern useVariable useValues
 				[ -z "${allCloneTasks:0:1}" ] || echo "$allCloneTasks" | grep "^$sourceName $sourcePath " \
@@ -128,9 +132,10 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	## execute source path-related patches 
 	##
+	local sourceName sourcePath mergePath filterGlob
 	[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute source path-related patches" >&2
 	[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
-	| while read -r sourceName sourcePath mergePath ; do
+	| while read -r sourceName sourcePath mergePath filterGlob ; do
 		local matchSourceName sourcePath scriptSourceName scriptName
 		[ -z "${allSourceScripts:0:1}" ] || echo "$allSourceScripts" | grep -e "^$sourceName " | cut -d" " -f2- \
 		| while read -r matchSourcePath scriptSourceName scriptName ; do
@@ -152,10 +157,10 @@ InstallPrepareFilesInternalPrintScript(){
 	## execute target path-related patches
 	##
 	[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute target path-related patches" >&2
-	local sourceName sourcePath mergePath
+	local sourceName sourcePath mergePath filterGlob
 	local scriptSourceName scriptName matchTargetPath
 	[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
-	| while read -r sourceName sourcePath mergePath ; do
+	| while read -r sourceName sourcePath mergePath filterGlob ; do
 		[ -z "${allTargetScripts:0:1}" ] || echo "$allTargetScripts" \
 		| while read -r scriptSourceName scriptName matchTargetPath; do
 			case "$matchTargetPath" in
