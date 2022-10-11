@@ -693,7 +693,7 @@ DistroImageCheckSourcePath(){
 	fi
 	
 	if [ $check "$MDSC_SOURCE/$sourceName/$sourcePath" ] ; then
-		[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
+		[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path: " $check "$MDSC_SOURCE/$sourceName/$sourcePath" >&2
 		echo "$declaredAt" "$sourceName" "$sourcePath" "$@"
 		return 0
 	fi
