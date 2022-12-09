@@ -187,7 +187,7 @@ ExecuteParallel(){
 		;;
 	esac
 
-	trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
+	trap "trap - SIGTERM && kill -- -$$ >/dev/null 2>&1" SIGINT SIGTERM EXIT
 	eval $sshTargets
 	wait
 }
