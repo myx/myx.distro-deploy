@@ -90,7 +90,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	}
 fi
 
-if [ -z "$MDSC_ORIGIN" -o "MDSC_ORIGIN" != "${MDSC_ORIGIN#$MMDAPP/}"] ; then
+if [ -z "$MDSC_ORIGIN" ] || [ "MDSC_ORIGIN" != "${MDSC_ORIGIN#$MMDAPP/}" ] ; then
 	MDSC_ORIGIN=""
 	MDSC_SOURCE=""
 	MDSC_CACHED=""
