@@ -41,7 +41,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	if [ "$deployType" != "sync" ] ; then
 		if [ "true" = "$prepareScript" ] || [ "auto" = "$prepareScript" -a  ! -f "$cacheFolder/exec"  ] ; then
 			Require InstallPrepareScript
-			InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
+			InstallPrepareScript --project "$MDSC_PRJ_NAME" $MATCH_SCRIPT_FILTER --to-file "$cacheFolder/exec"
 		fi
 		if [ ! -f "$cacheFolder/exec" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($cacheFolder/exec)" >&2
@@ -308,7 +308,9 @@ DeployProjectSsh(){
 	local executeSleep="${executeSleep:-true}"
 	
 	local deployType=""
-	
+
+	local MATCH_SCRIPT_FILTER=""
+
 	while true ; do
 		case "$1" in
 			--project)
@@ -351,6 +353,15 @@ DeployProjectSsh(){
 				shift
 				executeSleep="false"
 			;;
+			--match)
+				shift
+				if [ -z "$1" ] ; then
+					echo "$MDSC_CMD: ⛔ ERROR: match filter expected after --match option" >&2
+					return 1
+				fi
+				local MATCH_SCRIPT_FILTER="--match \"$1\""
+				shift
+			;;
 			*)
 				break
 			;;
@@ -380,7 +391,7 @@ DeployProjectSsh(){
 	if [ "true" = "$prepareScript" ] ; then
 		echo "$MDSC_CMD: --prepare-exec" >&2
 		Require InstallPrepareScript
-		InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$cacheFolder/exec"
+		InstallPrepareScript --project "$MDSC_PRJ_NAME" $MATCH_SCRIPT_FILTER --to-file "$cacheFolder/exec"
 		local prepareScript="auto"
 	fi
 	
@@ -423,7 +434,7 @@ DeployProjectSsh(){
 				local outputPath="$cacheFolder/exec"
 				if [ "true" = "$prepareScript" ] || [ "auto" = "$prepareScript" -a  ! -f "$outputPath"  ] ; then
 					Require InstallPrepareScript
-					InstallPrepareScript --project "$MDSC_PRJ_NAME" --to-file "$outputPath"
+					InstallPrepareScript --project "$MDSC_PRJ_NAME" $MATCH_SCRIPT_FILTER --to-file "$outputPath"
 				fi
 				if [ ! -f "$outputPath" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($outputPath)" >&2
@@ -523,8 +534,8 @@ DeployProjectSsh(){
 case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
-			echo "syntax: DeployProjectSsh.fn.sh --project <project> --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables}" >&2
+			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--match <install-script-filter>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
+			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables}" >&2
 			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
