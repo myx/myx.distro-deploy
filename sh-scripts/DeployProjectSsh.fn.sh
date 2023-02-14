@@ -359,7 +359,7 @@ DeployProjectSsh(){
 					echo "$MDSC_CMD: ⛔ ERROR: match filter expected after --match option" >&2
 					return 1
 				fi
-				local MATCH_SCRIPT_FILTER="--match \"$1\""
+				local MATCH_SCRIPT_FILTER="--match $1"
 				shift
 			;;
 			*)
