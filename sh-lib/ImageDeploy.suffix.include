@@ -1,6 +1,6 @@
 DeployCheckResult(){
 	local EXTRA_TEXT="No change log!"
-	local CHANGE_COUNT=""
+	local CHANGE_COUNT="0"
 
 	if [ -f "host-files-rsync.log" ] ; then
 		local CHANGE_COUNT="$( cat "host-files-rsync.log" | wc -l )"
