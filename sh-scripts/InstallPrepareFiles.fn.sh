@@ -75,9 +75,9 @@ InstallPrepareFilesInternalPrintScript(){
 			| while read -r sourceName sourcePath mergePath filterGlob ; do
 				# echo "mkdir -p './$mergePath'"
 				if [ -z "$filterGlob" ] ; then
-					echo "rsync -rtO --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+					echo "rsync -rtO --chmod=ug+rwX '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
 				else
-					echo "rsync -rtO --include='$filterGlob' --exclude='*' --chmod=ug+rw '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+					echo "rsync -rtO --include='$filterGlob' --exclude='*' --chmod=ug+rwX '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
 				fi
 			done
 		echo "} 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
@@ -304,7 +304,7 @@ InstallPrepareFiles(){
 				if ! ( set -e ; cd "$tempDirectory" ; eval "$executeScript" ) ; then
 					echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
 				fi
-				rsync -iprltOoD --delete --chmod=ug+rw "$tempDirectory/" "$targetPath" 2>&1 \
+				rsync -iprltOoD --delete --chmod=ug+rwX "$tempDirectory/" "$targetPath" 2>&1 \
 					| (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)
 			else
 				if ! ( set -e ; cd "$targetPath" ; eval "$executeScript" ) ; then
@@ -349,7 +349,7 @@ InstallPrepareFiles(){
 				echo "$MDSC_CMD: ⛔ ERROR: deploy-output directory is missing: $MMDAPP/output" >&2; 
 				return 1
 			fi
-			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rw ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
+			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rwX ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
 			return 0
 		;;
 	esac

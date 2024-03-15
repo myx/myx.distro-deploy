@@ -186,12 +186,12 @@ DeployProjectSshInternalPrintRemoteScript(){
 					fi
 					if [ -z "$useVariable" ] ; then
 						echo "cp -f 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern'"
-						# echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
+						# echo "rsync -rltoD --delete --chmod=ug+rwX 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern' \
 						#	2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 					else
 						useVariable="` echo "$useVariable" | sed -e 's/[^-A-Za-z0-9_]/\\\\&/g' `"
 						for useValue in $useValues ; do
-							echo "rsync -rltoD --delete --chmod=ug+rw 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
+							echo "rsync -rltoD --delete --chmod=ug+rwX 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/` echo "$targetPattern" | sed "s:$useVariable:$useValue:" `' \
 								2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || true)"
 						done
 					fi
@@ -238,11 +238,11 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 			if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
 				echo "mkdir -p -m 770 '$targetPath'"
-				echo "rsync -iprltOoD --delete --chmod=ug+rw --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
+				echo "rsync -iprltOoD --delete --chmod=ug+rwX --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
 					2>&1 | (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 | tee -a 'host-files-rsync.log' >&2 || true)"
 			else
 				echo "mkdir -p -m 770 '$( dirname $targetPath )'"
-				echo "rsync -iprltoD --delete --chmod=ug+rw 'sync/$sourcePath' '$targetPath' \
+				echo "rsync -iprltoD --delete --chmod=ug+rwX 'sync/$sourcePath' '$targetPath' \
 					2>&1 | (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 | tee -a 'host-files-rsync.log' >&2 || true)"
 			fi
 
