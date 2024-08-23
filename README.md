@@ -1,6 +1,6 @@
 # myx.distro-deploy
 
-Default build steps:
+Default build steps (order in which operations are performed. Source: 1..3, Distro: 4..5):
 
 	1xxx - source-prepare, source to cached (mode: source, stage: prepare) 
 				cached contains all sources required to build changed 
@@ -16,18 +16,26 @@ Default build steps:
 				deploy tasks are executed upon
 
 
-Project Files & Folders:
+Project Files & Folders (in each project):
 
 	project.inf - project description file
 	actions/** - usable actions (predefined parameters for other scripts)
-	source-prepare/builders/* - builders to work on project sets while building source-prepare
-	source-process/builders/* - builders to work on project sets while building source-process
-	image-prepare/builders/* - builders to work on project sets while building image-prepare
-	image-process/builders/* - builders to work on project sets while building image-process
-	image-install/builders/* - builders to work on project sets while building image-install
+	source-prepare/builders/1???-* - builders to work on project sets while building source-prepare
+	source-process/builders/2???-* - builders to work on project sets while building source-process
+	image-prepare/builders/3???-* - builders to work on project sets while building image-prepare
+	image-process/builders/4???-* - builders to work on project sets while building image-process
+	image-install/builders/5???-* - builders to work on project sets while building image-install
 	sh-libs/**
 	sh-scripts/**
 
+Builders Examples (actual builders):
+
+	source/myx/myx.distro-source/source-prepare/builders/1000-env-from-source.sh
+	source/myx/myx.distro-source/source-process/builders/2000-env-from-cached.sh
+	source/myx/myx.distro-source/source-process/builders/2899-output-ready.sh
+	source/myx/myx.distro-source/image-prepare/builders/3899-distro-ready.sh
+	source/myx/myx.distro-distro/image-process/builders/4911-deploy-apply.sh
+	source/myx/myx.distro-distro/image-install/builders/5911-deploy-apply.sh
 	
 App Folders:
 
