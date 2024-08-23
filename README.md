@@ -40,7 +40,6 @@ Builders Examples (actual builders):
 App Folders:
 
 	/
-	/actions - workspace actions - non-editable (generated)
 	/source - source codes and projects - editable and commitable or pullable
 	/cached - build system cache space (generated)
 	/output - output products (generated, cloned or omitted (in pure deploy mode))
@@ -50,6 +49,7 @@ App Folders:
 	/distro/repository-names.txt - repository names db file (prepared)
 	/distro/build-time-stamp.txt - distro timestamp file (prepared)
 	/distro/distro-index.inf - distro index shell-env file (prepared)
+	/actions - workspace actions - non-editable (generated)
 
 image-receive, image-install commands:
 
