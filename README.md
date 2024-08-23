@@ -46,11 +46,10 @@ App Folders:
 	/output - output products (generated, cloned or omitted (in pure deploy mode))
 	/export - export resources (generated or cloned)
 	/distro - distro structure, whole project tree, prepared (generated or cloned)
+	/distro/repo[/group]/project - project folders structure
 	/distro/repository-names.txt - repository names db file (prepared)
 	/distro/build-time-stamp.txt - distro timestamp file (prepared)
 	/distro/distro-index.inf - distro index shell-env file (prepared)
-
-
 
 image-receive, image-install commands:
 
