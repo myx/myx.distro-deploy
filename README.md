@@ -16,7 +16,7 @@ Default build steps (order in which operations are performed. Source: 1..3, Dist
 				deploy tasks are executed upon
 
 
-Project Files & Folders (in each project):
+Project Files & Folders (following masks have fixed meaning in the root folder of each project):
 
 	project.inf - project description file
 	actions/** - usable actions (predefined parameters for other scripts)
@@ -28,7 +28,7 @@ Project Files & Folders (in each project):
 	sh-libs/**
 	sh-scripts/**
 
-Builders Examples (actual builders):
+Builders Examples (actual builders, relative to the root of the workspace):
 
 	source/myx/myx.distro-source/source-prepare/builders/1000-env-from-source.sh
 	source/myx/myx.distro-source/source-process/builders/2000-env-from-cached.sh
@@ -37,7 +37,7 @@ Builders Examples (actual builders):
 	source/myx/myx.distro-distro/image-process/builders/4911-deploy-apply.sh
 	source/myx/myx.distro-distro/image-install/builders/5911-deploy-apply.sh
 
-Variables available in actions, build-step scripts and console (deploy mode):
+Variables (context environment) available in: actions, build-step scripts and console (deploy mode):
 
 	MMDAPP - workspace root (something like: "/Volumes/ws-2017/myx-work")
 	MDSC_INMODE - cosole mode ("distro")
@@ -47,14 +47,17 @@ Variables available in actions, build-step scripts and console (deploy mode):
 	MDSC_CACHED - current cache root (something like: "/Volumes/ws-2017/myx-work/cached")
 	MDSC_OUTPUT - current target root (something like: "/Volumes/ws-2017/myx-work/output/distro")
 	MDSC_DETAIL - debug settings, values: <empty>, "true", "full"
-	BUILD_STAMP - current build timestamp (build steps only)
 	useSshUser - override from ssh user calculated from project sequence variables
 	useSshHome - override from ssh home calculated from project sequence variables
 	useSshArgs - extra arguments for ssh conection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
-	
+
+Variables (context environment) specific to build-step scripts:
+
+	BUILD_STAMP - current build timestamp (build steps only)
+
 App Folders:
 
-	/
+	/ - workspace root directory
 	/source - source codes and projects - editable and commitable or pullable
 	/cached - build system cache space (generated)
 	/output - output products (generated, cloned or omitted (in pure deploy mode))
