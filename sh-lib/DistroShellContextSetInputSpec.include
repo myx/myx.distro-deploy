@@ -3,20 +3,20 @@
 # DistroShellContextSetInputSpec
 
 if [ "$1" = "--distro-path-auto" ] && [ ! -z "$MDSC_OPTION" ] ; then
-	set - "$MDSC_OPTION"
+	set -- "$MDSC_OPTION"
 fi
 if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/source/" ] && [ -d "$MMDAPP/cached" ] ; then
 	if [ -d "$MMDAPP/output/" ] ; then
-		set - "--distro-from-output"
+		set -- "--distro-from-output"
 	else
-		set - "--distro-from-cached"
+		set -- "--distro-from-cached"
 	fi
 fi
 if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/distro/" ] ; then
-	set - "--distro-from-distro"
+	set -- "--distro-from-distro"
 fi
 if [ "$1" = "--distro-path-auto" ] && [ -d "$MMDAPP/source/" ] ; then
-	set - "--distro-from-source"
+	set -- "--distro-from-source"
 fi
 if [ "$1" = "--distro-path-auto" ] ; then
 	echo "ERROR: DistroShellContextSetInputSpec: can't detect proper input source" >&2
