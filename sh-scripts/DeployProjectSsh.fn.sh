@@ -496,7 +496,7 @@ DeployProjectSsh(){
 
 				local projectSshTargets="$( DistroImageProjectSshTargets )"
 				if [ -z "${projectSshTargets:0:1}" ] ; then
-					echo "$MDSC_CMD: ⛔ ERROR: no ssh targets found!" >&2
+					echo "$MDSC_CMD: ⛔ ERROR: no ssh targets found! ($MDSC_PRJ_NAME)" >&2
 					return 1
 				fi
 
