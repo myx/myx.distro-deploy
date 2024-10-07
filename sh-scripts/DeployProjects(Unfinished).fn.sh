@@ -140,7 +140,7 @@ DeployProjectSsh(){
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-target option ($@)" >&2
 					return 1
 				fi
-				ListProjectProvides "$projectName" | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r sshTarget ; do
+				ListProjectProvides "$projectName" --print-provides-only | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r sshTarget ; do
 					local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
 					local sshPort="`echo "$sshTarget" | sed 's,^.*:,,'`"
 					printf 'ssh %s -p %s\n' "$sshHost" "$sshPort"

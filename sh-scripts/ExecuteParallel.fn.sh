@@ -52,6 +52,8 @@ ExecuteParallel(){
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"
 
+	local executePostProcess=""
+
 	while true ; do
 		case "$1" in
 			--no-cache)
@@ -78,6 +80,13 @@ ExecuteParallel(){
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
 				return 1
+			;;
+			--execute-post-process)
+				shift
+				if [ -z "$1" ] ; then
+					echo "$MDSC_CMD: ⛔ ERROR: '--execute-post-process' - command argument required!" >&2 ; return 1
+				fi
+				local executePostProcess="$1" ; shift
 			;;
 			*)
 				break
@@ -188,7 +197,12 @@ ExecuteParallel(){
 	esac
 
 	trap "trap - SIGTERM && kill -- -$$ >/dev/null 2>&1" SIGINT SIGTERM EXIT
-	eval $sshTargets
+
+	if [ -z "$executePostProcess" ] ; then
+		eval $sshTargets
+	else
+		eval "( $sshTargets ) 2>&1 | $executePostProcess"
+	fi
 	wait
 }
 

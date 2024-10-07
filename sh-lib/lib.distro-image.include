@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
 [ -z "$MDSC_DETAIL" ] || echo "+ DistroImage: library included" >&2
 
 # checks and updates MDSC_PRJ_NAME variable with project in focus
@@ -236,8 +239,10 @@ DistroImageProjectSshTargets(){
 
 	local sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
 	
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
-	grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
+
+	grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDOPRV_NAME" | cut -d" " -f2 | grep '^deploy-ssh-target:' | sed 's|^deploy-ssh-target:||' | awk '!x[$0]++' \
 	| while read -r sshTarget ; do
 	
 		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget" >&2
@@ -253,13 +258,11 @@ DistroImageProjectSshTargets(){
 		useSshHome="$setSshHome"
 		useSshArgs="$setSshArgs"
 
-		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		
 		while read -r clientSpec; do
 			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
 			DistroImageParseSshOptions $clientSpec
 		done <<< "$( \
-			grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
+			grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
 			| grep '^deploy-ssh-client-settings:' \
 			| sed 's|^deploy-ssh-client-settings:||' \
 			| tr ':' ' ' \
@@ -327,7 +330,7 @@ DistroImageProjectProvidesMerged(){
 	
 		set -e
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | tee "$cacheFile"
+		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | tee "$cacheFile"
 		return 0
 	fi
 	
@@ -372,7 +375,7 @@ DistroImageProjectSequenceFile(){
 	
 		set -e
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " < "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' > "$cacheFile"
+		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' > "$cacheFile"
 		echo "$cacheFile"
 		return 0
 	fi
@@ -394,15 +397,16 @@ DistroImageEnsureProvidesMergedFile(){
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
+		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
 		return 0
 	fi
-	local checkFile="$MDSC_CACHED/distro-provides.txt"
+	local checkFile="$MDSC_CACHED/distro-index.inf"
 	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
 			if [ "$cacheFile" -nt "$checkFile" ] ; then
+				[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
 				MDSC_IDAPRV_NAME="$cacheFile"
 				return 0
 			fi
@@ -419,7 +423,7 @@ DistroImageEnsureProvidesMergedFile(){
 		return 0
 	fi
 	
-	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-merged index" >&2
 	return 1
 }
 
@@ -433,14 +437,16 @@ DistroImageEnsureProvidesOwnedFile(){
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDOPRV_NAME:0:1}" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
+		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
 		return 0
 	fi
 	local checkFile="$MDSC_CACHED/distro-index.inf"
 	local cacheFile="$MDSC_CACHED/distro-provides.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
-			if [ "$( date -u -r "$checkFile" "+%Y%m%d%H%M%S" )" -lt "$( date -u -r "$cacheFile" "+%Y%m%d%H%M%S" )" ] ; then
+			# remake if it is too young (re: one second precision of -nt)
+			if [ "$cacheFile" -nt "$checkFile" ] ; then
+				[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
 				MDSC_IDOPRV_NAME="$cacheFile"
 				return 0
 			fi
@@ -457,7 +463,7 @@ DistroImageEnsureProvidesOwnedFile(){
 		return 0
 	fi
 	
-	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
+	echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-owned index" >&2
 	return 1
 }
 

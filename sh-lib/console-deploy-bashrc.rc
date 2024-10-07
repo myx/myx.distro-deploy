@@ -1,11 +1,13 @@
 echo "Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-# deploy -> source
+# search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
 PATH="$PATH:$MMDAPP/source/myx/myx.distro-deploy/sh-scripts:$MMDAPP/source/myx/myx.distro-source/sh-scripts"
 
 . "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
-DistroShellContext --distro-path-auto
+DistroShellContext --distro-from-output
+#DistroShellContext --distro-from-distro
+#DistroShellContext --distro-path-auto
 
 Require ListDistroScripts
 Require ListAllActions

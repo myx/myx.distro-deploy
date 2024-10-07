@@ -21,7 +21,7 @@ ImagePrepareProjectProvidesMerged(){
 	# ListProjectProvides.fn.sh "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-prepare # cuts "image-prepare:"
 	
 	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-	grep -e "^$MDSC_PRJ_NAME \\S* image-prepare:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++'
+	grep -e "^$MDSC_PRJ_NAME \\S* image-prepare:" "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++'
 }
 
 # prints actual project's sync folders (image-prepare:sync-source-files:)
