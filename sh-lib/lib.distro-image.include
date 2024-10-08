@@ -390,23 +390,25 @@ DistroImageProjectSequenceFile(){
 # sets MDSC_IDAPRV_NAME variable to all merged provides table file name
 DistroImageEnsureProvidesMergedFile(){
 	local MDSC_CMD='DistroImageEnsureProvidesMergedFile'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ "$1" != "MDSC_IDAPRV_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDAPRV_NAME" >&2
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
+		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
+
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	local checkFile="$MDSC_CACHED/distro-index.inf"
 	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
 			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
+				[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
 				MDSC_IDAPRV_NAME="$cacheFile"
 				return 0
 			fi
@@ -430,16 +432,18 @@ DistroImageEnsureProvidesMergedFile(){
 # sets MDSC_IDOPRV_NAME variable to all merged provides table file name
 DistroImageEnsureProvidesOwnedFile(){
 	local MDSC_CMD='DistroImageEnsureProvidesOwnedFile'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	if [ "$1" != "MDSC_IDOPRV_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDOPRV_NAME" >&2
 		return 1
 	fi
 	if [ ! -z "${MDSC_IDOPRV_NAME:0:1}" ] ; then
-		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using env-cached ($MDSC_OPTION)" >&2
+		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
+	
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
 	local checkFile="$MDSC_CACHED/distro-index.inf"
 	local cacheFile="$MDSC_CACHED/distro-provides.txt"
 	if [ -f "$checkFile" ] ; then
