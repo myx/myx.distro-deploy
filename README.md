@@ -6,13 +6,13 @@ Default build steps (order in which operations are performed. Source: 1..3, Dist
 				cached contains all sources required to build changed 
 				projects and actual meta-data (distro indices: pre-parsed names, 
 				reqires, etc...).
-	2xxx - source-process, cached to output (mode: source, stage: prepare)
+	2xxx - source-process, cached to output (mode: source, stage: process)
 				output contains all actual meta-data.
 	3xxx - image-prepare, output to distro (mode: image, prepare | util)
 				distro contains indices and exported items (in their project's locations)
-	4xxx - image-process, distro to deploy (prepare | util | install )
+	4xxx - image-process, distro to deploy (mode: image, process | util )
 				share repositories
-	5xxx - image-install, distro to deploy (prepare | util | install )
+	5xxx - image-install, distro to deploy (mode: image, install | util )
 				deploy tasks are executed upon
 
 
