@@ -229,19 +229,15 @@ DistroImageProjectSshTargets(){
 	
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%s ' "$argument" ; done )"
-	local sshTarget
 
-	local setSshHost="${useSshHost:-}"
-	local setSshPort="${useSshPort:-}"
-	local setSshUser="${useSshUser:-}"
-	local setSshHome="${useSshHome:-}"
-	local setSshArgs="${useSshArgs:-}"
-
-	local sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
+	local	setSshHost="${useSshHost:-}" \
+			setSshPort="${useSshPort:-}" \
+			setSshUser="${useSshUser:-}" \
+			setSshHome="${useSshHome:-}" \
+			setSshArgs="${useSshArgs:-}" \
+			sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
 	
-	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
-
 	local sshTargetsSpec="$( \
 		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDOPRV_NAME" \
 		| cut -d" " -f2 \
@@ -250,6 +246,7 @@ DistroImageProjectSshTargets(){
 		| awk '!x[$0]++' \
 	)"
 
+	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
 	local clientSettingsSpec="$( \
 		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" \
 		| cut -d" " -f3 \
@@ -258,6 +255,7 @@ DistroImageProjectSshTargets(){
 		| tr ':' ' ' \
 	)"
 
+	local sshTarget
 	while read -r sshTarget ; do
 	
 		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget" >&2
