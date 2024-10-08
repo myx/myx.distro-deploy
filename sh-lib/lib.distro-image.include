@@ -258,15 +258,17 @@ DistroImageProjectSshTargets(){
 		useSshHome="$setSshHome"
 		useSshArgs="$setSshArgs"
 
-		while read -r clientSpec; do
-			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
-			DistroImageParseSshOptions $clientSpec
-		done <<< "$( \
+		local clientSettingsSpec="$( \
 			grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f3 \
 			| grep '^deploy-ssh-client-settings:' \
 			| sed 's|^deploy-ssh-client-settings:||' \
 			| tr ':' ' ' \
 		)"
+
+		while read -r clientSpec; do
+			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
+			DistroImageParseSshOptions $clientSpec
+		done <<< "$clientSettingsSpec"
 
 		sshHost="${setSshHost:-$useSshHost}"
 		sshPort="${setSshPort:-$useSshPort}"
