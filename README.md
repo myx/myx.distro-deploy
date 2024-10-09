@@ -141,3 +141,47 @@ image-receive, image-install commands:
 
 		image-install:deploy-applied-script:.:host/scripts/at-remote-on-after-deploy.txt
 	
+
+### Stage: source-prepare:
+
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+
+
+### Stage: source-process:
+
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+
+
+### Stage: image-prepare:
+
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-deploy)
+
+	The 'distro-deploy' could be updated/cloned from compiled version without pulling and processing source files.
+	The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
+
+	(todo) During this stage one of the following actions available:
+	- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-image')
+	- `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
+
+
+Stage: image-process:
+
+	At the start of this stage:
+	1. Deploy system is ready to use content and indices of the distro-image to build deployment data
+
+	Following deployment data is built:
+	1. 'cached' folder exists
+	2. changed project list updated for '--select-changed' selector
+
+	At the end of this stage:
+	1. all exported data is exported
+	2. all projects packed with deployment data prepared
+
+
+Stage: image-install:
+
+	At the start of this stage:
+	1. Deploy system is fully configured and ready to use all deploy commands
+	
+
+
