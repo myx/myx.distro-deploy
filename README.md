@@ -69,7 +69,7 @@ App Folders:
 	/distro/distro-index.inf - distro index shell-env file (prepared)
 	/actions - workspace actions - non-editable (generated)
 
-image-receive, image-install commands:
+image-receive, image-install directives:
 
 	image-install:context-variable:
 		image-install:context-variable:<variableName>:{create|change|ensure|insert|update|remove|re-set|delete}[:<valueNoSpaces>...]
@@ -156,32 +156,33 @@ See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file
 
 See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-deploy)
 
-	The 'distro-deploy' could be updated/cloned from compiled version without pulling and processing source files.
-	The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
+The 'distro-deploy' could be updated/cloned from compiled version without pulling and processing source files.
+The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
 
-	(todo) During this stage one of the following actions available:
-	- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-image')
-	- `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
+(todo) During this stage one of the following actions available:
+- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-image')
+- `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
 
 
 ### Stage: image-process:
 
-	At the start of this stage:
-	1. Deploy system is ready to use content and indices of the distro-image to build deployment data
+At the start of this stage:
+1. Deploy system is ready to use content and indices of the distro-image to build deployment data
 
-	Following deployment data is built:
-	1. 'cached' folder exists
-	2. changed project list updated for '--select-changed' selector
+Following deployment data is built:
+1. distro and repositories single-file indices
+2. per-target concatenated deploy scripts
+3. per-target merged deploy settings data
 
-	At the end of this stage:
-	1. all exported data is exported
-	2. all projects packed with deployment data prepared
+At the end of this stage:
+1. all exported data is exported
+2. all projects packed with deployment data prepared
 
 
 ### Stage: image-install:
 
-	At the start of this stage:
-	1. Deploy system is fully configured and ready to use all deploy commands
-	
+At the start of this stage:
+1. Deploy system is fully configured and ready to use all deploy commands.
+
 
 
