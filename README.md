@@ -164,7 +164,7 @@ See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file
 	- `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
 
 
-Stage: image-process:
+### Stage: image-process:
 
 	At the start of this stage:
 	1. Deploy system is ready to use content and indices of the distro-image to build deployment data
@@ -178,7 +178,7 @@ Stage: image-process:
 	2. all projects packed with deployment data prepared
 
 
-Stage: image-install:
+### Stage: image-install:
 
 	At the start of this stage:
 	1. Deploy system is fully configured and ready to use all deploy commands
