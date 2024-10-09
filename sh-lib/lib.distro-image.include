@@ -246,14 +246,25 @@ DistroImageProjectSshTargets(){
 		| awk '!x[$0]++' \
 	)"
 
-	DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-	local clientSettingsSpec="$( \
-		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" \
-		| cut -d" " -f3 \
-		| grep '^deploy-ssh-client-settings:' \
-		| sed 's|^deploy-ssh-client-settings:||' \
-		| tr ':' ' ' \
-	)"
+	if [ "$useNoCache" != "--no-cache" ] ; then
+		Require ListProjectSequence
+		local clientSettingsSpec="$( \
+			ListProjectSequence "$MDSC_PRJ_NAME" $useNoCache $useNoIndex --print-provides \
+			| cut -d" " -f2 \
+			| grep '^deploy-ssh-client-settings:' \
+			| sed 's|^deploy-ssh-client-settings:||' \
+			| tr ':' ' ' \
+		)"
+	else
+		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
+		local clientSettingsSpec="$( \
+			grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" \
+			| cut -d" " -f3 \
+			| grep '^deploy-ssh-client-settings:' \
+			| sed 's|^deploy-ssh-client-settings:||' \
+			| tr ':' ' ' \
+		)"
+	fi
 
 	local sshTarget
 	while read -r sshTarget ; do
