@@ -1,3 +1,7 @@
+#!/bin/sh
+
+# Image Deploy Remote Host Script suffix
+
 DeployCheckResult(){
 	local EXTRA_TEXT="No change log!"
 	local CHANGE_COUNT="0"
