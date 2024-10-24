@@ -278,6 +278,128 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo 'exit 0'
 }
 
+DeployProjectsSsh(){
+	set -e
+
+	Require ListSshTargets
+
+	type Prefix >/dev/null 2>&1 || \
+		. "/usr/local/share/myx.common/bin/lib/prefix"
+
+
+	local MDSC_CMD='DeployProjectsSsh'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	
+	if [ ! -d "$MMDAPP/output" ] ; then
+		if [ ! -d "$MMDAPP/source" ] ; then
+			echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
+			return 1
+		fi
+	fi
+
+	case "$1" in
+		--select-from-env)
+			shift
+			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
+				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
+				return 1
+			fi
+		;;
+		--*)
+			Require ListDistroProjects
+			ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
+			return 0
+		;;
+	esac
+
+	local executeSleep="${executeSleep:-true}"
+	local explainTasks="${explainTasks:-true}"
+
+	while true ; do
+		case "$1" in
+			--no-cache)
+				shift
+				local useNoCache="--no-cache"
+			;;
+			--no-index)
+				shift
+				local useNoIndex="--no-index"
+			;;
+			--no-sleep)
+				shift
+				executeSleep="false"
+			;;
+			--non-interactive)
+				shift
+				executeSleep="false"
+				explainTasks="false"
+			;;
+			*)
+				break
+			;;
+		esac
+	done
+
+	local extraArguments="$( local argument ; for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+
+	local taskList="$(
+		ListDistroProjects --select-from-env \
+			--select-execute-default \
+		ListDistroProvides \
+			--filter-own-provides-column "deploy-ssh-target:" \
+		| while read -r projectName sshTarget ; do
+			echo "$projectName" "$sshTarget"
+		done
+	)"
+
+	if [ -z "$taskList" ] ; then
+		echo "No tasks!" >&2
+		return 1
+	fi
+	
+	echo "Targets selected: " >&2
+	local textLine
+	echo "$taskList" | while read textLine ; do
+		echo "  $textLine" >&2
+	done
+
+	local evalList="$(
+		echo "$taskList" \
+		| while read -r projectName sshTarget ; do
+			echo    Prefix "'$sshTarget'" DeployProjectSsh --project "'$projectName'" $extraArguments
+		done
+	)"
+
+	if [ -z "$evalList" ] ; then
+		echo "No tasks!" >&2
+		return 1
+	fi
+
+	if [ "full" = "$MDSC_DETAIL" ] ; then
+		echo "Will execute: " >&2
+		local textLine
+		echo "$evalList" | while read textLine ; do
+			echo "  $textLine" >&2
+		done
+	fi
+
+	if [ "true" = "$executeSleep" ] ; then
+		printf "\n%s\n%s\n" \
+			"⏳ ...sleeping for 5 seconds..." \
+			>&2
+		sleep 5
+	else
+		printf "\n%s\n" \
+			"📋 ...executing (--no-sleep)..." \
+			>&2
+	fi
+
+
+	trap "trap - SIGTERM && kill -- -$$ >/dev/null 2>&1" SIGINT SIGTERM EXIT
+
+	eval "$evalList"
+}
+
 DeployProjectSsh(){
 
 	set -e
@@ -293,7 +415,18 @@ DeployProjectSsh(){
 	fi
 
 	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
-	
+
+	case "$1" in
+		--project)
+		;;
+		--*)
+			Require ListDistroProjects
+			ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
+			return 0
+		;;
+	esac
+
+
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
 	local useSshHost="${useSshHost:-}"
@@ -465,6 +598,7 @@ DeployProjectSsh(){
 					return 1
 				fi
 
+				executeSleep="false"
 				DeployProjectSshInternalPrintRemoteScript
 				return 0
 			;;
@@ -535,7 +669,7 @@ case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--match <install-script-filter>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
-			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables}" >&2
+			echo "syntax: DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables|full-script}" >&2
 			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
@@ -547,6 +681,7 @@ case "$0" in
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-exec --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --deploy-full" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --print-full-script" >&2
 
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-deploy-patch-scripts" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-context-variables" >&2
