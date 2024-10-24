@@ -33,7 +33,7 @@ ExecuteSequence(){
 		;;
 		--select-from-env)
 			shift
-			if [ -z "$MDSC_SELECT_PROJECTS" ] ; then
+			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
 				return 1
 			fi
