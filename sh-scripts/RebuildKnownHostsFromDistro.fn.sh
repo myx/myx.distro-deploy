@@ -7,7 +7,7 @@ if [ -z "$MMDAPP" ] ; then
 	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
-type RebuildActions >/dev/null 2>&1 || \
+type RebuildKnownHosts >/dev/null 2>&1 || \
 	. "$MMDAPP/source/myx/myx.distro-source/sh-scripts/RebuildKnownHosts.fn.sh"
 
 
