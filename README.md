@@ -89,6 +89,35 @@ image-receive, image-install directives:
 
 		^^^ <sourceName> '.' - this (declarant) project's source
 
+			# if variable is not defined - creates variable/array with given value 
+			create)
+
+			# if variable is defined - sets it's value to given one
+			change)
+
+			# if variable is not defined - creates array with given value 
+			# if variable is defined - ensures array contains given value 
+			ensure)
+
+			# if variable is not defined - creates array with given value 
+			# if variable is defined - appends given value to array regardless if it's already present 
+			append|insert)
+
+			# if variable is defined - ensures array contains given value 
+			update)
+
+			# if variable is defined - removes given value from array. Un-defines variable if no value given.
+			remove)
+
+			# if variable is not defined - creates variable with given value 
+			# if variable is defined - sets variable to given value (same) 
+			re-set|define|upsert)
+
+			# define from project relative file
+			import|source)
+			
+			# Un-defines variable. Only when variable value matches, if variableValue specified.
+			delete)
 
 	image-install:exec-update-before:
 		image-install:exec-update-before:host/install/<scriptName>
