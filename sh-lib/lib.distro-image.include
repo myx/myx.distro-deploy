@@ -541,7 +541,7 @@ DistroImageProjectContextVariables(){
 			
 				# if variable is not defined - creates variable/array with given value 
 				create)
-					printf	'[ ! -z "$VAR_%s" ] || VAR_%s=%q\n' \
+					printf '[ ! -z "$VAR_%s" ] || VAR_%s=%q\n' \
 						"$variableName" \
 						"$variableName" "$variableValue"
 				;;
