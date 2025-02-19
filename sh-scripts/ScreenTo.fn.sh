@@ -29,8 +29,8 @@ ScreenTo(){
 	Require ListSshTargets
 
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-	local defaultCommand="-t 'test ! -x \"\`which screen\`\" || screen -s sh -q -O -U -D -R ; test -x \"\`which screen\`\" || /bin/sh'"
-			
+	local defaultCommand="-t 'SCREEN=\"\$(which screen)\"; SHELL=\"\$(which bash || which sh)\"; [ -x \"\$SCREEN\" ] && \$SCREEN -s \$SHELL -q -O -U -D -R || \$SHELL'"
+
 	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
 	if [ -z "$targets" ] ; then
