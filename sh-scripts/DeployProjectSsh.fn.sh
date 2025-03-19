@@ -438,7 +438,8 @@ DeployProjectSsh(){
 	local prepareFiles="${prepareFiles:-auto}" 
 	local prepareScript="${prepareScript:-auto}"
 
-	local executeSleep="${executeSleep:-true}"
+	## not-local 
+	executeSleep="${executeSleep:-true}"
 	
 	local deployType=""
 
