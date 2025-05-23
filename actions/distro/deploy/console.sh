@@ -4,4 +4,4 @@
 
 cd "$MMDAPP"
 export MMDAPP
-bash --rcfile "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+bash --rcfile "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"

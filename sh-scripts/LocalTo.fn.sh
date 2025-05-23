@@ -16,11 +16,11 @@ if ! type DistroImage >/dev/null 2>&1 ; then
 	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 fi
 
-ShellTo(){
+LocalTo(){
 
 	set -e
 
-	local MDSC_CMD='ShellTo'
+	local MDSC_CMD='LocalTo'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
 	local useSshHost="${useSshHost:-}"
@@ -55,9 +55,9 @@ ShellTo(){
 
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-	local defaultCommand="-t '\`which bash || which sh\` -i'"
+	local defaultCommand="`which bash || which sh`"
 			
-	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
+	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} )"
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
@@ -70,26 +70,46 @@ ShellTo(){
 		return 2
 	fi
 
-	set -e
-	echo "$MDSC_CMD: Using Command: $targets" >&2
-	eval "$targets"
+	local projectName="$(
+		echo "$targets" \
+		| while read -r projectName extraText ; do
+			echo "$projectName"
+		done
+	)"
+
+	local extraText="$(
+		echo "$targets" \
+		| while read -r projectName extraText ; do
+			echo "$extraText"
+		done
+	)"
+
+	(
+		echo "$MDSC_CMD: Project-ID: $projectName" >&2
+		echo "$MDSC_CMD: SshOptions: $extraText" >&2
+		DistroSelectProject MDSC_PRJ_NAME "$projectName"
+		export MDSC_PRJ_NAME="$MDSC_PRJ_NAME"
+		set -x
+		bash --rcfile "$MMDAPP/source/myx/myx.distro-${MDSC_INMODE:-source}/sh-lib/console-${MDSC_INMODE:-source}-bashrc.rc" --noprofile
+		#"$MMDAPP/actions/distro/source/console.sh" "$@"
+	)
 }
 
 case "$0" in
-	*/sh-scripts/ShellTo.fn.sh)
+	*/sh-scripts/LocalTo.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ShellTo.fn.sh <project> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ShellTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ShellTo.fn.sh [--help]" >&2
+			echo "📘 syntax: LocalTo.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "📘 syntax: LocalTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
+			echo "📘 syntax: LocalTo.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
-				echo "    ShellTo.fn.sh ndss113" >&2
-				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
-				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l mysql whoami" >&2
+				echo "    LocalTo.fn.sh ndss113" >&2
+				echo "    LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
+				echo "    LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l mysql whoami" >&2
 			fi
 			exit 1
 		fi
 		
-		ShellTo "$@"
+		LocalTo "$@"
 	;;
 esac

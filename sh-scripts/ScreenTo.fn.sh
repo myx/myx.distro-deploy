@@ -39,7 +39,7 @@ ScreenTo(){
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
-		echo "$MDSC_CMD: 🙋 STOP: More that one match: $@" >&2
+		echo "$MDSC_CMD: 🙋 STOP: More than one match: $@" >&2
 		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
 		return 2
 	fi
@@ -53,9 +53,11 @@ case "$0" in
 	*/sh-scripts/ScreenTo.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ScreenTo.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "syntax: ScreenTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
 			echo "syntax: ScreenTo.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
+				echo "    ScreenTo.fn.sh ndss113" >&2
 				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
 				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l mysql" >&2
 			fi
