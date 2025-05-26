@@ -32,7 +32,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	if [ "${cacheFolder#"$MMDAPP/output"}" = "$cacheFolder" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: invalid context: cacheFolder: $cacheFolder" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	##
@@ -45,7 +45,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		fi
 		if [ ! -f "$cacheFolder/exec" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($cacheFolder/exec)" >&2
-			return 1
+			set +e ; return 1
 		fi
 	fi
 
@@ -59,7 +59,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		fi
 		if [ ! -d "$cacheFolder/sync" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: no installer files found ($cacheFolder/sync)" >&2
-			return 1
+			set +e ; return 1
 		fi
 	fi
 
@@ -182,7 +182,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 					localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
 					if [ ! -f "$localFileName" ] ; then
 						echo "$MDSC_CMD: ⛔ ERROR: file is missing: $localFileName, declared at $declaredAt" >&2 
-						return 1
+						set +e ; return 1
 					fi
 					if [ -z "$useVariable" ] ; then
 						echo "cp -f 'sync/$sourcePath/$filePath/$fileName' 'sync/$sourcePath/$filePath/$targetPattern'"
@@ -293,7 +293,7 @@ DeployProjectsSsh(){
 	if [ ! -d "$MMDAPP/output" ] ; then
 		if [ ! -d "$MMDAPP/source" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
-			return 1
+			set +e ; return 1
 		fi
 	fi
 
@@ -302,7 +302,7 @@ DeployProjectsSsh(){
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
-				return 1
+				set +e ; return 1
 			fi
 		;;
 		--*)
@@ -354,7 +354,7 @@ DeployProjectsSsh(){
 
 	if [ -z "$taskList" ] ; then
 		echo "No tasks!" >&2
-		return 1
+		set +e ; return 1
 	fi
 	
 	echo "Targets selected: " >&2
@@ -372,7 +372,7 @@ DeployProjectsSsh(){
 
 	if [ -z "$evalList" ] ; then
 		echo "No tasks!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	if [ "full" = "$MDSC_DETAIL" ] ; then
@@ -410,7 +410,7 @@ DeployProjectSsh(){
 	if [ ! -d "$MMDAPP/output" ] ; then
 		if [ ! -d "$MMDAPP/source" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: output folder does not exist: $MMDAPP/output" >&2
-			return 1
+			set +e ; return 1
 		fi
 	fi
 
@@ -491,7 +491,7 @@ DeployProjectSsh(){
 				shift
 				if [ -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: match filter expected after --match option" >&2
-					return 1
+					set +e ; return 1
 				fi
 				local MATCH_SCRIPT_FILTER="--match $1"
 				shift
@@ -504,12 +504,12 @@ DeployProjectSsh(){
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 	
 	if [ ! -d "$MDSC_CACHED/$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not found: $MDSC_CACHED/$MDSC_PRJ_NAME" >&2
-		return 1
+		set +e ; return 1
 	fi
 	
 	local cacheFolder="$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
@@ -535,11 +535,11 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-files option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				if [ ! -d "$cacheFolder/sync" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no sync folder found ($cacheFolder/sync)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				find "$cacheFolder/sync" -type f | sed "s|^$cacheFolder/sync/||"
 				return 0
@@ -563,7 +563,7 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-installer option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				local outputPath="$cacheFolder/exec"
 				if [ "true" = "$prepareScript" ] || [ "auto" = "$prepareScript" -a  ! -f "$outputPath"  ] ; then
@@ -572,7 +572,7 @@ DeployProjectSsh(){
 				fi
 				if [ ! -f "$outputPath" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no installer script found ($outputPath)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				cat "$outputPath"
 				return 0
@@ -586,7 +586,7 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-none option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				return 0
 			;;
@@ -596,7 +596,7 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 
 				executeSleep="false"
@@ -624,7 +624,7 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 
 				DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
@@ -632,7 +632,7 @@ DeployProjectSsh(){
 				local projectSshTargets="$( DistroImageProjectSshTargets )"
 				if [ -z "${projectSshTargets:0:1}" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no ssh targets found! ($MDSC_PRJ_NAME)" >&2
-					return 1
+					set +e ; return 1
 				fi
 
 				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
@@ -653,17 +653,17 @@ DeployProjectSsh(){
 			;;
 			'')
 				echo "$MDSC_CMD: ⛔ ERROR: --do-XXXX option must be specified" >&2
-				return 1
+				set +e ; return 1
 			;;
 			*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid option: $1" >&2
-				return 1
+				set +e ; return 1
 			;;
 		esac
 	done
 
 	echo "$MDSC_CMD: ⛔ ERROR: oops, not supposed to get here!" >&2
-	return 1
+	set +e ; return 1
 }
 
 case "$0" in

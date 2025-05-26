@@ -38,12 +38,14 @@ Reinstall(){
 			return 0
 		fi
 		
-		echo "ERROR: Reinstall: More that one match: $@" >&2 ; return 1
+		echo "ERROR: Reinstall: More that one match: $@" >&2
+		set +e ; return 1
 	fi
 
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo "ERROR: Reinstall: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
+		echo "ERROR: Reinstall: 'filterProject' argument (name or keyword or substring) is required!" >&2
+		set +e ; return 1
 	fi
 
 	shift
@@ -58,7 +60,8 @@ Reinstall(){
 	# set +x
 
 	if [ -z "$targets" ] ; then
-		echo "ERROR: Reinstall: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2 ; return 1
+		echo "ERROR: Reinstall: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
+		set +e ; return 1
 	fi
 	
 	set -e

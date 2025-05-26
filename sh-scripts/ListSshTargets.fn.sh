@@ -32,7 +32,7 @@ ListSshTargets(){
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
 				echo "ERROR: $MDSC_CMD: no projects selected!" >&2
-				return 1
+				set +e ; return 1
 			fi
 		;;
 		--*)
@@ -81,7 +81,7 @@ ListSshTargets(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "$MDSC_CMD: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				
 				local setSshHost="${useSshHost:-}"

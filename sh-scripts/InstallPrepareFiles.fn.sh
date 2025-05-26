@@ -31,7 +31,7 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	##
@@ -176,7 +176,7 @@ InstallPrepareFilesInternalPrintScript(){
 				;;
 				'*'*)
 					echo "$MDSC_CMD: suffix search is not supported!" >&2
-					return 1
+					set +e ; return 1
 				;;
 				*)
 					case "${matchTargetPath%/}/" in
@@ -233,7 +233,7 @@ InstallPrepareFiles(){
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	case "$1" in
@@ -281,7 +281,7 @@ InstallPrepareFiles(){
 		 	local targetPath="$1" ; shift
 			if [ -z "$targetPath" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: 'targetDirectory' argument is required!" >&2
-				return 1
+				set +e ; return 1
 			fi
 
 			mkdir -p "$targetPath"
@@ -339,7 +339,7 @@ InstallPrepareFiles(){
 		--to-deploy-output)
 			if [ ! -d "$MMDAPP/output" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: deploy-output directory is missing: $MMDAPP/output" >&2; 
-				return 1
+				set +e ; return 1
 			fi
 			InstallPrepareFiles --to-directory "$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
 			return 0
@@ -347,7 +347,7 @@ InstallPrepareFiles(){
 		--to-deploy-output-clean)
 			if [ ! -d "$MMDAPP/output" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: deploy-output directory is missing: $MMDAPP/output" >&2; 
-				return 1
+				set +e ; return 1
 			fi
 			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rwX ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || true)"
 			return 0

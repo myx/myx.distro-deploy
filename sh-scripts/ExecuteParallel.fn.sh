@@ -31,7 +31,7 @@ ExecuteParallel(){
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
 				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
-				return 1
+				set +e ; return 1
 			fi
 		;;
 		--*)
@@ -79,12 +79,13 @@ ExecuteParallel(){
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
-				return 1
+				set +e ; return 1
 			;;
 			--execute-post-process)
 				shift
 				if [ -z "$1" ] ; then
-					echo "$MDSC_CMD: ⛔ ERROR: '--execute-post-process' - command argument required!" >&2 ; return 1
+					echo "$MDSC_CMD: ⛔ ERROR: '--execute-post-process' - command argument required!" >&2
+					set +e ; return 1
 				fi
 				local executePostProcess="$1" ; shift
 			;;
@@ -111,18 +112,21 @@ ExecuteParallel(){
 			shift
 			local executeType="--execute-script"
 			if [ -z "$1" ] ; then
-				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script' - file pathname argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script' - file pathname argument required!" >&2
+				set +e ; return 1
 			fi
 			local executeScriptName="$MMDAPP/source/${1#"$MMDAPP/source/"}" ; shift
 			if [ ! -f "$executeScriptName" ] ; then
-				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script $executeScriptName' - file is not available!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script $executeScriptName' - file is not available!" >&2
+				set +e ; return 1
 			fi
 		;;
 		--execute-command)
 			shift
 			local executeType="--execute-command"
 			if [ -z "$1" ] ; then
-				echo "$MDSC_CMD: ⛔ ERROR: '--execute-command' - command argument required!" >&2 ; return 1
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-command' - command argument required!" >&2
+				set +e ; return 1
 			fi
 			local executeCommand="$1" ; shift
 		;;

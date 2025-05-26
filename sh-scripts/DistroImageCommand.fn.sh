@@ -56,7 +56,7 @@ DistroImageCommand(){
 	fi
 
 	echo "DistroImageCommand: No sources available, need to fetch!" >&2
-	return 1
+	set +e ; return 1
 }
 
 

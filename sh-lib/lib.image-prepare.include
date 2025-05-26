@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
 [ -z "$MDSC_DETAIL" ] || echo "+ ImagePrepare: library included" >&2
 
 if ! type DistroImage >/dev/null 2>&1 ; then
@@ -10,7 +13,7 @@ ImagePrepareProjectProvidesMerged(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	DistroImageProjectProvidesMerged | grep -e "^\\S\\S* image-prepare:"
@@ -31,7 +34,7 @@ ImagePrepareProjectSyncFolders(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	local declaredAt sourceName sourcePath mergePath filterGlob
@@ -55,7 +58,7 @@ ImagePrepareProjectSourcePatchScripts(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	ImagePrepareProjectProvidesMerged \
@@ -82,7 +85,7 @@ ImagePrepareProjectTargetPatchScripts(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	local declaredAt scriptSourceName scriptName targetPath
@@ -109,7 +112,7 @@ ImagePrepareProjectCloneTasks(){
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	local declaredAt sourceName sourcePath fileName targetPattern useVariable useValues
@@ -126,5 +129,5 @@ ImagePrepareProjectCloneTasks(){
 # main shell command
 ImagePrepare(){
 	echo "Not Supported!" >&2
-	return 1
+	set +e ; return 1
 }

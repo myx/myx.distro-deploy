@@ -29,7 +29,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 						return 0
 					;;
 				esac
-				return 1
+				set +e ; return 1
 			;;
 			*)
 				if DistroShellContext --is-spec-option "$1" ; then
@@ -50,7 +50,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
 			. "$MDSC_SOURCE/myx/myx.distro-deploy/sh-lib/HelpRequire.include"
-			return 1
+			set +e ; return 1
 		fi
 		if type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 			return 0
@@ -81,7 +81,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
 			. "$MDSC_SOURCE/myx/myx.distro-deploy/sh-lib/HelpDistro.include"
-			return 1
+			set +e ; return 1
 		fi
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 			. "${distroCommand%.fn.sh}.fn.sh"

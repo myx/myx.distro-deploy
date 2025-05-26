@@ -18,7 +18,7 @@ DeployProjectSsh(){
 	if [ ! -d "$MMDAPP/output" ] ; then
 		if [ ! -d "$MMDAPP/source" ] ; then
 			echo "ERROR: DeploySettings: output folder does not exist: $MMDAPP/output" >&2
-			return 1
+			set +e ; return 1
 		fi
 	fi
 
@@ -37,14 +37,14 @@ DeployProjectSsh(){
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
 				echo "ERROR: DeploySettings: --select-from-env no projects selected!" >&2
-				return 1
+				set +e ; return 1
 			fi
 		;;
 		--set-env)
 			shift
 			if [ -z "$1" ] ; then
 				echo "ERROR: DeploySettings: --set-env argument expected!" >&2
-				return 1
+				set +e ; return 1
 			fi
 			local envName="$1" ; shift
 			eval "$envName='` DeploySettings --explicit-noop "$@" `'"
@@ -83,15 +83,15 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-folders option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
-				return 1
+				set +e ; return 1
 			;;
 			--print-files)
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-files option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				local outputPath="$MMDAPP/output/deploy/$projectName/sync"
 				if [ "true" = "$doFiles" ] || [ "auto" = "$doFiles" -a  ! -d "$outputPath"  ] ; then
@@ -100,7 +100,7 @@ DeployProjectSsh(){
 				fi
 				if [ ! -d "$outputPath" ] ; then
 					echo "ERROR: DeployProjectSsh: no sync folder found ($outputPath)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				find "$outputPath" -type f | sed "s|^$outputPath/||"
 				return 0
@@ -109,18 +109,18 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-sync-tasks option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
-				return 1
+				set +e ; return 1
 			;;
 			--deploy-rsync-direct|--deploy-script-rsync)
-				return 1
+				set +e ; return 1
 			;;
 			--print-installer)
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-installer option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				local outputPath="$MMDAPP/output/deploy/$projectName/exec"
 				if [ "true" = "$doScripts" ] || [ "auto" = "$doScripts" -a  ! -f "$outputPath"  ] ; then
@@ -129,7 +129,7 @@ DeployProjectSsh(){
 				fi
 				if [ ! -f "$outputPath" ] ; then
 					echo "ERROR: DeployProjectSsh: no installer script found ($outputPath)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				cat "$outputPath"
 				return 0
@@ -138,7 +138,7 @@ DeployProjectSsh(){
 				shift
 				if [ ! -z "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-target option ($@)" >&2
-					return 1
+					set +e ; return 1
 				fi
 				ListProjectProvides "$projectName" --print-provides-only | grep 'deploy-ssh-target:' | sed 's|deploy-ssh-target:||' | while read -r sshTarget ; do
 					local sshHost="`echo "$sshTarget" | sed 's,:.*$,,'`"
@@ -149,11 +149,11 @@ DeployProjectSsh(){
 			;;
 			'')
 				echo "ERROR: DeployProjectSsh: --do-XXXX option must be specified" >&2
-				return 1
+				set +e ; return 1
 			;;
 			*)
 				echo "ERROR: DeployProjectSsh: invalid option: $1" >&2
-				return 1
+				set +e ; return 1
 			;;
 		esac
 	done

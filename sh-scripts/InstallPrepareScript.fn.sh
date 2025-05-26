@@ -34,7 +34,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 	##
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	local match
@@ -46,7 +46,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 		local fileName="$MDSC_SOURCE/$sourceName/$scriptPath"
 		if [ ! -f "$fileName" ] ; then
 			echo "$MDSC_CMD: ⛔ ERROR: file is missing: $fileName" >&2; 
-			return 1
+			set +e ; return 1
 		fi
 		if [ ! -z "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
 			printf ' -e %q' "$m"
@@ -74,13 +74,13 @@ InstallPrepareScriptInternalPrintScript(){
 	##
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	local fileNames="$( InstallPrepareScriptInternalPrintScriptFiles )"
 	if [ -z "$fileNames" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: no scripts selected!" >&2
-		return 1
+		set +e ; return 1
 	fi 
 
 	echo "#!/bin/sh"
@@ -179,7 +179,7 @@ InstallPrepareScript(){
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		return 1
+		set +e ; return 1
 	fi
 
 	case "$1" in
@@ -200,7 +200,8 @@ InstallPrepareScript(){
 			shift
 			local targetFile="$1"
 			if [ -z "$targetFile" ] ; then
-				echo "$MDSC_CMD: 'targetFile' argument is required!" >&2 ; return 1
+				echo "$MDSC_CMD: 'targetFile' argument is required!" >&2
+				set +e ; return 1
 			fi
 			
 			InstallPrepareScriptInternalPrintScript > "$targetFile"
@@ -208,7 +209,7 @@ InstallPrepareScript(){
 		;;
 		*)
 			echo "$MDSC_CMD: ⛔ ERROR: invalid option: $1" >&2
-			return 1
+			set +e ; return 1
 		;;
 	esac
 }

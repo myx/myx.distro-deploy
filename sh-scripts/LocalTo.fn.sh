@@ -36,7 +36,7 @@ LocalTo(){
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
-				return 1
+				set +e ; return 1
 			;;
 			*)
 				break
@@ -46,7 +46,8 @@ LocalTo(){
 
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo -e "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2 ; return 1
+		echo -e "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2
+		set +e ; return 1
 	fi
 
 	shift
@@ -61,13 +62,13 @@ LocalTo(){
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
-		return 1
+		set +e ; return 1
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
 		echo "$MDSC_CMD: 🙋 STOP: More than one match: $@" >&2
 		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
-		return 2
+		set +e ; return 2
 	fi
 
 	local projectName="$(
