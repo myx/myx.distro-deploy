@@ -213,16 +213,13 @@ ExecuteParallel(){
 case "$0" in
 	*/sh-scripts/ExecuteParallel.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: ExecuteParallel.fn.sh <search> --execute-stdin [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <search> --execute-script <script-name> [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <search> --execute-command <command> [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <search> --display-targets [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
+			echo "syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteParallel.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				echo "  Search:" >&2
-				echo "    --select-{all|sequence|changed|none} " >&2
-				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
-				echo "    --{select|filter|remove}-repository-projects <repositoryName>" >&2
+				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ExecuteParallel.fn.sh --select-all --display-targets -l root" >&2
 				echo "    ExecuteParallel.fn.sh --select-projects l6 --execute-stdin -l root" >&2

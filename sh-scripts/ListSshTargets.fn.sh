@@ -135,13 +135,10 @@ case "$0" in
 	*/sh-scripts/ListSshTargets.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: ListSshTargets.fn.sh [--line-prefix <prefix>] [--line-suffix <suffix>] --all-targets [<ssh arguments>...]" >&2
-			echo "syntax: ListSshTargets.fn.sh <search> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
+			echo "syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
 			echo "syntax: ListSshTargets.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				echo "  Search:" >&2
-				echo "    --select-{all|sequence|changed|none} " >&2
-				echo "    --{select|filter|remove}-{projects|[merged-]provides|[merged-]keywords} <glob>" >&2
-				echo "    --{select|filter|remove}-repository-projects <repositoryName>" >&2
+				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ListSshTargets.fn.sh --all-targets" >&2
 
