@@ -169,7 +169,10 @@ image-receive, image-install directives:
 		image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
 
 		image-install:deploy-applied-script:.:host/scripts/at-remote-on-after-deploy.txt
-	
+
+### Before we start: installation (distro-source)	
+
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
 
 ### Stage: source-prepare:
 
@@ -192,6 +195,9 @@ The 'distro-source' is exporting (pushing and syncing) all export packages built
 - `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-image')
 - `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
 
+### Before we start: installation (distro-deploy)	
+
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
 
 ### Stage: image-process:
 
