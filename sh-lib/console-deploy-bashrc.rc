@@ -4,7 +4,7 @@ echo "Working in $MMDAPP" >&2
 export MDSC_BIN="${MDLC_BIN:-$MMDAPP/source}"
 
 # search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
-PATH=$(echo "$PATH" | sed -E "s|$MDSC_BIN/myx/myx.distro-(source|deploy|remote)/sh-scripts||g")
+PATH=$(echo "$PATH" | sed -E "s|$MDSC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
 PATH+=":$MDSC_BIN/myx/myx.distro-deploy/sh-scripts"
 PATH+=":$MDSC_BIN/myx/myx.distro-source/sh-scripts"
 
