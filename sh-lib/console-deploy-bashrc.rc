@@ -2,6 +2,7 @@ echo "Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
 export MDSC_BIN="${MDLC_BIN:-$MMDAPP/source}"
+export BASH_ENV="$MDSC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
 # search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
 PATH=$(echo "$PATH" | sed -E "s|$MDSC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
