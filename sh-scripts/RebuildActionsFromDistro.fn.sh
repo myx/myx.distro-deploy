@@ -12,7 +12,7 @@ type RebuildActions >/dev/null 2>&1 || \
 
 
 RebuildActionsFromDistro(){
-	if [ "$MDSC_INMODE" = "distro" ] ; then
+	if [ "$MDSC_INMODE" = "deploy" ] ; then
 		RebuildActions "$@"
 	else
 		( \

@@ -62,14 +62,14 @@ case "$1" in
 		MDSC_SOURCE="$MMDAPP/output/distro"
 		MDSC_CACHED="$MMDAPP/output/cached"
 		MDSC_OUTPUT="$MMDAPP/output/distro"
-		MDSC_INMODE="distro"
+		MDSC_INMODE="deploy"
 		MDSC_OPTION="--distro-from-output"
 	;;
 	--distro-from-distro)
 		MDSC_SOURCE="$MMDAPP/distro"
 		MDSC_CACHED="$MMDAPP/output/cached"
 		MDSC_OUTPUT="$MMDAPP/output/distro"
-		MDSC_INMODE="distro"
+		MDSC_INMODE="deploy"
 		MDSC_OPTION="--distro-from-distro"
 	;;
 	*)

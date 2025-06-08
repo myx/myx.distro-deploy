@@ -12,7 +12,7 @@ type RebuildKnownHosts >/dev/null 2>&1 || \
 
 
 RebuildKnownHostsFromDistro(){
-	if [ "$MDSC_INMODE" = "distro" ] ; then
+	if [ "$MDSC_INMODE" = "deploy" ] ; then
 		RebuildKnownHosts "$@"
 	else
 		( \
