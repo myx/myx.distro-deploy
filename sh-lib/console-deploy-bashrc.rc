@@ -125,7 +125,7 @@ consolePromptState(){
 		cd "$MDSC_INT_CD"
 		export -n MDSC_INT_CD
 	fi
-	printf "MDDSC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
+	printf "MDSC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
 }
 
 PS1="\` consolePromptState \`: $PS1"
