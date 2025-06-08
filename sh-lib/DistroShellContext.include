@@ -107,6 +107,9 @@ if [ -z "$MDSC_ORIGIN" ] || [ "$MDSC_ORIGIN" == "${MDSC_ORIGIN#$MMDAPP/}" ] ; th
 
 	export MDSC_DETAIL
 
+	if [ -z "$MDSC_ORIGIN" ] && [ -d "$MDSC_BIN/myx/myx.distro-source/sh-lib" ] ; then
+		MDSC_ORIGIN="$MDSC_BIN/myx/myx.distro-deploy/sh-lib"
+	fi
 	if [ -z "$MDSC_ORIGIN" ] && [ -d "$MMDAPP/source/myx/myx.distro-deploy/sh-lib" ] ; then
 		MDSC_ORIGIN="$MMDAPP/source/myx/myx.distro-deploy/sh-lib"
 	fi
