@@ -27,7 +27,7 @@ DistroShellContext --distro-from-output
 Action(){
 	local actionCommand="$1" ; shift
 	if [ -z "$actionCommand" ] ; then
-		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpAction.include"
+		( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpConsoleAction.include" )
 		set +e ; return 1
 	fi
 	case "$actionCommand" in
@@ -54,12 +54,8 @@ Deploy(){
 			set +e ; return 1
 		;;
 	esac
-	local distroCommand="$1" ; shift
-	if [ -z "$distroCommand" ] ; then
-		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDeploy.include"
-		set +e ; return 1
-	fi
 
+	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 		if [ ! -f "$MDDC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
@@ -94,12 +90,8 @@ if ! type Source >/dev/null 2>&1 ; then
 				set +e ; return 1
 			;;
 		esac
-		local distroCommand="$1" ; shift
-		if [ -z "$distroCommand" ] ; then
-			. "$MDDC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
-			set +e ; return 1
-		fi
 
+		local distroCommand="$1" ; shift
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 			if [ ! -f "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 				echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2

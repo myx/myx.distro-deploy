@@ -69,7 +69,7 @@ if ! type Distro >/dev/null 2>&1 ; then
 		esac
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
-			. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDistro.include"
+			( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDistro.include" )
 			set +e ; return 1
 		fi
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
