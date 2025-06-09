@@ -43,6 +43,7 @@ case "$1" in
 
 			CONSOLE_INTERACTIVE="-i"
 			if [ "$1" == "--non-interactive" ] ; then
+				shift
 				CONSOLE_INTERACTIVE=""
 			fi
 			
