@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+case "$1" in
+	--make-console-command)
+		shift
+		set -e
+		"$MMDAPP/.local/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include" --make-console-script > "$MMDAPP/DistroDeployConsole.sh"
+		chmod 770 "$MMDAPP/DistroDeployConsole.sh"
+
+		if [ "$1" != "--quiet" ] ; then
+			local consoles="$( ls $MMDAPP/Distro*Console.sh | sed 's|^|	|g' )"
+			printf \
+				"\nNote: DistroDeployConsole.sh created, now you can run:\n%s\n\n" \
+				"$consoles" \
+			>&2
+		fi
+
+		return 0
+	;;
+	--make-console-script)
+		shift
+
+		cat << 'DISTROCONSOLE'
+			#!/usr/bin/env bash
+
+			set -e
+
+			if [ -z "$MMDAPP" ] ; then
+				export MMDAPP
+				MMDAPP="$( ( cd $(dirname "$0") ; pwd ) )"
+			fi
+
+			[ -d "$MMDAPP/.local" ] || ( echo "ERROR: expecting '$MMDAPP/.local' directory." >&2 && exit 1 )
+
+			cd "$MMDAPP"
+			export MMDAPP
+			bash --rcfile "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
+DISTROCONSOLE
+
+		return 0
+	;;
+	*)
+		echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
+		set +e ; return 1
+	;;
+esac
