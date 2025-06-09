@@ -2,14 +2,20 @@ echo >&2
 echo "This is DistroDeployConsole. It runs in DistroDeploy context and provides following commands:" >&2
 echo >&2
 
+if type Action >/dev/null 2>&1 ; then
+	Action --help
+fi
 if type Require >/dev/null 2>&1 ; then
 	Require --help
 fi
-if type Deploy >/dev/null 2>&1 ; then
-	Source --help
-fi
 if type Source >/dev/null 2>&1 ; then
 	Source --help
+fi
+if type Deploy >/dev/null 2>&1 ; then
+	Deploy --help
+fi
+if type Distro >/dev/null 2>&1 ; then
+	Distro --help
 fi
 
 echo >&2
