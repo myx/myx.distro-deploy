@@ -5,7 +5,7 @@ case "$1" in
 	--make-console-command)
 		shift
 		set -e
-		"$MMDAPP/.local/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include" --make-console-script > "$MMDAPP/DistroDeployConsole.sh"
+		bash "$MMDAPP/.local/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include" --make-console-script > "$MMDAPP/DistroDeployConsole.sh"
 		chmod 770 "$MMDAPP/DistroDeployConsole.sh"
 
 		if [ "$1" != "--quiet" ] ; then
