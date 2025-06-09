@@ -63,7 +63,7 @@ if ! type Distro >/dev/null 2>&1 ; then
 	Distro(){
 		case "$1" in
 			''|--*)
-				( . "$MDRC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
+				( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
 				set +e ; return 1
 			;;
 		esac
