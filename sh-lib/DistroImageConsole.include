@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+MDDC_BIN="${MDDC_BIN:-$MMDAPP/.local}"
+
+case "$1" in 
+	--completion-*)
+		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
+		set +e ; return 1
+	;;
+	''|--help)
+		shift
+		( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDistro.include" )
+		set +e ; return 1
+	;;
+	*)
+		echo "DistroImageConsole: Invalid argument: $1" >&2
+		set +e ; return 1
+	;;
+esac
