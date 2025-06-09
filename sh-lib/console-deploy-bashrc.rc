@@ -1,15 +1,22 @@
 echo "Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-export MDSC_BIN="${MDLC_BIN:-$MMDAPP/source}"
-export BASH_ENV="$MDSC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+if [ -z "$MDLC_BIN" ] && [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" ] ; then
+	MDDC_BIN="${MDLC_BIN:-$MMDAPP/source}"
+else
+	MDDC_BIN="${MDLC_BIN:-$MMDAPP/.local}"
+fi
+
+export MDDC_BIN
+
+export BASH_ENV="$MDDC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
 # search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
-PATH=$(echo "$PATH" | sed -E "s|$MDSC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
-PATH+=":$MDSC_BIN/myx/myx.distro-deploy/sh-scripts"
-PATH+=":$MDSC_BIN/myx/myx.distro-source/sh-scripts"
+PATH=$(echo "$PATH" | sed -E "s|$MDDC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
+PATH+=":$MDDC_BIN/myx/myx.distro-deploy/sh-scripts"
+PATH+=":$MDDC_BIN/myx/myx.distro-source/sh-scripts"
 
-. "$MDSC_BIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
+. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 DistroShellContext --distro-from-output
 #DistroShellContext --distro-from-distro
 #DistroShellContext --distro-path-auto
@@ -23,7 +30,7 @@ Require ListAllActions
 Action(){
 	local actionCommand="$1" ; shift
 	if [ -z "$actionCommand" ] ; then
-		. "$MDSC_BIN/myx/myx.distro-deploy/sh-lib/HelpAction.include"
+		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpAction.include"
 		set +e ; return 1
 	fi
 	case "$actionCommand" in
@@ -46,16 +53,16 @@ Action(){
 Deploy(){
 	local distroCommand="$1" ; shift
 	if [ -z "$distroCommand" ] ; then
-		. "$MDSC_BIN/myx/myx.distro-deploy/sh-lib/HelpDeploy.include"
+		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDeploy.include"
 		set +e ; return 1
 	fi
 
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDSC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if [ ! -f "$MDDC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDSC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "$MDDC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e
@@ -80,16 +87,16 @@ Deploy(){
 Source(){
 	local distroCommand="$1" ; shift
 	if [ -z "$distroCommand" ] ; then
-		. "$MDSC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
+		. "$MDDC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
 		set +e ; return 1
 	fi
 
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDSC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if [ ! -f "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDSC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e
@@ -126,7 +133,7 @@ consolePromptState(){
 		cd "$MDSC_INT_CD"
 		export -n MDSC_INT_CD
 	fi
-	printf "MDSC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
+	printf "MDDC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
 }
 
 PS1="\` consolePromptState \`: $PS1"
