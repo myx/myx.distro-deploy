@@ -83,40 +83,45 @@ Deploy(){
 	}
 }
 
-
-Source(){
-	local distroCommand="$1" ; shift
-	if [ -z "$distroCommand" ] ; then
-		. "$MDDC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
-		set +e ; return 1
-	fi
-
-	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
+if ! type Source >/dev/null 2>&1 ; then
+	Source(){
+		local distroCommand="$1" ; shift
+		if [ -z "$distroCommand" ] ; then
+			. "$MDDC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
 			set +e ; return 1
 		fi
-		. "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
-	fi
 
-	set +e
+		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+			if [ ! -f "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+				echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
+				set +e ; return 1
+			fi
+			. "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		fi
 
-	"${distroCommand%.fn.sh}" "$@" || {
-		EXITCODE=$?
-		echo "ERROR: exited with error status ($EXITCODE)" >&2
 		set +e
-		return $EXITCODE
-	}
-	return 0
 
-	( "${distroCommand%.fn.sh}" "$@" ; ) || {
-		EXITCODE=$?
-		echo "ERROR: exited with error status ($EXITCODE)" >&2
-		set +e
-		return $EXITCODE
+		"${distroCommand%.fn.sh}" "$@" || {
+			EXITCODE=$?
+			echo "ERROR: exited with error status ($EXITCODE)" >&2
+			set +e
+			return $EXITCODE
+		}
+		return 0
+
+		( "${distroCommand%.fn.sh}" "$@" ; ) || {
+			EXITCODE=$?
+			echo "ERROR: exited with error status ($EXITCODE)" >&2
+			set +e
+			return $EXITCODE
+		}
 	}
+fi
+
+Help(){
+	( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
+	set +e ; return 1
 }
-
 
 complete -W "\`ListDistroScripts\`" "."
 complete -W "\`ListDistroScripts\`" "*"
