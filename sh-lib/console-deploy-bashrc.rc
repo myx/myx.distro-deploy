@@ -21,9 +21,6 @@ DistroShellContext --distro-from-output
 #DistroShellContext --distro-from-distro
 #DistroShellContext --distro-path-auto
 
-Require ListDistroScripts
-Require ListAllActions
-
 # Action myx/yaumnrc/test-parser.url
 # Action make-ws2017.sh
 
@@ -135,14 +132,28 @@ Help(){
 	set +e ; return 1
 }
 
-complete -W "\`ListDistroScripts\`" "."
-complete -W "\`ListDistroScripts\`" "*"
-complete -W "\`ListDistroScripts\`" "which"
-complete -W "\`ListAllActions --completion\`"    "Action"
-complete -W "\`ListDistroScripts --completion\`" "Require"
-complete -W "\`ListDistroScripts --completion\`" "Distro"
-complete -W "\`ListDistroScripts --completion --type deploy\`" "Deploy"
-complete -W "\`ListDistroScripts --completion --type source\`" "Source"
+consoleActionsCompletion()
+{
+	Require ListAllActions
+	local PREFIX="$2"
+	if [ -z "$PREFIX" ] ; then
+		COMPREPLY=( $( ListAllActions --completion | sed 's!/.*!/!' | sort -u ) )
+	else
+		COMPREPLY=( $( ListAllActions --completion | grep "^$PREFIX" | sort -u ) )
+	fi
+}
+
+complete -F consoleActionsCompletion "Action"
+
+complete -W "\` Deploy --completion-all \`" "."
+complete -W "\` Deploy --completion-all \`" "*"
+complete -W "\` Deploy --completion-all \`" "which"
+complete -W "\` Deploy --completion-require \`" "Require"
+
+complete -W "\` Deploy --completion-distro \`" "Distro"
+
+complete -W "\` Deploy --completion-deploy \`" "Deploy"
+complete -W "\` Source --completion-source \`" "Source"
 
 PS1="\` Deploy --shell-prompt \`: $PS1"
 export PS1

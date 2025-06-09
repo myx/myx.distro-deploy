@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+MDDC_BIN="${MDDC_BIN:-$MMDAPP/.local}"
+
+case "$1" in
+	--completion-require)
+		shift
+		Deploy --completion-all \
+		| grep -e '\.fn\.sh$' \
+		| sort -u \
+		| sed 's:\.fn\.sh$::' 
+		return 0
+	;;
+	--completion-distro)
+		shift
+		Source --completion-all \
+		| grep '^\(Distro\|Source\|Deploy\|Remote\|Build\|Clean\).*.fn.sh$' \
+		| sort -u \
+		| sed 's:\.fn\.sh$::' 
+		return 0
+	;;
+	--completion-deploy)
+		shift
+		Deploy --completion-all \
+		| grep '^\(DistroDeploy\|Deploy\).*.fn.sh$' \
+		| sort -u \
+		| sed 's:\.fn\.sh$::' 
+		return 0
+	;;
+	--completion-all)
+		shift
+		( 
+			MDPATH=""
+			for ITEM in ".local" "system" "deploy" "source" "remote" ; do
+				if [ -d "$MDDC_BIN/myx/myx.distro-$ITEM/sh-scripts" ] ; then
+					MDPATH+=" $MDDC_BIN/myx/myx.distro-$ITEM/sh-scripts"
+				fi
+			done
+
+			find $MDPATH -type 'f' -name '*.sh' \
+			| sed -E "s:^$MDDC_BIN/myx/myx.distro-(.local|system|deploy|source|remote)/sh-scripts/::g" \
+			| sort
+		)
+		return 0
+	;;
+	*)
+		echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
+		set +e ; return 1
+	;;
+esac
