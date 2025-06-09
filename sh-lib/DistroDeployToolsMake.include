@@ -7,7 +7,7 @@ case "$1" in
 		set -e
 		( 
 			DistroDeployTools(){
-				. "$MMDAPP/.local/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include"
+				. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include"
 			}
 			DistroDeployTools --make-console-script > "$MMDAPP/DistroDeployConsole.sh"
 		)
