@@ -31,6 +31,11 @@ DistroDeployTools(){
 			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
 			set +e ; return 1
 		;;
+		--upgrade-deploy-tools)
+			shift
+			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh --install-distro-deploy"
+			return 0
+		;;
 		''|--help)
 			echo "syntax: DistroDeployTools.fn.sh <option>" >&2
 			echo "syntax: DistroDeployTools.fn.sh [--help]" >&2
@@ -50,7 +55,7 @@ case "$0" in
 	*/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh)
 
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: DistroDeployTools.fn.sh --help" >&2
+			echo "syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
 		fi
 
 		set -e
