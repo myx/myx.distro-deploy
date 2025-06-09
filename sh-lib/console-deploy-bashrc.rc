@@ -51,6 +51,12 @@ Action(){
 
 
 Deploy(){
+	case "$1" in
+		''|--*)
+			( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
+			set +e ; return 1
+		;;
+	esac
 	local distroCommand="$1" ; shift
 	if [ -z "$distroCommand" ] ; then
 		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDeploy.include"
@@ -85,6 +91,12 @@ Deploy(){
 
 if ! type Source >/dev/null 2>&1 ; then
 	Source(){
+		case "$1" in
+			''|--*)
+				( . "$MDDC_BIN/myx/myx.distro-source/sh-lib/DistroSourceConsole.include" )
+				set +e ; return 1
+			;;
+		esac
 		local distroCommand="$1" ; shift
 		if [ -z "$distroCommand" ] ; then
 			. "$MDDC_BIN/myx/myx.distro-source/sh-lib/HelpSource.include"
@@ -132,16 +144,7 @@ complete -W "\`ListDistroScripts --completion\`" "Distro"
 complete -W "\`ListDistroScripts --completion --type deploy\`" "Deploy"
 complete -W "\`ListDistroScripts --completion --type source\`" "Source"
 
-consolePromptState(){
-	if [ ! -z "$MDSC_INT_CD" ] ; then
-		echo "Changing directory: $MDSC_INT_CD"
-		cd "$MDSC_INT_CD"
-		export -n MDSC_INT_CD
-	fi
-	printf "MDDC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
-}
-
-PS1="\` consolePromptState \`: $PS1"
+PS1="\` Deploy --shell-prompt \`: $PS1"
 export PS1
 
 if [ ! -z "$MDSC_PRJ_NAME" ] ; then
