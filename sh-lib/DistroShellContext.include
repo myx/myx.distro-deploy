@@ -13,8 +13,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 			;;
 			--is-spec-option)
 				case "$2" in
-					--distro-path-auto|--distro-source-only|--distro-from-{source,cached,output,distro})
-					#--distro-path-auto|--distro-source-only|--distro-from-source|--distro-from-cached|--distro-from-output|--distro-from-distro)
+					--distro-path-auto|--distro-source-only|--distro-from-source|--distro-from-cached|--distro-from-output|--distro-from-distro)
 						return 0
 					;;
 				esac
