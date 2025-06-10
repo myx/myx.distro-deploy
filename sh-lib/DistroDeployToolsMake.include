@@ -47,7 +47,7 @@ case "$1" in
 					echo . "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 					cat
 				} | bash "$@"
-				return 0
+				exit 0
 			fi
 			
 			bash --rcfile "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
