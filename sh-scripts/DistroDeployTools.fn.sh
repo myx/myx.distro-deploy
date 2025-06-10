@@ -33,7 +33,7 @@ DistroDeployTools(){
 		;;
 		--upgrade-deploy-tools)
 			shift
-			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh --install-distro-deploy"
+			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
 			return 0
 		;;
 		''|--help)
