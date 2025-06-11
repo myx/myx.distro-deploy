@@ -2,7 +2,7 @@
 # ^^^ for syntax checking in the editor only
 
 case "$1" in
-	--make-console-command)
+	--make-console-command|--make-console-commands)
 		shift
 		set -e
 		( 
