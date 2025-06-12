@@ -145,7 +145,7 @@ consoleActionsCompletion()
 
 complete -F consoleActionsCompletion "Action"
 
-complete -W "\` Deploy --completion-all \`" "."
+complete -W "\` Deploy --completion-all \`" ""
 complete -W "\` Deploy --completion-all \`" "*"
 complete -W "\` Deploy --completion-all \`" "which"
 complete -W "\` Deploy --completion-require \`" "Require"
