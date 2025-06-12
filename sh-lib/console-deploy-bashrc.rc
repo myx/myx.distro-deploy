@@ -16,8 +16,8 @@ export BASH_ENV="$MDDC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc
 
 # search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
 
-if [ -x "$MDSC_BIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
-	PATH="$MDSC_BIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
+if [ -x "$MDDC_BIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
+	PATH="$MDDC_BIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
 PATH=$(echo "$PATH" | sed -E "s|$MDDC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
