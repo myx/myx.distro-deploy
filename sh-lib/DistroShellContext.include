@@ -9,7 +9,9 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	DistroShellContext(){
 		case "$1" in
 			--uncache)
-				echo "DistroShellContext: clear cache" >&2
+				shift
+				echo "DistroLocalContext: clear cache" >&2
+				return 0
 			;;
 			--is-spec-option)
 				case "$2" in
@@ -108,7 +110,7 @@ while true ; do
 		continue
 	fi 
 	if DistroShellContext --is-spec-option "$1" ; then
-		[ -z "$MDSC_DETAIL" ] || echo "DistroShellContext: input spec: $1" >&2
+		[ -n "$MDSC_DETAIL" ] && echo "DistroShellContext: input spec: $1" >&2
 		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroShellContextSetInputSpec.include"		
 		shift
 		continue
