@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 # ^^^ for syntax checking in the editor only
 
-MDDC_BIN="${MDDC_BIN:-$MMDAPP/.local}"
-
 case "$1" in 
 	--shell-prompt)
 		if [ ! -z "$MDSC_INT_CD" ] ; then
-			echo "Changing directory: $MDSC_INT_CD"
+			echo "Changing directory: $MDSC_INT_CD" >&2
 			cd "$MDSC_INT_CD"
 			export -n MDSC_INT_CD
 		fi
@@ -14,16 +12,16 @@ case "$1" in
 		return 0
 	;;
 	--completion-*)
-		. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
+		. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
 		set +e ; return 1
 	;;
 	''|--help)
 		shift
-		( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDeploy.include" )
+		( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDeploy.include" )
 		set +e ; return 1
 	;;
 	--start-console)
-		bash --rcfile "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
+		bash --rcfile "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
 		return 0
 	;;
 	*)

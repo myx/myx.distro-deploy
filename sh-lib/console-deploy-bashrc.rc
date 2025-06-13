@@ -4,37 +4,34 @@
 echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-if [ -z "$MDLC_BIN" ] && [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" ] ; then
-	MDDC_BIN="${MDLC_BIN:-$MMDAPP/source}"
+if [ -f "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include" ] ; then
+	. "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include"
 else
-	MDDC_BIN="${MDLC_BIN:-$MMDAPP/.local}"
+	. "${MDLC_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-source/sh-lib/DistroShellContext.include"
 fi
 
-export MDDC_BIN
-
-export BASH_ENV="$MDDC_BIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
-
-# search: 1) previous path; 2) distro deploy scripts; 3) distro source scripts.
-
-if [ -x "$MDDC_BIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
-	PATH="$MDDC_BIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
-fi
-
-PATH=$(echo "$PATH" | sed -E "s|$MDDC_BIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
-PATH+=":$MDDC_BIN/myx/myx.distro-deploy/sh-scripts"
-PATH+=":$MDDC_BIN/myx/myx.distro-source/sh-scripts"
-
-. "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 DistroShellContext --distro-from-output
 #DistroShellContext --distro-from-distro
 #DistroShellContext --distro-path-auto
+
+export BASH_ENV="$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+
+if [ -x "$MDDC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
+	PATH="$MDDC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
+fi
+
+PATH=$(echo "$PATH" | sed -E "s|$MDDC_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
+PATH+=":$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts"
+PATH+=":$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts"
+
+. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 
 # Action myx/yaumnrc/test-parser.url
 # Action make-ws2017.sh
 
 Action(){
 	if [ -z "$1" ] || [ "$1" == "--help" ] ; then
-		( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpConsoleAction.include" )
+		( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleAction.include" )
 		set +e ; return 1
 	fi
 	local actionCommand="$1" ; shift
@@ -58,18 +55,18 @@ Action(){
 Deploy(){
 	case "$1" in
 		''|--*)
-			( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
+			( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
 			set +e ; return 1
 		;;
 	esac
 
 	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDDC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if [ ! -f "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDDC_BIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e
@@ -94,18 +91,18 @@ if ! type Source >/dev/null 2>&1 ; then
 	Source(){
 		case "$1" in
 			''|--*)
-				( . "$MDDC_BIN/myx/myx.distro-source/sh-lib/DistroSourceConsole.include" )
+				( . "$MDDC_ORIGIN/myx/myx.distro-source/sh-lib/DistroSourceConsole.include" )
 				set +e ; return 1
 			;;
 		esac
 
 		local distroCommand="$1" ; shift
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-			if [ ! -f "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			if [ ! -f "$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 				echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 				set +e ; return 1
 			fi
-			. "$MDDC_BIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			. "$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 		fi
 
 		set +e
@@ -128,7 +125,7 @@ if ! type Source >/dev/null 2>&1 ; then
 fi
 
 Help(){
-	( . "$MDDC_BIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
+	( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
 	set +e ; return 1
 }
 

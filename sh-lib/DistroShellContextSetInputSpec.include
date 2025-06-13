@@ -25,10 +25,7 @@ fi
 
 
 if [ "$adpcChangeSpec" = "true" ] ; then
-	if [ -z "$1" ] ; then
-		echo "ERROR: DistroShellContextSetInputSpec: inputSpec argument is required!" >&2
-		exit 1
-	fi
+	: "${1:?ERROR: DistroDeployContextSetInputSpec: inputSpec argument is required}"
 	if ! DistroShellContext --is-spec-option "$1" ; then
 		echo "ERROR: DistroShellContextSetInputSpec: inputSpec argument is invalid: $1" >&2
 		exit 1
