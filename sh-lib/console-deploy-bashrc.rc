@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ^^^ for syntax checking in the editor only
 
-echo "Working in $MMDAPP" >&2
+echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
 if [ -z "$MDLC_BIN" ] && [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" ] ; then
