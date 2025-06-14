@@ -12,16 +12,16 @@ case "$1" in
 		return 0
 	;;
 	--completion-*)
-		. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
+		. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
 		set +e ; return 1
 	;;
 	''|--help)
 		shift
-		( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDeploy.include" )
+		( . "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleDeploy.include" )
 		set +e ; return 1
 	;;
 	--start-console)
-		bash --rcfile "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
+		bash --rcfile "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
 		return 0
 	;;
 	*)

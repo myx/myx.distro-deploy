@@ -23,8 +23,8 @@ DistroDeployTools(){
 			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include"
 			set +e ; return 1
 		;;
-		--system-config-option|--custom-config-option)
-			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsConfig.include"
+		--*-config-option)
+			. "$MMDAPP/.local/myx/myx.distro-.local/sh-lib/DistroLocalToolsConfig.include"
 			set +e ; return 1
 		;;
 		--completion-*)

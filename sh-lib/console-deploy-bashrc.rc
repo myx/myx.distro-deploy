@@ -4,34 +4,29 @@
 echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-if [ -f "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include" ] ; then
-	. "$MMDAPP/source/myx/myx.distro-source/sh-lib/DistroShellContext.include"
-else
-	. "${MDLC_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-source/sh-lib/DistroShellContext.include"
-fi
-
+. "${MDSC_ORIGIN:=${MDLT_ORIGIN:=$MMDAPP/.local}}/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 DistroShellContext --distro-from-output
 #DistroShellContext --distro-from-distro
 #DistroShellContext --distro-path-auto
 
-export BASH_ENV="$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+export BASH_ENV="$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
-if [ -x "$MDDC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
-	PATH="$MDDC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
+if [ -x "$MDSC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
+	PATH="$MDSC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
-PATH=$(echo "$PATH" | sed -E "s|$MDDC_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
-PATH+=":$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts"
-PATH+=":$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts"
+PATH=$(echo "$PATH" | sed -E "s|$MDSC_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
+PATH+=":$MDSC_ORIGIN/myx/myx.distro-deploy/sh-scripts"
+PATH+=":$MDSC_ORIGIN/myx/myx.distro-source/sh-scripts"
 
-. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
+. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 
 # Action myx/yaumnrc/test-parser.url
 # Action make-ws2017.sh
 
 Action(){
 	if [ -z "$1" ] || [ "$1" == "--help" ] ; then
-		( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleAction.include" )
+		( . "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpConsoleAction.include" )
 		set +e ; return 1
 	fi
 	local actionCommand="$1" ; shift
@@ -55,18 +50,18 @@ Action(){
 Deploy(){
 	case "$1" in
 		''|--*)
-			( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
+			( . "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
 			set +e ; return 1
 		;;
 	esac
 
 	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if [ ! -f "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e
@@ -91,18 +86,18 @@ if ! type Source >/dev/null 2>&1 ; then
 	Source(){
 		case "$1" in
 			''|--*)
-				( . "$MDDC_ORIGIN/myx/myx.distro-source/sh-lib/DistroSourceConsole.include" )
+				( . "$MDSC_ORIGIN/myx/myx.distro-source/sh-lib/DistroSourceConsole.include" )
 				set +e ; return 1
 			;;
 		esac
 
 		local distroCommand="$1" ; shift
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-			if [ ! -f "$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			if [ ! -f "$MDSC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
 				echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 				set +e ; return 1
 			fi
-			. "$MDDC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+			. "$MDSC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 		fi
 
 		set +e
@@ -125,7 +120,7 @@ if ! type Source >/dev/null 2>&1 ; then
 fi
 
 Help(){
-	( . "$MDDC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
+	( . "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
 	set +e ; return 1
 }
 
