@@ -2,7 +2,17 @@
 # ^^^ for syntax checking in the editor only
 
 case "$1" in
-	--make-console-command|--make-console-commands)
+	--make-workspace-integration-files)
+		shift
+
+		if [ -z "$MDLC_ORIGIN" ] || [ "$MDLC_ORIGIN" == "$MMDAPP/.local" ] ; then
+			touch $MMDAPP/.local/MDLC_DEPLOY_ENV_SETTINGS.env
+		fi
+
+		DistroDeployTools --make-console-command "$@"
+		return 0
+	;;
+	--make-console-command)
 		shift
 		set -e
 		( 
