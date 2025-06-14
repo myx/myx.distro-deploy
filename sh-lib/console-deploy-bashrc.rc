@@ -58,7 +58,7 @@ Deploy(){
 	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 		if [ ! -f "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-			echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
+			echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
 		. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
@@ -68,7 +68,7 @@ Deploy(){
 
 	"${distroCommand%.fn.sh}" "$@" || {
 		EXITCODE=$?
-		echo "ERROR: exited with error status ($EXITCODE)" >&2
+		echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
 		set +e
 		return $EXITCODE
 	}
@@ -76,7 +76,7 @@ Deploy(){
 
 	( "${distroCommand%.fn.sh}" "$@" ; ) || {
 		EXITCODE=$?
-		echo "ERROR: exited with error status ($EXITCODE)" >&2
+		echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
 		set +e
 		return $EXITCODE
 	}
@@ -94,7 +94,7 @@ if ! type Source >/dev/null 2>&1 ; then
 		local distroCommand="$1" ; shift
 		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
 			if [ ! -f "$MDSC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-				echo "ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
+				echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 				set +e ; return 1
 			fi
 			. "$MDSC_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
@@ -104,7 +104,7 @@ if ! type Source >/dev/null 2>&1 ; then
 
 		"${distroCommand%.fn.sh}" "$@" || {
 			EXITCODE=$?
-			echo "ERROR: exited with error status ($EXITCODE)" >&2
+			echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
 			set +e
 			return $EXITCODE
 		}
@@ -112,7 +112,7 @@ if ! type Source >/dev/null 2>&1 ; then
 
 		( "${distroCommand%.fn.sh}" "$@" ; ) || {
 			EXITCODE=$?
-			echo "ERROR: exited with error status ($EXITCODE)" >&2
+			echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
 			set +e
 			return $EXITCODE
 		}

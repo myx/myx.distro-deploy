@@ -4,7 +4,7 @@ if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
 	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
 if [ -z "$MDSC_ORIGIN" ] || ! type DistroShellContext >/dev/null 2>&1 ; then
@@ -38,13 +38,13 @@ Reinstall(){
 			return 0
 		fi
 		
-		echo "ERROR: Reinstall: More that one match: $@" >&2
+		echo "⛔ ERROR: Reinstall: More that one match: $@" >&2
 		set +e ; return 1
 	fi
 
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo "ERROR: Reinstall: 'filterProject' argument (name or keyword or substring) is required!" >&2
+		echo "⛔ ERROR: Reinstall: 'filterProject' argument (name or keyword or substring) is required!" >&2
 		set +e ; return 1
 	fi
 
@@ -60,7 +60,7 @@ Reinstall(){
 	# set +x
 
 	if [ -z "$targets" ] ; then
-		echo "ERROR: Reinstall: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
+		echo "⛔ ERROR: Reinstall: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2
 		set +e ; return 1
 	fi
 	

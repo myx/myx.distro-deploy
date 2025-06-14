@@ -46,7 +46,7 @@ case "$1" in
 				MMDAPP="$( ( cd $(dirname "$0") ; pwd ) )"
 			fi
 
-			[ -d "$MMDAPP/.local" ] || ( echo "ERROR: expecting '$MMDAPP/.local' directory." >&2 && exit 1 )
+			[ -d "$MMDAPP/.local" ] || ( echo "⛔ ERROR: expecting '$MMDAPP/.local' directory." >&2 && exit 1 )
 
 			cd "$MMDAPP"
 			export MMDAPP
@@ -66,7 +66,7 @@ DISTROCONSOLE
 		return 0
 	;;
 	*)
-		echo "ERROR: $MDSC_CMD: invalid option: $1" >&2
+		echo "⛔ ERROR: $MDSC_CMD: invalid option: $1" >&2
 		set +e ; return 1
 	;;
 esac

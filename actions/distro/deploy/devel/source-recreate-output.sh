@@ -1,6 +1,6 @@
 #/bin/sh
 
-[ -d "$MMDAPP/source" ] || ( echo "ERROR: expecting 'source' directory." >&2 && exit 1 )
+[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 
 
 # will need to re-run after that.
