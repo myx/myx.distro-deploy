@@ -110,7 +110,7 @@ InstallPrepareFilesInternalPrintScript(){
 					done
 					
 					if [ -z "$sourceText" ] ; then
-						echo "# WARNING: no targets for cloning task: '${cloneSourcePath##$sourcePath}$sourceFileName'"
+						echo "# 🙋 WARNING: no targets for cloning task: '${cloneSourcePath##$sourcePath}$sourceFileName'"
 						continue
 					fi
 
