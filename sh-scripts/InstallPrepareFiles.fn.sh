@@ -66,7 +66,7 @@ InstallPrepareFilesInternalPrintScript(){
 	## sync files from source to output
 	##
 	local sourceName sourcePath mergePath filterGlob
-	if [ ! -z "${allSyncFolders:0:1}" ] ; then
+	if [ -n "${allSyncFolders:0:1}" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: sync files from source to output" >&2
 		echo '{'
 			echo 'echo "ImagePrepareFiles: 🔁 syncing files..." >&2'
@@ -87,7 +87,7 @@ InstallPrepareFilesInternalPrintScript(){
 	## clone/multiply files
 	##
 	local sourceName sourcePath mergePath filterGlob
-	if [ ! -z "${allSyncFolders:0:1}" ] ; then
+	if [ -n "${allSyncFolders:0:1}" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: clone/multiply files" >&2
 		local executeScript="$(
 			echo "$allSyncFolders" \
@@ -121,7 +121,7 @@ InstallPrepareFilesInternalPrintScript(){
 				done 
 			done
 		)"
-		if [ ! -z "${executeScript:0:1}" ] ; then
+		if [ -n "${executeScript:0:1}" ] ; then
 			echo '{'
 				echo 'echo "ImagePrepareFiles: 🔂 clone/multiply files..." >&2'
 				echo "$executeScript"

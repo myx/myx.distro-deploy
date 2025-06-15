@@ -4,7 +4,7 @@
 : "${MMDAPP:?⛔ ERROR: MMDAPP is not set}"
 
 if [ "$1" = "--distro-path-auto" ] ; then
-	if [ ! -z "$MDSC_OPTION" ] ; then
+	if [ -n "$MDSC_OPTION" ] ; then
 		set -- "$MDSC_OPTION"
 	elif [ -d "$MMDAPP/source/" ] && [ -d "$MMDAPP/cached" ] ; then
 		if [ -d "$MMDAPP/output/" ] ; then

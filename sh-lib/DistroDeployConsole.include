@@ -3,7 +3,7 @@
 
 case "$1" in 
 	--shell-prompt)
-		if [ ! -z "$MDSC_INT_CD" ] ; then
+		if [ -n "$MDSC_INT_CD" ] ; then
 			echo "Changing directory: $MDSC_INT_CD" >&2
 			cd "$MDSC_INT_CD"
 			export -n MDSC_INT_CD

@@ -48,7 +48,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 			echo "$MDSC_CMD: ⛔ ERROR: file is missing: $fileName" >&2; 
 			set +e ; return 1
 		fi
-		if [ ! -z "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
+		if [ -n "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
 			printf ' -e %q' "$m"
 		done ) )" ] ; then
 			[ -z "$MDSC_DETAIL" ] || echo "- $MDSC_CMD: skip (scripts filter): $sourceName/$scriptPath" >&2

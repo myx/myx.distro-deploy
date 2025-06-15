@@ -151,7 +151,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		## for every sync task
 		##
 		local sourcePath targetPath
-		if [ ! -z "${deploySyncFilesTasks:0:1}" ] ; then
+		if [ -n "${deploySyncFilesTasks:0:1}" ] ; then
 			echo "$deploySyncFilesTasks" \
 			| while read -r sourcePath targetPath; do
 	
@@ -533,7 +533,7 @@ DeployProjectSsh(){
 		case "$1" in
 			--print-files)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-files option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -561,7 +561,7 @@ DeployProjectSsh(){
 			;;
 			--print-installer)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --print-installer option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -584,7 +584,7 @@ DeployProjectSsh(){
 			;;
 			--deploy-none)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-none option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -594,7 +594,7 @@ DeployProjectSsh(){
 				deployType="${1#"--print-"}"
 				deployType="${deployType%"-script"}"
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -622,7 +622,7 @@ DeployProjectSsh(){
 			--deploy-sync|--deploy-exec|--deploy-full)
 				local deployType="${1#--deploy-}"
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: ⛔ ERROR: no options allowed after --deploy-$deployType option ($@)" >&2
 					set +e ; return 1
 				fi

@@ -325,7 +325,7 @@ DistroImageProjectProvidesMerged(){
 	local MDSC_CMD='DistroImageProjectProvidesMerged'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	#if [ ! -z "${MDSC_PRJ_MPRV:0:1}" ] ; then
+	#if [ -n "${MDSC_PRJ_MPRV:0:1}" ] ; then
 	#	echo "$MDSC_PRJ_MPRV"
 	#	return 0
 	#fi
@@ -414,7 +414,7 @@ DistroImageEnsureProvidesMergedFile(){
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDAPRV_NAME" >&2
 		set +e ; return 1
 	fi
-	if [ ! -z "${MDSC_IDAPRV_NAME:0:1}" ] ; then
+	if [ -n "${MDSC_IDAPRV_NAME:0:1}" ] ; then
 		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
@@ -456,7 +456,7 @@ DistroImageEnsureProvidesOwnedFile(){
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDOPRV_NAME" >&2
 		set +e ; return 1
 	fi
-	if [ ! -z "${MDSC_IDOPRV_NAME:0:1}" ] ; then
+	if [ -n "${MDSC_IDOPRV_NAME:0:1}" ] ; then
 		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
@@ -541,7 +541,7 @@ DistroImageProjectContextVariables(){
 			
 				# if variable is not defined - creates variable/array with given value 
 				create)
-					printf '[ ! -z "$VAR_%s" ] || VAR_%s=%q\n' \
+					printf '[ -n "$VAR_%s" ] || VAR_%s=%q\n' \
 						"$variableName" \
 						"$variableName" "$variableValue"
 				;;
@@ -710,7 +710,7 @@ DistroImageCheckSourcePath(){
 			done < "$( DistroImageProjectSequenceFile )" \
 		)"
 	
-		if [ ! -z "${commandOutput:0:1}" ] ; then
+		if [ -n "${commandOutput:0:1}" ] ; then
 			echo "$commandOutput"
 			return 0
 		fi
@@ -741,7 +741,7 @@ DistroImageCheckSourcePath(){
 		done \
 	)"
 	
-	if [ ! -z "${commandOutput:0:1}" ] ; then
+	if [ -n "${commandOutput:0:1}" ] ; then
 		echo "$commandOutput"
 		return 0
 	fi

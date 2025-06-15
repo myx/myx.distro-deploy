@@ -48,7 +48,7 @@ NotifySmart(){
 
 	logger -s -t "$eventType" "@${eventUser:-$(whoami)}: $eventText"
 
-	if [ ! -z "$SLACK_TOKEN" ] ; then
+	if [ -n "$SLACK_TOKEN" ] ; then
 		local slackBearer="${slackBearer:-$SLACK_TOKEN}" slackChannel="${slackChannel:-$SLACK_TOPIC}"
 		case "$eventType" in
 			alert)

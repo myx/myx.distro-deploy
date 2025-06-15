@@ -79,7 +79,7 @@ ListSshTargets(){
 			;;
 			--all-targets)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "$MDSC_CMD: no options allowed after --all-targets option ($MDSC_OPTION, $@)" >&2
 					set +e ; return 1
 				fi

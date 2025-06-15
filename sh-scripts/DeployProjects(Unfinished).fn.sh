@@ -81,7 +81,7 @@ DeployProjectSsh(){
 			;;
 			--print-folders)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-folders option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -89,7 +89,7 @@ DeployProjectSsh(){
 			;;
 			--print-files)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-files option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -107,7 +107,7 @@ DeployProjectSsh(){
 			;;
 			--print-sync-tasks)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-sync-tasks option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -118,7 +118,7 @@ DeployProjectSsh(){
 			;;
 			--print-installer)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-installer option ($@)" >&2
 					set +e ; return 1
 				fi
@@ -136,7 +136,7 @@ DeployProjectSsh(){
 			;;
 			--print-ssh-target)
 				shift
-				if [ ! -z "$1" ] ; then
+				if [ -n "$1" ] ; then
 					echo "ERROR: DeployProjectSsh: no options allowed after --print-ssh-target option ($@)" >&2
 					set +e ; return 1
 				fi
