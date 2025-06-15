@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+case "$1" in
+	--make-workspace-integration-files)
+		shift
+
+		if [ "$MDLT_ORIGIN" == "$MMDAPP/.local" ] ; then
+			touch $MMDAPP/.local/MDSC.deploy.settings.env
+		fi
+
+		DistroDeployTools --make-console-command "$@"
+		return 0
+	;;
+	--make-console-command)
+		shift
+		set -e
+		( 
+			DistroDeployTools(){
+				. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DeployTools.Make.include"
+			}
+			DistroDeployTools --make-console-script > "$MMDAPP/DistroDeployConsole.sh"
+		)
+		chmod 770 "$MMDAPP/DistroDeployConsole.sh"
+
+		if [ "$1" != "--quiet" ] ; then
+			local consoles="$( ls $MMDAPP/Distro*Console.sh | sed 's|^|	|g' )"
+			printf \
+				"\nNote: DistroDeployConsole.sh created, now you can run:\n%s\n\n" \
+				"$consoles" \
+			>&2
+		fi
+
+		return 0
+	;;
+	--make-console-script)
+		shift
+
+		cat << 'DISTROCONSOLE'
+			#!/usr/bin/env bash
+
+			set -e
+
+			if [ -z "$MMDAPP" ] || [ ! -d "$MMDAPP" ] ; then
+				MMDAPP="$( ( cd $(dirname "$0") ; pwd ) )"
+			fi
+
+			[ -d "$MMDAPP/.local" ] || ( echo "⛔ ERROR: expecting '$MMDAPP/.local' directory." >&2 && exit 1 )
+
+			MDLT_CONSOLE_ORIGIN="$( ( \
+				. "$MMDAPP/.local/MDLT.settings.env" ; \
+				echo "${MDLT_CONSOLE_ORIGIN:-.local}" \
+			) )"
+			MDLC_INMODE="${MDLT_CONSOLE_ORIGIN#$MMDAPP/}"
+			case "$MDLC_INMODE" in
+				.local)
+					export MDLT_ORIGIN="$MMDAPP/.local"
+				;;
+				source)
+					if [ -f "$MMDAPP/source/myx/myx.distro-.local/sh-lib/LocalContext.include" ] ; then
+						export MDLT_ORIGIN="$MMDAPP/$MDLC_INMODE"
+					else
+						export MDLT_ORIGIN="$MMDAPP/.local"
+					fi
+				;;
+				/*)
+					if [ -f "$MDLC_INMODE/myx/myx.distro-.local/sh-lib/LocalContext.include" ] ; then
+						export MDLT_ORIGIN="$MDLC_INMODE"
+					else
+						export MDLT_ORIGIN="$MMDAPP/.local"
+					fi
+				;;
+				*)
+					export MDLT_ORIGIN="$MMDAPP/.local"
+				;;
+			esac
+			if [ ! -f "$MMDAPP/source/myx/myx.distro-source/sh-lib/SourceContext.include" ] ; then
+				echo "⛔ ERROR: Context.SetInputSpec: can't find/detect origin" >&2
+				exit 1
+			fi
+
+			cd "$MMDAPP"
+			export MMDAPP
+
+			if [ "$1" == "--non-interactive" ] ; then
+				shift
+				{
+					echo . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+					cat
+				} | bash "$@"
+				exit 0
+			fi
+			
+			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
+DISTROCONSOLE
+
+		return 0
+	;;
+	*)
+		echo "⛔ ERROR: $MDSC_CMD: invalid option: $1" >&2
+		set +e ; return 1
+	;;
+esac

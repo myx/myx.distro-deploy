@@ -4,7 +4,7 @@
 echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
+. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
 DistroSystemContext --distro-from-output
 #DistroSystemContext --distro-from-distro
 #DistroSystemContext --distro-path-auto
@@ -48,7 +48,7 @@ Action(){
 Deploy(){
 	case "$1" in
 		''|--*)
-			( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployConsole.include" )
+			( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.include" )
 			set +e ; return 1
 		;;
 	esac

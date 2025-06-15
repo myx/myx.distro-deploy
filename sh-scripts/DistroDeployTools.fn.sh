@@ -20,7 +20,7 @@ DistroDeployTools(){
 
 	case "$1" in
 		--make-*)
-			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsMake.include"
+			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DeployTools.Make.include"
 			set +e ; return 1
 		;;
 		--*-config-option)
