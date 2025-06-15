@@ -41,7 +41,7 @@ Variables (context environment) available in: actions, build-step scripts and co
 
 	MMDAPP - workspace root (something like: "/Volumes/ws-2017/myx-work")
 	MDSC_INMODE - console mode ("deploy")
-	MDSC_ORIGIN - source of System (Source or Deploy) Console commands (something like: "/Volumes/ws-2017/myx-work/.local/")
+	MDLT_ORIGIN - source of System (Source or Deploy) Console commands (something like: "/Volumes/ws-2017/myx-work/.local/")
 	MDSC_OPTION - console mode settings (something like: "--distro-from-output")
 	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/output/distro")
 	MDSC_CACHED - current cache root (something like: "/Volumes/ws-2017/myx-work/cached")

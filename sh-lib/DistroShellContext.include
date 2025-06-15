@@ -26,7 +26,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 				if DistroShellContext --is-spec-option "$1" ; then
 					local adpcChangeSpec="true"
 					[ -z "$MDSC_DETAIL" ] || echo "DistroDeployContext: input spec: $1" >&2
-					. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/ShellContext.SetInputSpec.include"		
+					. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
 					return 0
 				fi
 			;;
@@ -34,7 +34,7 @@ if ! type DistroShellContext >/dev/null 2>&1 ; then
 	}
 fi
 
-if [ -z "$MDSC_ORIGIN" ] || [ "$MDSC_ORIGIN" == "${MDSC_ORIGIN#$MMDAPP/}" ] ; then
+if [ -z "$MDLT_ORIGIN" ] || [ "$MDLT_ORIGIN" == "${MDLT_ORIGIN#$MMDAPP/}" ] ; then
 	export MDSC_DETAIL=""
 	export MDSC_INMODE=""
 	export MDSC_SOURCE=""
@@ -42,17 +42,7 @@ if [ -z "$MDSC_ORIGIN" ] || [ "$MDSC_ORIGIN" == "${MDSC_ORIGIN#$MMDAPP/}" ] ; th
 	export MDSC_OUTPUT=""
 	export MDSC_OPTION=""
 
-	if	   [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" ] \
-		&& [ -d "$MMDAPP/source/myx/myx.distro-system" ] \
-		&& [ -d "$MMDAPP/source/myx/myx.distro-.local" ] \
-		&& [ -d "$MMDAPP/source/myx/myx.common/os-myx.common" ] \
-	; then
-		export MDSC_ORIGIN="$MMDAPP/source"
-	else
-		export MDSC_ORIGIN="${MDLT_ORIGIN:-$MMDAPP/.local}"
-	fi
-	
-	echo "DistroDeployContext: init: $MDSC_ORIGIN/myx/myx.distro-deploy" >&2
+	echo "DistroDeployContext: init: $MDLT_ORIGIN/myx/myx.distro-deploy" >&2
 fi
 
 while true ; do
@@ -63,7 +53,7 @@ while true ; do
 	fi 
 	if DistroShellContext --is-spec-option "$1" ; then
 		[ -n "$MDSC_DETAIL" ] && echo "DistroDeployContext: input spec: $1" >&2
-		. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/ShellContext.SetInputSpec.include"		
+		. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
 		shift
 		continue
 	fi
