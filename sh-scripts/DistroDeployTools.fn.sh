@@ -24,7 +24,7 @@ DistroDeployTools(){
 			set +e ; return 1
 		;;
 		--*-config-option)
-			. "$MMDAPP/.local/myx/myx.distro-.local/sh-lib/DistroLocalToolsConfig.include"
+			. "$MMDAPP/.local/myx/myx.distro-.local/sh-lib/LocalTools.Config.include"
 			set +e ; return 1
 		;;
 		--upgrade-deploy-tools)
