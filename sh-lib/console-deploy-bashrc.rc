@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ^^^ for syntax checking in the editor only
 
-echo "DeployConsole: Working in $MMDAPP" >&2
+[ -z "$MDLT_ORIGIN" ] && echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
 . "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
