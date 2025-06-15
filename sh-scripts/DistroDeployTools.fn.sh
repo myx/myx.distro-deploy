@@ -27,10 +27,6 @@ DistroDeployTools(){
 			. "$MMDAPP/.local/myx/myx.distro-.local/sh-lib/DistroLocalToolsConfig.include"
 			set +e ; return 1
 		;;
-		--completion-*)
-			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
-			set +e ; return 1
-		;;
 		--upgrade-deploy-tools)
 			shift
 			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy

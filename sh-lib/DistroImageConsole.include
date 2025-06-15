@@ -2,10 +2,6 @@
 # ^^^ for syntax checking in the editor only
 
 case "$1" in 
-	--completion-*)
-		. "$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroDeployToolsCompletion.include"
-		set +e ; return 1
-	;;
 	''|--help)
 		shift
 		( . "$MDSC_ORIGIN/myx/myx.distro-system/sh-lib/HelpConsoleDistro.include" )
