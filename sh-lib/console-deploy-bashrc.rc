@@ -4,10 +4,10 @@
 echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
-DistroShellContext --distro-from-output
-#DistroShellContext --distro-from-distro
-#DistroShellContext --distro-path-auto
+. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
+DistroSystemContext --distro-from-output
+#DistroSystemContext --distro-from-distro
+#DistroSystemContext --distro-path-auto
 
 # export BASH_ENV="$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
@@ -18,8 +18,6 @@ fi
 PATH=$(echo "$PATH" | sed -E "s|$MDLT_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
 PATH+=":$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts"
 PATH+=":$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts"
-
-. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DistroShellContext.include"
 
 # Action myx/yaumnrc/test-parser.url
 # Action make-ws2017.sh
