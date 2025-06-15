@@ -9,7 +9,7 @@ DistroShellContext --distro-from-output
 #DistroShellContext --distro-from-distro
 #DistroShellContext --distro-path-auto
 
-export BASH_ENV="$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
+# export BASH_ENV="$MDSC_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
 if [ -x "$MDSC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
 	PATH="$MDSC_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
