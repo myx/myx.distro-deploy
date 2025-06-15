@@ -57,14 +57,14 @@ case "$1" in
 					export MDLT_ORIGIN="$MMDAPP/.local"
 				;;
 				source)
-					if [ -f "$MMDAPP/source/myx/myx.distro-.local/sh-lib/LocalContext.include" ] ; then
+					if [ -f "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/DeployContext.include" ] ; then
 						export MDLT_ORIGIN="$MMDAPP/$MDLC_INMODE"
 					else
 						export MDLT_ORIGIN="$MMDAPP/.local"
 					fi
 				;;
 				/*)
-					if [ -f "$MDLC_INMODE/myx/myx.distro-.local/sh-lib/LocalContext.include" ] ; then
+					if [ -f "$MDLC_INMODE/myx/myx.distro-deploy/sh-lib/DeployContext.include" ] ; then
 						export MDLT_ORIGIN="$MDLC_INMODE"
 					else
 						export MDLT_ORIGIN="$MMDAPP/.local"
@@ -74,7 +74,7 @@ case "$1" in
 					export MDLT_ORIGIN="$MMDAPP/.local"
 				;;
 			esac
-			if [ ! -f "$MMDAPP/source/myx/myx.distro-source/sh-lib/SourceContext.include" ] ; then
+			if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployContext.include" ] ; then
 				echo "⛔ ERROR: Context.SetInputSpec: can't find/detect origin" >&2
 				exit 1
 			fi
