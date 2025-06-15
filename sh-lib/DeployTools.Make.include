@@ -75,7 +75,7 @@ case "$1" in
 				;;
 			esac
 			if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployContext.include" ] ; then
-				echo "⛔ ERROR: Context.SetInputSpec: can't find/detect origin, spec: $MDLT_CONSOLE_ORIGIN, origin: $MDLT_ORIGIN" >&2
+				echo "⛔ ERROR: DeployContext.SetInputSpec: can't find/detect origin, spec: $MDLT_CONSOLE_ORIGIN, origin: $MDLT_ORIGIN" >&2
 				exit 1
 			fi
 
