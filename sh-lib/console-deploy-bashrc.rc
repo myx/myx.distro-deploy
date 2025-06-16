@@ -123,9 +123,9 @@ Help(){
 }
 
 if complete -D &>/dev/null; then
-	complete -F Distro -D
+	complete -o default -o filenames -o nospace -F Distro -D
 else
-	complete -F Distro "" "*" "Action" "Require" "Distro" "Deploy" "Source" "which"
+	complete -o default -o filenames -o nospace -F Distro "" "*" "Action" "Require" "Distro" "Deploy" "Source" "which"
 fi
 
 PS1="\` Deploy --shell-prompt \`: $PS1"
