@@ -16,8 +16,8 @@ function DeployConsoleCompletionHelper(){
 
 	local compPrompt="$1" ; shift
 
-	[ "${COMP_WORDS[0]}" == "Source" ] || {
-		echo "⛔ ERROR: --completion-helper: must be called to complete 'Source' command: $@, ${COMP_WORDS[0]}" >&2
+	[ "${COMP_WORDS[0]}" == "Deploy" ] || {
+		echo "⛔ ERROR: --completion-helper: must be called to complete 'Deploy' command: $@, ${COMP_WORDS[0]}" >&2
 		set +e ; return 1
 	}
 	[ "$COMP_LINE" == "$compPrompt" ] || {
