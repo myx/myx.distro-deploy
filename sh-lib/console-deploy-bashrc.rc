@@ -15,7 +15,8 @@ if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" 
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
-PATH=$(echo "$PATH" | sed -E "s|$MDLT_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
+# add paths, replace if any
+PATH=$(echo "$PATH" | sed -E "s|:$MDLT_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
 PATH+=":$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts"
 PATH+=":$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts"
 
@@ -46,10 +47,12 @@ Action(){
 
 
 Deploy(){
+	set -e
+
 	case "$1" in
 		''|--*)
 			( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.include" )
-			set +e ; return 1
+			return 0
 		;;
 	esac
 
@@ -82,10 +85,12 @@ Deploy(){
 
 if ! type Source >/dev/null 2>&1 ; then
 	Source(){
+		set -e
+
 		case "$1" in
 			''|--*)
 				( . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/SourceConsole.include" )
-				set +e ; return 1
+				return 0
 			;;
 		esac
 
@@ -122,12 +127,21 @@ Help(){
 	set +e ; return 1
 }
 
-if complete -D &>/dev/null; then
-	complete -o default -o filenames -F Distro -D
-else
-	complete -o default -o filenames -F Distro "" "*" "Action" "Require" "Distro" "Deploy" "Source" "which"
-fi
+# ⚠️ Order matters in Bash 3.2: the wildcard ("*") registration must come before the specific (Distro) one, so that when you type:
+#complete -W "Help Action Require Distro Deploy Source" \
 
+#if complete -D &>/dev/null; then
+#	complete -F Distro -D
+#fi
+
+complete -W "Help Require" \
+         -o default -o filenames \
+         "*"
+complete -F Distro \
+         -o filenames \
+        "Action" "Require" "Distro" "Deploy" "Source"
+
+PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
 export PS1
 
