@@ -30,7 +30,7 @@ function DeployConsoleCompletionHelper(){
 	# grab the vertical list
 	list=$(
 		Distro --completion-all \
-		| grep '^\(DistroSource\|Source\|Build\|Clean\|List\).*.fn.sh$' \
+		| grep '^\(DistroDeploy\|Deploy\|ListDistro\|ListAll\|CleanAll\).*.fn.sh$' \
 		| sort -u \
 		| sed 's:\.fn\.sh$::' 
 	)
