@@ -11,13 +11,6 @@ case "$1" in
 		printf "MDDC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
 		return 0
 	;;
-	--completion-helper)
-		shift
-		(
-			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.CompletionHelper.include"
-			DeployConsoleCompletionHelper "$@"
-		)
-	;;
 	''|--help)
 		shift
 		( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/HelpConsoleDeploy.include" )
