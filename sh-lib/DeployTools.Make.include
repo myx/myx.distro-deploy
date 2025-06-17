@@ -92,7 +92,7 @@ case "$1" in
 				exit 0
 			fi
 			
-			export MDSC_ARGUMENTS="$@" \
+			export MDSC_ARGUMENTS="$@"
 			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i
 DISTROCONSOLE
 
