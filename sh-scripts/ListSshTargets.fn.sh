@@ -57,10 +57,10 @@ ListSshTargets(){
 	while true ; do
 		case "$1" in
 			--no-cache)
-				shift ; local useNoCache="--no-cache"
+				useNoCache=$1 ; shift
 			;;
 			--no-index)
-				shift ; local useNoIndex="--no-index"
+				useNoIndex=$1 ; shift
 			;;
 			--ssh-host)
 				shift ; useSshHost="$1" ; shift

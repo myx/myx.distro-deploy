@@ -201,7 +201,7 @@ DistroImageProjectSshTargets(){
 				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
 			;;
 			--no-cache)
-				shift ; local useNoCache="--no-cache"
+				useNoCache=$1 ; shift
 			;;
 			--no-index)
 				shift ; local useNoIndex="--no-index"

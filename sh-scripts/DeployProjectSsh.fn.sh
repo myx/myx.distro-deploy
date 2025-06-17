@@ -318,8 +318,7 @@ DeployProjectsSsh(){
 	while true ; do
 		case "$1" in
 			--no-cache)
-				shift
-				local useNoCache="--no-cache"
+				useNoCache=$1 ; shift
 			;;
 			--no-index)
 				shift

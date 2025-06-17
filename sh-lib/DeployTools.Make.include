@@ -87,11 +87,11 @@ case "$1" in
 				{
 					echo ". '$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc'"
 					cat
-				} | bash "$@"
+				} | bash -- "$@"
 				exit 0
 			fi
 			
-			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i "$@"
+			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i -- "$@"
 DISTROCONSOLE
 
 		return 0
