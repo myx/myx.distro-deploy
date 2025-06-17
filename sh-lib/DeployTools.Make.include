@@ -85,13 +85,15 @@ case "$1" in
 			if [ "$1" == "--non-interactive" ] ; then
 				shift
 				{
+					echo MDSC_ARGUMENTS="$@"
 					echo ". '$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc'"
 					cat
-				} | bash -- "$@"
+				} | bash -s
 				exit 0
 			fi
 			
-			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i -- "$@"
+			export MDSC_ARGUMENTS="$@" \
+			bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc" -i
 DISTROCONSOLE
 
 		return 0

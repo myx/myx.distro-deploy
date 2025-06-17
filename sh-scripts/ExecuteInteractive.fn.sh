@@ -21,6 +21,12 @@ ExecuteInteractive(){
 	
 	set -e
 
+	local MDSC_CMD='ExecuteInteractive'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
+	
+
 	case "$1" in
 		--project)
 			shift
@@ -35,7 +41,7 @@ ExecuteInteractive(){
 		--select-from-env)
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
-				echo "⛔ ERROR: ListSshTargets: no projects selected!" >&2
+				echo "⛔ ERROR: $MDSC_CMD: no projects selected!" >&2
 				set +e ; return 1
 			fi
 		;;
@@ -45,24 +51,6 @@ ExecuteInteractive(){
 			return 0
 		;;
 	esac
-
-	local useNoCache=""
-	local useNoIndex=""
-
-	while true ; do
-		case "$1" in
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				shift
-				local useNoIndex="--no-index"
-			;;
-			*)
-				break
-			;;
-		esac
-	done
 	
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \

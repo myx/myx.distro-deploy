@@ -23,6 +23,8 @@ ExecuteParallel(){
 
 	local MDSC_CMD='ExecuteParallel'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
 	
 	case "$1" in
 		--all-targets)
@@ -41,9 +43,6 @@ ExecuteParallel(){
 		;;
 	esac
 
-	local useNoCache=""
-	local useNoIndex=""
-
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
@@ -56,13 +55,6 @@ ExecuteParallel(){
 
 	while true ; do
 		case "$1" in
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				shift
-				local useNoIndex="--no-index"
-			;;
 			--no-sleep)
 				shift
 				executeSleep="false"

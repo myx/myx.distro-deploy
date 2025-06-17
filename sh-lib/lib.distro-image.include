@@ -185,6 +185,8 @@ DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
+	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
 	local useSshHost="${useSshHost:-}"
@@ -199,12 +201,6 @@ DistroImageProjectSshTargets(){
 		case "$1" in
 			--project)
 				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
-			;;
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				shift ; local useNoIndex="--no-index"
 			;;
 			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
@@ -246,10 +242,10 @@ DistroImageProjectSshTargets(){
 		| awk '!x[$0]++' \
 	)"
 
-	if [ "$useNoCache" != "--no-cache" ] ; then
+	if [ "$MDSC_NO_CACHE" != "--no-cache" ] ; then
 		Require ListProjectSequence
 		local clientSettingsSpec="$( \
-			ListProjectSequence "$MDSC_PRJ_NAME" $useNoCache $useNoIndex --print-provides \
+			ListProjectSequence "$MDSC_PRJ_NAME" $MDSC_NO_CACHE $MDSC_NO_INDEX --print-provides \
 			| cut -d" " -f2 \
 			| grep '^deploy-ssh-client-settings:' \
 			| sed 's|^deploy-ssh-client-settings:||' \

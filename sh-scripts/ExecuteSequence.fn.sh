@@ -27,6 +27,8 @@ ExecuteSequence(){
 
 	local MDSC_CMD='ExecuteSequence'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
 	
 	case "$1" in
 		--all-targets)
@@ -45,9 +47,6 @@ ExecuteSequence(){
 		;;
 	esac
 
-	local useNoCache=""
-	local useNoIndex=""
-
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
@@ -58,13 +57,6 @@ ExecuteSequence(){
 
 	while true ; do
 		case "$1" in
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				shift
-				local useNoIndex="--no-index"
-			;;
 			--no-sleep)
 				shift
 				executeSleep="false"

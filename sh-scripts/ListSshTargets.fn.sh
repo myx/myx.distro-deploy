@@ -24,6 +24,8 @@ ListSshTargets(){
 
 	local MDSC_CMD='ListSshTargets'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
 	
 	case "$1" in
 		--all-targets|--line-prefix|--line-suffix)
@@ -42,9 +44,6 @@ ListSshTargets(){
 		;;
 	esac
 
-	local useNoCache=""
-	local useNoIndex=""
-
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
@@ -56,12 +55,6 @@ ListSshTargets(){
 	
 	while true ; do
 		case "$1" in
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				useNoIndex=$1 ; shift
-			;;
 			--ssh-host)
 				shift ; useSshHost="$1" ; shift
 			;;

@@ -286,9 +286,10 @@ DeployProjectsSsh(){
 	type Prefix >/dev/null 2>&1 || \
 		. "/usr/local/share/myx.common/bin/lib/prefix"
 
-
 	local MDSC_CMD='DeployProjectsSsh'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
 	
 	if [ ! -d "$MMDAPP/output" ] ; then
 		if [ ! -d "$MMDAPP/source" ] ; then
@@ -317,13 +318,6 @@ DeployProjectsSsh(){
 
 	while true ; do
 		case "$1" in
-			--no-cache)
-				useNoCache=$1 ; shift
-			;;
-			--no-index)
-				shift
-				local useNoIndex="--no-index"
-			;;
 			--no-sleep)
 				shift
 				executeSleep="false"
