@@ -123,7 +123,7 @@ if ! type Source >/dev/null 2>&1 ; then
 fi
 
 Help(){
-	( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployConsole.include" )
+	( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/HelpDistroDeployConsole.include" )
 	set +e ; return 1
 }
 

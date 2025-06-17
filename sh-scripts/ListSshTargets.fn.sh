@@ -138,7 +138,7 @@ case "$0" in
 			echo "syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
 			echo "syntax: ListSshTargets.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/HelpSelectProjects.include"
+				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ListSshTargets.fn.sh --all-targets" >&2
 

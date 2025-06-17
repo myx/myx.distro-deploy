@@ -95,7 +95,7 @@ case "$0" in
 			echo "syntax: ExecuteInteractive.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteInteractive.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/HelpSelectProjects.include"
+				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ExecuteInteractive.fn.sh --select-projects l6 -l root uname -a" >&2
 				echo "    ExecuteInteractive.fn.sh --select-merged-keywords l6 -l root uname -a" >&2

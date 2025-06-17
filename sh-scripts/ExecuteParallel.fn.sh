@@ -219,7 +219,7 @@ case "$0" in
 			echo "syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "syntax: ExecuteParallel.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/HelpSelectProjects.include"
+				. "$MMDAPP/source/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ExecuteParallel.fn.sh --select-all --display-targets -l root" >&2
 				echo "    ExecuteParallel.fn.sh --select-projects l6 --execute-stdin -l root" >&2
