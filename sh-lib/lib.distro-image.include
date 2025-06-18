@@ -185,7 +185,7 @@ DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseOptions.include"
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
