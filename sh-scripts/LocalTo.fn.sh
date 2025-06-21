@@ -13,7 +13,7 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 fi
 
 if ! type DistroImage >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 fi
 
 LocalTo(){
@@ -91,7 +91,7 @@ LocalTo(){
 		DistroSelectProject MDSC_PRJ_NAME "$projectName"
 		export MDSC_PRJ_NAME="$MDSC_PRJ_NAME"
 		set -x
-		bash --rcfile "$MMDAPP/source/myx/myx.distro-${MDSC_INMODE:-source}/sh-lib/console-${MDSC_INMODE:-source}-bashrc.rc" --noprofile
+		bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-${MDSC_INMODE:-source}/sh-lib/console-${MDSC_INMODE:-source}-bashrc.rc" --noprofile
 		#"$MMDAPP/actions/distro/source/console.sh" "$@"
 	)
 }

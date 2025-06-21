@@ -16,7 +16,7 @@ Require ListDistroProvides
 Require ListProjectProvides
 
 if ! type DistroImage >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 fi
 
 ##

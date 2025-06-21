@@ -44,7 +44,7 @@ DistroImageCommand(){
 	fi
 	
 	if [ -f "$DIR_SRC/java/ru/myx/distro/DistroImageCommand.java" ] ; then
-		. "$MMDAPP/source/myx/myx.distro-source/sh-lib/RunJavaClassClean.include" ;
+		. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/RunJavaClassClean.include" ;
 		RunJavaClassClean \
 			"myx/myx.distro-source" \
 			ru.myx.distro.DistroImageCommand \

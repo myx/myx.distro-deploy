@@ -8,7 +8,7 @@ if [ -z "$MMDAPP" ] ; then
 fi
 
 type RebuildActions >/dev/null 2>&1 || \
-	. "$MMDAPP/source/myx/myx.distro-source/sh-scripts/RebuildActions.fn.sh"
+	. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/RebuildActions.fn.sh"
 
 
 RebuildActionsFromDistro(){
@@ -16,7 +16,7 @@ RebuildActionsFromDistro(){
 		RebuildActions "$@"
 	else
 		( \
-			. "$MMDAPP/source/myx/myx.distro-system/sh-lib/SystemContext.include" ; \
+			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.include" ; \
 			DistroSystemContext --distro-path-auto
 			RebuildActions "$@"
 		)

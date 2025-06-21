@@ -13,7 +13,7 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 fi
 
 if ! type ImagePrepare >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
+	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
 fi
 
 ##
@@ -46,7 +46,7 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	## build prepare script start
 	##
-	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImagePrepareFiles.prefix.include"
+	cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/ImagePrepareFiles.prefix.include"
 
 	##
 	## check debug logging settings
@@ -198,7 +198,7 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	## build prepare script end
 	##
-	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImagePrepareFiles.suffix.include"
+	cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/ImagePrepareFiles.suffix.include"
 	
 	echo 'exit 0'
 	return 0

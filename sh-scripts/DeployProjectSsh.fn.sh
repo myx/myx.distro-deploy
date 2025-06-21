@@ -13,7 +13,7 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 fi
 
 if ! type ImageInstall >/dev/null 2>&1 ; then
-	. "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
+	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
 fi
 
 
@@ -111,7 +111,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	## remote host script start
 	##
-	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
+	cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/ImageDeploy.prefix.include"
 
 	##
 	## FIXME: should it be here?
@@ -273,7 +273,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	## remote host script end
 	##
-	cat "$MMDAPP/source/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
+	cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/ImageDeploy.suffix.include"
 	
 	echo 'exit 0'
 }
