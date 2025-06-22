@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+# source & deploy are different - they are loaded in rc, but scripts are requesting SystemContext.include, common to both
+
+: "${MMDAPP:?⛔ ERROR: MMDAPP is not set}"
+
+if type DistroDeployContext >/dev/null 2>&1 ; then
+	return 0
+fi
+
+DistroDeployContext(){
+	DistroSystemContext "$@"
+}
+
+. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
+DistroSystemContext --distro-from-output
