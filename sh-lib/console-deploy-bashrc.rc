@@ -4,14 +4,16 @@
 [ -z "$MDLT_ORIGIN" ] && echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
+. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
 DistroSystemContext --distro-from-output
-#DistroSystemContext --distro-from-distro
-#DistroSystemContext --distro-path-auto
+# DistroDeployContext --distro-from-output
+# DistroSystemContext --distro-from-distro
+# DistroSystemContext --distro-path-auto
 
 # export BASH_ENV="$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/console-deploy-bashrc.rc"
 
 if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
+	: ${MYXROOT:=$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/share/myx.common}
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
@@ -147,6 +149,7 @@ complete -F Distro \
 
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
+
 export PS1 PATH
 
 if [ -n "$MDSC_PRJ_NAME" ] ; then
