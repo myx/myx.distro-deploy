@@ -15,10 +15,14 @@ if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" 
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
-# add paths, replace if any
-PATH=$(echo "$PATH" | sed -E "s|:$MDLT_ORIGIN/myx/myx.distro-\(source\|deploy\|remote\)/sh-scripts||g")
-PATH+=":$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts"
-PATH+=":$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts"
+# add paths in particular order, replace if any
+PATH=$(
+  printf '%s:%s:%s:%s' \
+    "${PATH//:$MDLT_ORIGIN\/myx\/myx.distro-*\/sh-scripts/}" \
+    "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts" \
+    "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts" \
+    "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts"
+)
 
 # Action myx/yaumnrc/test-parser.url
 # Action make-ws2017.sh
