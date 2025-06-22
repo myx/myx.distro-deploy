@@ -147,7 +147,7 @@ complete -F Distro \
 
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
-export PS1
+export PS1 PATH
 
 if [ -n "$MDSC_PRJ_NAME" ] ; then
 	# DistroSelectProject MDSC_PRJ_NAME "$MDSC_PRJ_NAME"
