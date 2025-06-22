@@ -53,11 +53,9 @@ Action(){
 
 
 Deploy(){
-	set -e
-
 	case "$1" in
 		''|--*)
-			( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.include" )
+			( set -e ; . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.include" )
 			return 0
 		;;
 	esac
@@ -71,31 +69,19 @@ Deploy(){
 		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 	fi
 
-	set +e
-
-	"${distroCommand%.fn.sh}" "$@" || {
+	set +e ; "${distroCommand%.fn.sh}" "$@" || {
 		EXITCODE=$?
 		echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
-		set +e
-		return $EXITCODE
+		set +e ; return $EXITCODE
 	}
 	return 0
-
-	( "${distroCommand%.fn.sh}" "$@" ; ) || {
-		EXITCODE=$?
-		echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
-		set +e
-		return $EXITCODE
-	}
 }
 
 if ! type Source >/dev/null 2>&1 ; then
 	Source(){
-		set -e
-
 		case "$1" in
 			''|--*)
-				( . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/SourceConsole.include" )
+				( set -e ; . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/SourceConsole.include" )
 				return 0
 			;;
 		esac
@@ -109,22 +95,12 @@ if ! type Source >/dev/null 2>&1 ; then
 			. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
 		fi
 
-		set +e
-
-		"${distroCommand%.fn.sh}" "$@" || {
+		set +e ; "${distroCommand%.fn.sh}" "$@" || {
 			EXITCODE=$?
 			echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
-			set +e
-			return $EXITCODE
+			set +e ; return $EXITCODE
 		}
 		return 0
-
-		( "${distroCommand%.fn.sh}" "$@" ; ) || {
-			EXITCODE=$?
-			echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
-			set +e
-			return $EXITCODE
-		}
 	}
 fi
 
@@ -145,7 +121,7 @@ complete -W "Help Require" \
          "*"
 complete -F Distro \
          -o filenames \
-        "Action" "Require" "Distro" "Deploy" "Source"
+        "Action" "Require" "Remote" "Distro" "Deploy" "Source"
 
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
