@@ -33,8 +33,8 @@ DistroDeployTools(){
 			return 0
 		;;
 		''|--help)
-			echo "syntax: DistroDeployTools.fn.sh <option>" >&2
-			echo "syntax: DistroDeployTools.fn.sh [--help]" >&2
+			echo "📘 syntax: DistroDeployTools.fn.sh <option>" >&2
+			echo "📘 syntax: DistroDeployTools.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				cat "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/HelpDistroDeployTools.text" >&2
 			fi
@@ -51,7 +51,7 @@ case "$0" in
 	*/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh)
 
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
+			echo "📘 syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
 		fi
 
 		set -e

@@ -359,10 +359,10 @@ InstallPrepareFiles(){
 case "$0" in
 	*/sh-scripts/InstallPrepareFiles.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --print-sync-folders/--print-clone-files/--print-script" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh --project <project> --to-temp <command> [<argument...>]" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh --project <project> [--save-script <fileName>] --to-directory <targetDirectory>" >&2
-			echo "syntax: InstallPrepareFiles.fn.sh [--help]" >&2
+			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> --print-sync-folders/--print-clone-files/--print-script" >&2
+			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> --to-temp <command> [<argument...>]" >&2
+			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> [--save-script <fileName>] --to-directory <targetDirectory>" >&2
+			echo "📘 syntax: InstallPrepareFiles.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-sync-folders" >&2

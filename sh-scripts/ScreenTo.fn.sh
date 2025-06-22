@@ -53,9 +53,9 @@ ScreenTo(){
 case "$0" in
 	*/sh-scripts/ScreenTo.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: ScreenTo.fn.sh <project> [<ssh arguments>...]" >&2
-			echo "syntax: ScreenTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
-			echo "syntax: ScreenTo.fn.sh [--help]" >&2
+			echo "📘 syntax: ScreenTo.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "📘 syntax: ScreenTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
+			echo "📘 syntax: ScreenTo.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    ScreenTo.fn.sh ndss113" >&2

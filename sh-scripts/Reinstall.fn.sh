@@ -71,8 +71,8 @@ Reinstall(){
 case "$0" in
 	*/sh-scripts/Reinstall.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: Reinstall.fn.sh <project> [<ssh arguments>...]" >&2
-			echo "syntax: Reinstall.fn.sh [--help]" >&2
+			echo "📘 syntax: Reinstall.fn.sh <project> [<ssh arguments>...]" >&2
+			echo "📘 syntax: Reinstall.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    Reinstall.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2

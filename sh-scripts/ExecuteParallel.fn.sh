@@ -204,11 +204,11 @@ ExecuteParallel(){
 case "$0" in
 	*/sh-scripts/ExecuteParallel.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
-			echo "syntax: ExecuteParallel.fn.sh [--help]" >&2
+			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
+			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
+			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
+			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
+			echo "📘 syntax: ExecuteParallel.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
