@@ -26,32 +26,6 @@ PATH=$(
     "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts"
 )
 
-# Action myx/yaumnrc/test-parser.url
-# Action make-ws2017.sh
-
-Action(){
-	if [ -z "$1" ] || [ "$1" == "--help" ] ; then
-		( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/HelpConsoleAction.include" )
-		set +e ; return 1
-	fi
-	local actionCommand="$1" ; shift
-	case "$actionCommand" in
-		*.sh)
-			( \
-				. "$MMDAPP/actions/$actionCommand" ; \
-				echo "$actionCommand: finished." ; \
-			)
-		;;
-		*.url)
-			open "$MMDAPP/actions/$actionCommand"
-		;;
-		*)
-			echo "Unknown Action Type, source:" >&2
-			myx.common lib/prefix "    " cat "$MMDAPP/actions/$actionCommand"
-	esac
-}
-
-
 Deploy(){
 	case "$1" in
 		''|--*)

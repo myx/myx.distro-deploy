@@ -1,3 +1,0 @@
-echo "Syntax: Action <distroCommandName>" >&2
-echo >&2
-set +e ; return 1
