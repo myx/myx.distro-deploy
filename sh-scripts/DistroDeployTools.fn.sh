@@ -13,8 +13,13 @@ if [ -z "$MMDAPP" ] ; then
 fi
 
 DistroDeployTools(){
+	if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
+		. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+	fi
+	DistroSystemContext --distro-path-auto
+
 	local MDSC_CMD='DistroDeployTools'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD" $MDSC_NO_CACHE $MDSC_NO_INDEX "$@" >&2
 
 	set -e
 
@@ -32,11 +37,12 @@ DistroDeployTools(){
 			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
 			return 0
 		;;
-		''|--help)
+		--help|--help-syntax)
 			echo "📘 syntax: DistroDeployTools.fn.sh <option>" >&2
+			echo "📘 syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
 			echo "📘 syntax: DistroDeployTools.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				cat "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/HelpDistroDeployTools.text" >&2
+				cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployTools.text" >&2
 			fi
 			set +e ; return 1
 		;;
@@ -51,7 +57,8 @@ case "$0" in
 	*/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh)
 
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
+			DistroDeployTools "${1:-"--help-syntax"}"
+			exit 1
 		fi
 
 		set -e
