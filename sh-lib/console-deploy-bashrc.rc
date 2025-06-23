@@ -94,7 +94,7 @@ complete -W "Help Require" \
          -o default -o filenames \
          "*"
 complete -F Distro \
-         -o filenames \
+         -o nospace \
         "Action" "Require" "Remote" "Distro" "Deploy" "Source"
 
 PROMPT_COMMAND="set +e"
