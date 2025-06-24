@@ -21,16 +21,16 @@ DistroDeployTools(){
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	case "$1" in
 		--make-*)
-			. "$MMDAPP/.local/myx/myx.distro-deploy/sh-lib/DeployTools.Make.include"
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployTools.Make.include"
 			return 0
 		;;
 		--*-config-option)
-			. "$MMDAPP/.local/myx/myx.distro-.local/sh-lib/LocalTools.Config.include"
+			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/LocalTools.Config.include"
 			return 0
 		;;
 		--upgrade-deploy-tools)
 			shift
-			bash "$MMDAPP/.local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
+			bash "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
 			return 0
 		;;
 		''|--help|--help-syntax)
