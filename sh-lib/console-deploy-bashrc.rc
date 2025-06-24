@@ -22,7 +22,7 @@ if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" 
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
-# add paths in particular order, replace if any
+# add paths, replace if any
 PATH=$(
   printf '%s:%s:%s:%s' \
     "${PATH//:$MDLT_ORIGIN\/myx\/myx.distro-*\/sh-scripts/}" \
@@ -31,6 +31,7 @@ PATH=$(
     "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts"
 )
 
+if ! type Deploy >/dev/null 2>&1 ; then
 Deploy(){
 	case "$1" in
 		''|--*)
@@ -55,32 +56,33 @@ Deploy(){
 	}
 	return 0
 }
+fi
 
 if ! type Source >/dev/null 2>&1 ; then
-	Source(){
-		case "$1" in
-			''|--*)
-				( set -e ; . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/SourceConsole.include" )
-				return 0
-			;;
-		esac
+Source(){
+	case "$1" in
+		''|--*)
+			( set -e ; . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/SourceConsole.include" )
+			return 0
+		;;
+	esac
 
-		local distroCommand="$1" ; shift
-		if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-			if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
-				echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
-				set +e ; return 1
-			fi
-			. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+	local distroCommand="$1" ; shift
+	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
+		if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+			echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
+			set +e ; return 1
 		fi
+		. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+	fi
 
-		set +e ; "${distroCommand%.fn.sh}" "$@" || {
-			EXITCODE=$?
-			echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
-			set +e ; return $EXITCODE
-		}
-		return 0
+	set +e ; "${distroCommand%.fn.sh}" "$@" || {
+		EXITCODE=$?
+		echo "⛔ ERROR: exited with error status ($EXITCODE)" >&2
+		set +e ; return $EXITCODE
 	}
+	return 0
+}
 fi
 
 Help(){
@@ -98,9 +100,15 @@ Help(){
 complete -W "Help Require" \
          -o default -o filenames \
          "*"
+
+for f in "$MDLT_ORIGIN"/myx/myx.distro-{source,deploy,remote,system,.local}/sh-scripts/*.fn.sh; do
+  [ -x "$f" ] || continue
+  complete -F Distro "$(basename "$f")"
+done
+
 complete -F Distro \
          -o nospace \
-        "Action" "Require" "Remote" "Distro" "Deploy" "Source" "*.fn.sh"
+        "Action" "Require" "Remote" "Distro" "Deploy" "Source"
 
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
