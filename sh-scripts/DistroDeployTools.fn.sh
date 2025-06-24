@@ -54,7 +54,7 @@ case "$0" in
 		set -e
 
 		if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
-			. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/SystemContext.include"
+			. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
 		fi
 		DistroSystemContext --distro-path-auto
 
