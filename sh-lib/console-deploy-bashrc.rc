@@ -4,6 +4,11 @@
 [ -z "$MDLT_ORIGIN" ] && echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
+[ -z "MDSC_ARGUMENTS" ] || {
+	set -- $MDSC_ARGUMENTS
+	export MDSC_ARGUMENTS=""
+}
+
 . "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
 DistroSystemContext --distro-from-output
 # DistroDeployContext --distro-from-output
@@ -95,7 +100,7 @@ complete -W "Help Require" \
          "*"
 complete -F Distro \
          -o nospace \
-        "Action" "Require" "Remote" "Distro" "Deploy" "Source"
+        "Action" "Require" "Remote" "Distro" "Deploy" "Source" "*.fn.sh"
 
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
