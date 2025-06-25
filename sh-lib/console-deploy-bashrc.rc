@@ -110,6 +110,8 @@ complete -F Distro \
          -o nospace \
         "Action" "Require" "Remote" "Distro" "Deploy" "Source"
 
+export LANG=en_US.UTF-8
+
 PROMPT_COMMAND="set +e"
 PS1="\` Deploy --shell-prompt \`: $PS1"
 
