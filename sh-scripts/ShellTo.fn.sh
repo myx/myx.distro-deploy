@@ -18,10 +18,10 @@ fi
 
 ShellTo(){
 
-	set -e
-
 	local MDSC_CMD='ShellTo'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	set -e
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 
