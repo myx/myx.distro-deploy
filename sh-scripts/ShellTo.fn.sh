@@ -23,6 +23,8 @@ ShellTo(){
 	local MDSC_CMD='ShellTo'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
+
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
