@@ -245,7 +245,7 @@ DistroImageProjectSshTargets(){
 	if [ "$MDSC_NO_CACHE" != "--no-cache" ] ; then
 		Require ListProjectSequence
 		local clientSettingsSpec="$( \
-			ListProjectSequence "$MDSC_PRJ_NAME" $MDSC_NO_CACHE $MDSC_NO_INDEX --print-provides \
+			ListProjectSequence "$MDSC_PRJ_NAME" --print-provides \
 			| cut -d" " -f2 \
 			| grep '^deploy-ssh-client-settings:' \
 			| sed 's|^deploy-ssh-client-settings:||' \
