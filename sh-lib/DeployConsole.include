@@ -12,7 +12,12 @@ case "$1" in
 		printf "MDDC:%s:%s" "$MDSC_INMODE" "$(basename "${MDSC_PRJ_NAME:--}")"
 		return 0
 	;;
-	''|--help|--help-syntax)
+	--help|--help-syntax)
+		shift
+		( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/HelpConsoleDeploy.include" )
+		return 0
+	;;
+	'')
 		shift
 		( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/HelpConsoleDeploy.include" )
 		set +e ; return 1
