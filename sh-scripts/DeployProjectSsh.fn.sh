@@ -136,7 +136,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	printf '\t%s\\\n\t%s\\\n\t%s\n' \
 		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d 2>/dev/null || openssl dec -base64; } || ' \
 		'command -v base64 >/dev/null 2>&1 && { base64 --ignore-garbage -d 2>/dev/null || base64 -D; } || ' \
-		'command -v uudecode >/dev/null 2>&1 && uudecode -p'
+		'command -v uudecode >/dev/null 2>&1 && { { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p; }'
 	echo ") | tr -d '\r' | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
@@ -145,7 +145,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	( 
 		command -v openssl	>/dev/null 2>&1 && openssl base64 -e -A || \
 		command -v base64	>/dev/null 2>&1 && base64 -w0 || \
-		command -v uuencode	>/dev/null 2>&1 && uuencode -m - packed.tbz 
+		command -v uuencode	>/dev/null 2>&1 && uuencode -m - packed.tbz | sed '1d; /^====$/d'
 		printf '\n'    # ensure a trailing newline
 	)
 
