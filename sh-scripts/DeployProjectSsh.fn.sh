@@ -170,7 +170,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: openssl, base64 or uuencode utility is available" >&2
 			set +e ; return 1
 		}
-		printf '\n'    # ensure a trailing newline
 	}
 
 	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
