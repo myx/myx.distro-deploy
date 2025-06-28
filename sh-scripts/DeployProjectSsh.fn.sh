@@ -125,11 +125,31 @@ DeployProjectSshInternalPrintRemoteScript(){
 	## embed files needed
 	##
 	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
-	
-	# replaced by linux hack: printf "\n( uudecode -p | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-	printf "\n( uudecode -o /dev/stdout | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
-	tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
+
+	# old sender: 
+	#   printf '%b' "\n( uudecode -o /dev/stdout | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	# old receiver: 
+	#   tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
+
+	# decode on receiver side
+	echo '('
+	printf '\t%s\\\n\t%s\\\n\t%s\n' \
+		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d 2>/dev/null || openssl dec -base64; } || ' \
+		'command -v base64 >/dev/null 2>&1 && { base64 -d 2>/dev/null || base64 -D; } || ' \
+		'command -v uudecode >/dev/null 2>&1 && uudecode -p'
+	echo ") | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
+
+	# watch out: $(echo intentionally splits into several arguments!
+	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
+	# encode on sender side
+	( 
+		command -v openssl	>/dev/null 2>&1 && openssl base64 -e -A || \
+		command -v base64	>/dev/null 2>&1 && base64 -w0 || \
+		command -v uuencode	>/dev/null 2>&1 && uuencode -m - packed.tbz 
+	)
+
 	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
+	# remote script will continue after this
 	
 	##
 	## check do sync
