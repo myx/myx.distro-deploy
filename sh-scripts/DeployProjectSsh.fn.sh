@@ -133,9 +133,21 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 	# decode on receiver side
 	echo "tr -d '\\r' | {"
-	echo ' { command -v openssl >/dev/null 2>&1 && { openssl base64 -d -A 2>/dev/null || openssl enc -d -base64; } } || \\'
-	echo ' { command -v base64 >/dev/null 2>&1 && { base64 --ignore-garbage -d 2>/dev/null || base64 -D; } } || \\'
-	echo ' { command -v uudecode >/dev/null 2>&1 && { { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p; } } ||'
+	echo ' { command -v openssl >/dev/null 2>&1 && {'
+	[ -z "$MDSC_DETAIL" ] || \
+	echo '    echo ">>> INFO: using openssl to decode base64" >&2'
+	echo '    openssl base64 -d -A 2>/dev/null || openssl enc -d -base64'
+	echo ' } } || \'
+	echo ' { command -v base64 >/dev/null 2>&1 && {'
+	[ -z "$MDSC_DETAIL" ] || \
+	echo '    echo ">>> INFO: using base64 utility to decode" >&2'
+	echo '    base64 --ignore-garbage -d 2>/dev/null || base64 -D'
+	echo ' } } || \'
+	echo ' { command -v uudecode >/dev/null 2>&1 && {'
+	[ -z "$MDSC_DETAIL" ] || \
+	echo '    echo ">>> INFO: using uudecode utility to decode" >&2'
+	echo '    { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p'
+	echo ' } } || \'
 	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: openssl, base64 or uuencode utility is available" >&2; exit 1; }'
 	echo "} | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
