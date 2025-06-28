@@ -124,7 +124,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	##
 	## embed files needed
 	##
-	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: pack deploy files from $cacheFolder/" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 pack deploy files from $cacheFolder/" >&2
 
 	# old sender: 
 	#   printf '%b' "\n( uudecode -o /dev/stdout | tar jxf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
