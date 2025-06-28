@@ -132,7 +132,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	#   tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
 
 	# decode on receiver side
-	echo "tr -d '\\r' | {"
+	echo "{ tr -d '\\r' | {"
 	echo ' { command -v openssl >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
 	echo '    echo ">>> INFO: using openssl to decode base64" >&2'
@@ -149,11 +149,11 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo '    { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p'
 	echo ' } } || \'
 	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: openssl, base64 or uuencode utility is available" >&2; exit 1; }'
-	echo "} | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
+	echo "} | tar jxf - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
-	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | { 
+	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | (
 		{ command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
 			openssl base64 -e -A 2>/dev/null || openssl enc -base64 -A
@@ -170,7 +170,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: openssl, base64 or uuencode utility is available" >&2
 			set +e ; return 1
 		}
-	}
+	)
 
 	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
 	# remote script will continue after this
