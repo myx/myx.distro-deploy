@@ -140,8 +140,8 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo ") | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
-	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
 	# encode on sender side
+	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
 	( 
 		command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
