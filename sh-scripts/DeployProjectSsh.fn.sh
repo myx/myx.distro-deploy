@@ -154,8 +154,8 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
 	tar \
-		$( if tar --version 2>/dev/null | grep -q GNU ; then echo "--no-xattrs --no-acls --no-selinux" fi) \
-		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then echo "--disable-copyfile" fi) \
+		$( if tar --version 2>/dev/null | grep -q GNU ; then echo "--no-xattrs --no-acls --no-selinux" fi ) \
+		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then echo "--disable-copyfile" fi ) \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
 		jcf - \
