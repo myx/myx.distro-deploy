@@ -134,7 +134,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# decode on receiver side
 	echo "tr -d '\\r' | ("
 	printf '\t%s\\\n\t%s\\\n\t%s\n' \
-		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d 2>/dev/null || openssl dec -base64; } || ' \
+		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d -A 2>/dev/null || openssl enc -d -base64; } || ' \
 		'command -v base64 >/dev/null 2>&1 && { base64 --ignore-garbage -d 2>/dev/null || base64 -D; } || ' \
 		'command -v uudecode >/dev/null 2>&1 && { { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p; }'
 	echo ") | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
@@ -143,9 +143,22 @@ DeployProjectSshInternalPrintRemoteScript(){
 	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
 	# encode on sender side
 	( 
-		command -v openssl	>/dev/null 2>&1 && openssl base64 -e -A || \
-		command -v base64	>/dev/null 2>&1 && base64 -w0 || \
-		command -v uuencode	>/dev/null 2>&1 && { uuencode -m packed.tbz | sed '1d; /^====$/d'; }
+		command -v openssl	>/dev/null 2>&1 && {
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
+			openssl base64 -e -A 
+		} || \
+		command -v base64	>/dev/null 2>&1 && {
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'base64' utility to encode" >&2
+			base64 -w0 
+		} || \
+		command -v uuencode	>/dev/null 2>&1 && { 
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'uuencode' utility to encode" >&2
+			uuencode -m packed.tbz | sed '1d; /^====$/d'
+		} || \
+		{ 
+			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: openssl, base64 or uuencode utility is available" >&2
+			set +e ; return 1
+		}
 		printf '\n'    # ensure a trailing newline
 	)
 
