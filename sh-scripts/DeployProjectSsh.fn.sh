@@ -136,7 +136,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo ' { command -v openssl >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
 	echo '    echo ">>> INFO: using openssl to decode base64" >&2'
-	echo '    openssl base64 -d -A 2>/dev/null || openssl enc -d -base64'
+	echo '    openssl base64 -d -A 2>/dev/null || openssl enc -base64 -d -A'
 	echo ' } } || \'
 	echo ' { command -v base64 >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
@@ -156,7 +156,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | { 
 		{ command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
-			openssl base64 -e -A
+			openssl base64 -e -A 2>/dev/null || openssl enc -base64 -A
 		} } || \
 		{ command -v base64	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'base64' utility to encode" >&2
