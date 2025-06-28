@@ -142,18 +142,18 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
 	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | { 
-		command -v openssl	>/dev/null 2>&1 && {
+		{ command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
-			openssl base64 -e -A || :
-		} || \
-		command -v base64	>/dev/null 2>&1 && {
+			openssl base64 -e -A
+		} } || \
+		{ command -v base64	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'base64' utility to encode" >&2
-			base64 -w0 || :
-		} || \
-		command -v uuencode	>/dev/null 2>&1 && {
+			base64 -w0
+		} } || \
+		{ command -v uuencode	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'uuencode' utility to encode" >&2
-			uuencode -m packed.tbz | sed '1d; /^====$/d' || :
-		} || \
+			uuencode -m packed.tbz | sed '1d; /^====$/d'
+		} } || \
 		{
 			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: openssl, base64 or uuencode utility is available" >&2
 			set +e ; return 1
