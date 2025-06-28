@@ -135,20 +135,20 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo "{ tr -d '\\r' | {"
 	echo ' { command -v openssl >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
-	echo '    echo ">>> INFO: using openssl to decode base64" >&2'
+	echo '    echo "ImageDeploy: 📦 base64: using \"openssl\" to decode" >&2'
 	echo '    openssl base64 -d -A 2>/dev/null || openssl enc -base64 -d -A'
 	echo ' } } || \'
 	echo ' { command -v base64 >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
-	echo '    echo ">>> INFO: using base64 utility to decode" >&2'
+	echo '    echo "ImageDeploy: 📦 base64: using \"base64\" utility to decode" >&2'
 	echo '    base64 --ignore-garbage -d 2>/dev/null || base64 -D'
 	echo ' } } || \'
 	echo ' { command -v uudecode >/dev/null 2>&1 && {'
 	[ -z "$MDSC_DETAIL" ] || \
-	echo '    echo ">>> INFO: using uudecode utility to decode" >&2'
+	echo '    echo "ImageDeploy: 📦 base64: using \"uudecode\" utility to decode" >&2'
 	echo '    { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p'
 	echo ' } } || \'
-	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: openssl, base64 or uuencode utility is available" >&2; exit 1; }'
+	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: \"openssl\", \"base64\" or \"uuencode\" utility is available" >&2; exit 1; }'
 	echo "} | tar jxf - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
@@ -163,19 +163,19 @@ DeployProjectSshInternalPrintRemoteScript(){
 		-C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') \
 	| (
 		{ command -v openssl	>/dev/null 2>&1 && {
-			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 base64: using \"openssl\" to encode base64" >&2
 			openssl base64 -e -A 2>/dev/null || openssl enc -base64 -A
 		} } || \
 		{ command -v base64	>/dev/null 2>&1 && {
-			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'base64' utility to encode" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 base64: using \"base64\" utility to encode" >&2
 			base64 -w0
 		} } || \
 		{ command -v uuencode	>/dev/null 2>&1 && {
-			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'uuencode' utility to encode" >&2
+			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 base64: using \"uuencode\" utility to encode" >&2
 			uuencode -m packed.tbz | sed '1d; /^====$/d'
 		} } || \
 		{
-			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: openssl, base64 or uuencode utility is available" >&2
+			echo "$MDSC_CMD: ⛔ ERROR: can't detect base64 encoder, make sure: \"openssl\", \"base64\" or \"uuencode\" utility is available" >&2
 			set +e ; return 1
 		}
 	)
