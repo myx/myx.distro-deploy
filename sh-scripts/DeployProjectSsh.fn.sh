@@ -132,12 +132,12 @@ DeployProjectSshInternalPrintRemoteScript(){
 	#   tar jcf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
 
 	# decode on receiver side
-	echo '('
+	echo "tr -d '\\r' | ("
 	printf '\t%s\\\n\t%s\\\n\t%s\n' \
 		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d 2>/dev/null || openssl dec -base64; } || ' \
 		'command -v base64 >/dev/null 2>&1 && { base64 --ignore-garbage -d 2>/dev/null || base64 -D; } || ' \
 		'command -v uudecode >/dev/null 2>&1 && { { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p; }'
-	echo ") | tr -d '\r' | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
+	echo ") | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
 	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
