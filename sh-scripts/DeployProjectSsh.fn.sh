@@ -146,6 +146,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		command -v openssl	>/dev/null 2>&1 && openssl base64 -e -A || \
 		command -v base64	>/dev/null 2>&1 && base64 -w0 || \
 		command -v uuencode	>/dev/null 2>&1 && uuencode -m - packed.tbz 
+		printf '\n'    # ensure a trailing newline
 	)
 
 	printf '\nEOF_PROJECT_TAR_XXXXXXXX\n\n'
