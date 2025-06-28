@@ -135,9 +135,9 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo '('
 	printf '\t%s\\\n\t%s\\\n\t%s\n' \
 		'command -v openssl >/dev/null 2>&1 && { openssl base64 -d 2>/dev/null || openssl dec -base64; } || ' \
-		'command -v base64 >/dev/null 2>&1 && { base64 -d 2>/dev/null || base64 -D; } || ' \
+		'command -v base64 >/dev/null 2>&1 && { base64 --ignore-garbage -d 2>/dev/null || base64 -D; } || ' \
 		'command -v uudecode >/dev/null 2>&1 && uudecode -p'
-	echo ") | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
+	echo ") | tr -d '\r' | tar jxf - <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
 	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | \
