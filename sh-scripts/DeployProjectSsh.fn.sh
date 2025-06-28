@@ -155,6 +155,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# encode on sender side
 	tar \
 		jcf - \
+		--format=ustar \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
 		$( if tar --version 2>/dev/null | grep -q GNU ; then echo "--no-xattrs --no-acls --no-selinux"; fi ) \
