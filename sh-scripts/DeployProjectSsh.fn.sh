@@ -153,7 +153,13 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
-	tar jcf - -C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | (
+	tar \
+		$( if tar --version 2>/dev/null | grep -q GNU ; then echo "--no-xattrs --no-acls --no-selinux" fi) \
+		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then echo "--disable-copyfile" fi) \
+		--exclude='.DS_Store' \
+		--exclude='.AppleDouble' \
+		jcf - \
+		-C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') | (
 		{ command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: using 'openssl' to encode base64" >&2
 			openssl base64 -e -A 2>/dev/null || openssl enc -base64 -A
