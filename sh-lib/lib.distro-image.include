@@ -76,7 +76,7 @@ DistroSshConnect(){
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
-				shift ; shift
+				shift 2
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -155,7 +155,7 @@ DistroImageParseSshOptions(){
 	while true ; do
 		case "$1" in
 			--ssh-name) # for prefix only, yet
-				shift ; shift
+				shift 2
 			;;
 			--ssh-host)
 				shift ; useSshHost="$1" ; shift
@@ -204,7 +204,7 @@ DistroImageProjectSshTargets(){
 			;;
 			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
-				shift ; shift
+				shift 2
 			;;
 			--line-prefix)
 				shift ; linePrefix="$1" ; shift

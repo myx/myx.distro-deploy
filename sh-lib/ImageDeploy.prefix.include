@@ -20,15 +20,15 @@ NotifySmart(){
 		case "$1" in
 			--text)
 				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
-				local eventText="$2" ; shift ; shift
+				local eventText="$2" ; shift 2
 			;;
 			--user)
 				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
-				local eventUser="$2" ; shift ; shift
+				local eventUser="$2" ; shift 2
 			;;
 			--emoji)
 				[ -z "$2" ] && echo "NotifySmart: argument expected after $1 option" >&2 && return 1
-				local eventEmoji="$2" ; shift ; shift
+				local eventEmoji="$2" ; shift 2
 			;;
 			--alert|--audit|--track|--debug)
 				local eventType="${1##--}" ; shift
@@ -123,9 +123,16 @@ DeployTaskCleanup(){
 
 trap DeployTaskCleanup EXIT
 
-if [ "`myx.common os/getRamBytes`" -gt "4294967296" ] && mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" ; then
-	[ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: 🗂 tmpfs mounted" >&2
-	IMAGE_USE_TEMPFS=true
+if case "$(uname)" in \
+     Linux)   awk '/^MemTotal:/ {exit ($2 < 4194304)}' /proc/meminfo ;; \
+     Darwin)  test $(( $(sysctl -n hw.memsize) / 1024 )) -ge 4194304 ;; \
+     FreeBSD) test $(( $(sysctl -n hw.physmem) / 1024 )) -ge 4194304 ;; \
+     *)       false ;; \
+   esac \
+   && mount -t tmpfs tmpfs "$MDSC_IMAGE_UNPACK_DIR" >/dev/null 2>&1
+then
+  [ -z "$MDSC_DETAIL" ] || echo "ImageDeploy: 🗂 tmpfs mounted" >&2
+  IMAGE_USE_TEMPFS=true
 fi
 
 cd "$MDSC_IMAGE_UNPACK_DIR"

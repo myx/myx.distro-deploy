@@ -32,7 +32,7 @@ LocalTo(){
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
-				shift ; shift
+				shift 2
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
