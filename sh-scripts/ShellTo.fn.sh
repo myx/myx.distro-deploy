@@ -58,7 +58,7 @@ ShellTo(){
 
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-	local defaultCommand="-t '\`which bash || which sh\` -i'"
+	local defaultCommand="-t '\`command -v bash || command -v sh\` -i'"
 			
 	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
