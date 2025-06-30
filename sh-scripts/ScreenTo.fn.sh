@@ -33,7 +33,7 @@ ScreenTo(){
 
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t '[ -x \"\`which screen\`\" ] && env SHELL=\"\`which bash || which sh\`\" \`which screen\` -q -O -U -D -R || \`which bash || which sh\`'"
-	local defaultCommand='IF command -v screen >/dev/null 2>&1 ; then ; env SHELL="$(command -v bash || command -v sh)" $(command -v screen) -q -O -U -D -R else ; exec $(command -v bash || command -v sh) fi'
+	local defaultCommand='if command -v screen >/dev/null 2>&1 ; then env SHELL="$(command -v bash || command -v sh)" $(command -v screen) -q -O -U -D -R ; else exec $(command -v bash || command -v sh) ; fi'
 
 	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
