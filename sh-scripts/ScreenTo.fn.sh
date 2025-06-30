@@ -32,7 +32,7 @@ ScreenTo(){
 	Require ListSshTargets
 
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-	local defaultCommand="-t 'command -v screen >/dev/null && env SHELL=\"\`command -v bash || command -v sh\`\" screen -q -O -U -D -R || \`command -v bash || command -v sh\`'"
+	local defaultCommand="-t 'command -v screen >/dev/null && env SHELL=\"\`command -v bash || command -v sh\`\" exec screen -q -O -U -D -R || exec \`command -v bash || command -v sh\` -i'"
 
 	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
 
