@@ -1,5 +1,52 @@
 #!/usr/bin/env bash
 
+
+
+cat >/dev/null <<COMMENTS
+#!/usr/bin/env bash
+set -o errexit
+set -o pipefail
+
+# any broken pipe or ERR will kill *all* processes in our group
+trap 'kill 0' SIGPIPE ERR
+
+# ── your pipeline here ──
+# as soon as one side dies (ssh exits, cat dies, etc),
+# bash delivers SIGPIPE into the trap and kills everyone.
+{ 
+  echo echo hello
+  # …your feeder… e.g. stty+read loop or cat …
+  cat
+} | ssh -tt host bash -i
+
+
+
+
+
+Explanation:
+kill 0 sends the signal to every process in the current process‐group (which by default includes all members of the pipeline).
+We trap on SIGPIPE (raised when a write hits a closed pipe) and ERR (in case any builtin exits non-zero under errexit).
+As soon as ssh (or your feeder) goes away, the trap fires and kills the remainder—no more “stuck cat waiting for a keystroke.”
+If you only care about broken pipes (and not other errors), you can drop the ERR trap and just do:
+
+trap 'kill 0' SIGPIPE
+
+COMMENTS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
