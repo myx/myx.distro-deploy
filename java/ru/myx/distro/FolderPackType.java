@@ -167,6 +167,7 @@ public enum FolderPackType {
 	try (final TarArchiveOutputStream tos = new TarArchiveOutputStream(jos)) {
 	    tos.setLongFileMode(TarArchiveOutputStream.LONGFILE_POSIX);
 	    tos.setBigNumberMode(TarArchiveOutputStream.BIGNUMBER_POSIX);
+	    tos.setAddPaxHeadersForNonAsciiNames(false);
 
 	    for (final Map.Entry<Path, FolderScanCommand.ScanFileRecord> file : data.knownFiles.entrySet()) {
 		final Path key = file.getKey();
