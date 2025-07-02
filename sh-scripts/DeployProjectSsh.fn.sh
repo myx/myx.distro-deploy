@@ -153,8 +153,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
-	tar \
-		-jc \
+	tar -jcf - \
 		--format=ustar \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
@@ -167,7 +166,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 		--exclude='CVS' \
 		$( if tar --version 2>/dev/null | grep -q GNU ; then echo "--no-xattrs --no-acls --no-selinux"; fi ) \
 		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then echo "--disable-copyfile"; fi ) \
-		-f - \
 		-C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') \
 	| (
 		{ command -v openssl	>/dev/null 2>&1 && {
