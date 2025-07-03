@@ -154,7 +154,14 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
 	tar -cjf - \
-		--format=ustar \
+		--format=posix \
+		--no-xattrs \
+		$( if tar --version 2>/dev/null | grep -q GNU ; then
+			echo --no-acls --no-selinux
+		fi ) \
+		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then 
+			echo --no-xattrs --disable-copyfile $( [ "$(uname)" != FreeBSD ] || echo --no-mac-metadata )
+		fi ) \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
 		--exclude='Icon?' \
@@ -164,12 +171,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 		--exclude='.git' \
 		--exclude='.git/**' \
 		--exclude='CVS' \
-		$( if tar --version 2>/dev/null | grep -q GNU ; then
-			echo --no-xattrs --no-acls --no-selinux
-		fi ) \
-		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then 
-			echo --disable-copyfile $( [ "$(uname)" != FreeBSD ] || echo --no-mac-metadata )
-		fi ) \
 		-C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') \
 	| (
 		{ command -v openssl	>/dev/null 2>&1 && {
