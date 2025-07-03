@@ -154,7 +154,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
 	tar -cjf - \
-		--format=posix \
+		--format=ustar \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
 		--exclude='Icon?' \
