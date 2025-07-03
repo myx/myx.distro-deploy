@@ -160,7 +160,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 			echo --no-acls --no-selinux
 		fi ) \
 		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then 
-			echo --no-xattrs --disable-copyfile $( [ "$(uname)" != FreeBSD ] || echo --no-mac-metadata )
+			echo --disable-copyfile $( [ "$(uname)" != FreeBSD ] || echo --no-mac-metadata )
 		fi ) \
 		--exclude='.DS_Store' \
 		--exclude='.AppleDouble' \
