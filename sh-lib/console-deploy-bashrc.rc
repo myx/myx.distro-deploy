@@ -19,6 +19,7 @@ DistroSystemContext --distro-from-output
 
 if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
 	: ${MYXROOT:=$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/share/myx.common}
+	export MYXROOT
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
 fi
 
