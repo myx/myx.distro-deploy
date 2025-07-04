@@ -347,7 +347,7 @@ DeployProjectsSsh(){
 	Require ListSshTargets
 
 	type Prefix >/dev/null 2>&1 || \
-		. "/usr/local/share/myx.common/bin/lib/prefix"
+		. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix"
 
 	local MDSC_CMD='DeployProjectsSsh'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
