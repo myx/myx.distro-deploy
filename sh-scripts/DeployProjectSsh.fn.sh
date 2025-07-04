@@ -127,9 +127,9 @@ DeployProjectSshInternalPrintRemoteScript(){
 	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 pack deploy files from $cacheFolder/" >&2
 
 	# old sender: 
-	#   printf '%b' "\n( uudecode -o /dev/stdout | tar -xjf - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	#   printf '%b' "\n( uudecode -o /dev/stdout | tar -x${compressTool}f - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 	# old receiver: 
-	#   tar -cjf - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
+	#   tar -c${compressTool}f - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
 
 	# decode on receiver side
 	echo "{ tr -d '\\r' | {"
@@ -149,11 +149,11 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo '    { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p'
 	echo ' } } || \'
 	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: \"openssl\", \"base64\" or \"uuencode\" utility is available" >&2; exit 1; }'
-	echo "} | tar -xjf - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
+	echo "} | tar -x${compressTool}f - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
-	tar -cjf - \
+	tar -c${compressTool}f - \
 		--format=posix \
 		--no-xattrs \
 		$( if tar --version 2>/dev/null | grep -q GNU ; then
@@ -378,6 +378,7 @@ DeployProjectsSsh(){
 
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"
+	local compressTool=z # gzip - default, supported in pristine linux
 
 	while true ; do
 		case "$1" in
@@ -389,6 +390,14 @@ DeployProjectsSsh(){
 				shift
 				executeSleep="false"
 				explainTasks="false"
+			;;
+			--use-bzip2|--use-bz2)
+				shift
+				compressTool=j
+			;;
+			--use-xz)
+				shift
+				compressTool=J
 			;;
 			*)
 				break
