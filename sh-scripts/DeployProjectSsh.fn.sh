@@ -422,7 +422,7 @@ DeployProjectsSsh(){
 	local evalList="$(
 		echo "$taskList" \
 		| while read -r projectName sshTarget ; do
-			echo    Prefix "'$sshTarget'" DeployProjectSsh --project "'$projectName'" $extraArguments
+			echo    Prefix "'$sshTarget'" DeployProjectSsh --project "'$projectName'" --no-sleep $extraArguments
 		done
 	)"
 
