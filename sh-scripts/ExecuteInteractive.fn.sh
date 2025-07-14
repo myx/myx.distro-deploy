@@ -15,7 +15,7 @@ fi
 Require ListSshTargets
 
 type Prefix >/dev/null 2>&1 || \
-	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix"
+	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
 
 ExecuteInteractive(){
 	

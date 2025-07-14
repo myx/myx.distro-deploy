@@ -15,7 +15,7 @@ fi
 Require ListSshTargets
 
 type Prefix >/dev/null 2>&1 || \
-	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix"
+	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
 
 if ! type DistroImage >/dev/null 2>&1 ; then
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
