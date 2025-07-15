@@ -17,6 +17,31 @@ if ! type ImageInstall >/dev/null 2>&1 ; then
 fi
 
 
+#[ -n "${TAR_ARGS_GENERIC-}" ] || \
+#	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/tar.${MYXUNIX:-$( uname -s )}"
+
+[ -n "${TAR_ARGS_GENERIC-}" ] || \
+TAR_ARGS_GENERIC=$( printf '%s ' \
+	--format=posix \
+	--no-xattrs \
+	$(if tar --version 2>/dev/null | grep -q GNU; then
+		echo --no-acls --no-selinux
+	fi) \
+	$(if tar --version 2>/dev/null | grep -qi bsdtar; then
+		echo --disable-copyfile \
+			$( [ "$(uname -s)" != FreeBSD ] || echo --no-mac-metadata )
+	fi) \
+	--exclude='.DS_Store' \
+	--exclude='.AppleDouble' \
+	--exclude='Icon?' \
+	--exclude='._*' \
+	--exclude='.Spotlight-V100' \
+	--exclude='.Trashes' \
+	--exclude='.git' \
+	--exclude='.git/**' \
+	--exclude='CVS'
+)
+
 ##
 ## Internal - prints script using prepared variables
 ##
@@ -154,24 +179,9 @@ DeployProjectSshInternalPrintRemoteScript(){
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
 	tar -c${compressTool}f - \
-		--format=posix \
-		--no-xattrs \
-		$( if tar --version 2>/dev/null | grep -q GNU ; then
-			echo --no-acls --no-selinux
-		fi ) \
-		$( if tar --version 2>/dev/null | grep -qi bsdtar ; then 
-			echo --disable-copyfile $( [ "$(uname)" != FreeBSD ] || echo --no-mac-metadata )
-		fi ) \
-		--exclude='.DS_Store' \
-		--exclude='.AppleDouble' \
-		--exclude='Icon?' \
-		--exclude='._*' \
-		--exclude='.Spotlight-V100' \
-		--exclude='.Trashes' \
-		--exclude='.git' \
-		--exclude='.git/**' \
-		--exclude='CVS' \
-		-C "$cacheFolder/" $(echo "$deployType" | sed 's|full|sync exec|') \
+		${TAR_ARGS_GENERIC-} \
+		-C "$cacheFolder/" \
+		$(echo "$deployType" | sed 's|full|sync exec|') \
 	| (
 		{ command -v openssl	>/dev/null 2>&1 && {
 			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 base64: using \"openssl\" to encode base64" >&2
