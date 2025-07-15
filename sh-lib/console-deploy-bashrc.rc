@@ -119,6 +119,9 @@ while true; do
 		*)
 			echo "⛔ ERROR: unknown MDSC_HISTORY: $MDSC_HISTORY" >&2; exit 1 ;;
 	esac 
+	[ -f "${HISTFILE-}" ] || {
+		cat "$MDLT_OGIRIN/myx/myx.distro-deploy/sh-lib/DeployConsole.History.seed.txt" > "$HISTFILE"
+	}
 	export HISTCONTROL=ignoredups:erasedups
 	export HISTSIZE=999
 	export HISTFILESIZE=99999

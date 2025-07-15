@@ -1,0 +1,2 @@
+export MDSC_DETAIL=full
+DistroLocalTools.fn.sh --install-distro-source --install-distro-deploy ; DistroImageSync.fn.sh --all-tasks --execute-source-prepare-pul
