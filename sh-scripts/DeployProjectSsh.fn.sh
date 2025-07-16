@@ -389,6 +389,7 @@ DeployProjectsSsh(){
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"
 
+
 	# gzip - default, supported in pristine linux
 	local compressSetting=g compressDeflate='gzip -6' compressInflate='gunzip'
 
@@ -527,7 +528,12 @@ DeployProjectSsh(){
 
 	## not-local 
 	executeSleep="${executeSleep:-true}"
-	
+
+	# gzip - default, supported in pristine linux
+	local compressSetting="${compressSetting:-'g'}" 
+	local compressDeflate="${compressDeflate:-'gzip -6'}" 
+	local compressInflate="${compressInflate:-'gunzip'}"
+
 	local deployType=""
 
 	local MATCH_SCRIPT_FILTER=""
@@ -582,6 +588,24 @@ DeployProjectSsh(){
 				fi
 				local MATCH_SCRIPT_FILTER="--match $1"
 				shift
+			;;
+			--use-gzip|--use-gz)
+				shift
+				compressSetting=g
+				compressDeflate='gzip -6'
+				compressInflate='gunzip'
+			;;
+			--use-bzip2|--use-bz2)
+				shift
+				compressSetting=j
+				compressDeflate='bzip2 -6'
+				compressInflate='bunzip2'
+			;;
+			--use-xz)
+				shift
+				compressSetting=J
+				compressDeflate='xz -6'
+				compressInflate='unxz'
 			;;
 			*)
 				break
