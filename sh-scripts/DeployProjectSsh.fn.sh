@@ -729,10 +729,11 @@ DeployProjectSsh(){
 				| while read -r sshTarget; do
 					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
 					if ! DeployProjectSshInternalPrintRemoteScript \
-					| tee "$cacheFolder/deploy-script.$deployType.txt" \
-					| eval ${compressDeflate} \
-					| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \
-					| DistroSshConnect $sshTarget "'${compressInflate} | bash'"  ; then
+						| tee "$cacheFolder/deploy-script.$deployType.txt" \
+						| eval ${compressDeflate} \
+						| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \
+						| DistroSshConnect $sshTarget "'${compressInflate} | bash'"
+					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
 					fi
 				done
