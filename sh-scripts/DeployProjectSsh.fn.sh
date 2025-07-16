@@ -405,15 +405,21 @@ DeployProjectsSsh(){
 			;;
 			--use-gzip|--use-gz)
 				shift
-				compressSetting=g compressDeflate='gzip -6' compressInflate='gunzip'
+				compressSetting=g
+				compressDeflate='gzip -6'
+				compressInflate='gunzip'
 			;;
 			--use-bzip2|--use-bz2)
 				shift
-				compressSetting=j compressDeflate='bzip2 -6' compressInflate='bunzip2'
+				compressSetting=j
+				compressDeflate='bzip2 -6'
+				compressInflate='bunzip2'
 			;;
 			--use-xz)
 				shift
-				compressSetting=J compressDeflate='xz -6' compressInflate='unxz'
+				compressSetting=J
+				compressDeflate='xz -6'
+				compressInflate='unxz'
 			;;
 			*)
 				break
