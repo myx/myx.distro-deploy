@@ -152,9 +152,9 @@ DeployProjectSshInternalPrintRemoteScript(){
 	[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: 📦 pack deploy files from $cacheFolder/" >&2
 
 	# old sender: 
-	#   printf '%b' "\n( uudecode -o /dev/stdout | tar -x${compressTool}f - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
+	#   printf '%b' "\n( uudecode -o /dev/stdout | tar -x${compressSetting}f - ) << 'EOF_PROJECT_TAR_XXXXXXXX'\n"
 	# old receiver: 
-	#   tar -c${compressTool}f - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
+	#   tar -c${compressSetting}f - -C "$cacheFolder/" $( echo "$deployType" | sed 's|full|sync exec|' ) | uuencode -m packed.tbz
 
 	# decode on receiver side
 	echo "{ tr -d '\\r' | {"
@@ -174,11 +174,11 @@ DeployProjectSshInternalPrintRemoteScript(){
 	echo '    { printf "begin-base64 644 packed.b64\n"; cat; printf "\n====\nend\n"; } | uudecode -p'
 	echo ' } } || \'
 	echo ' { echo "⛔ ERROR: can not detect base64 encoder on target machine, make sure: \"openssl\", \"base64\" or \"uuencode\" utility is available" >&2; exit 1; }'
-	echo "} | tar -x${compressTool}f - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
+	echo "} | tar -x${compressSetting}f - ; } <<'EOF_PROJECT_TAR_XXXXXXXX'"
 
 	# watch out: $(echo intentionally splits into several arguments!
 	# encode on sender side
-	tar -c${compressTool}f - \
+	tar -c${compressSetting}f - \
 		${TAR_ARGS_GENERIC-} \
 		-C "$cacheFolder/" \
 		$(echo "$deployType" | sed 's|full|sync exec|') \
@@ -388,7 +388,9 @@ DeployProjectsSsh(){
 
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"
-	local compressTool=z # gzip - default, supported in pristine linux
+
+	# gzip - default, supported in pristine linux
+	local compressSetting=g compressDeflate='gzip -6' compressInflate='gunzip'
 
 	while true ; do
 		case "$1" in
@@ -401,13 +403,17 @@ DeployProjectsSsh(){
 				executeSleep="false"
 				explainTasks="false"
 			;;
+			--use-gzip|--use-gz)
+				shift
+				compressSetting=g compressDeflate='gzip -6' compressInflate='gunzip'
+			;;
 			--use-bzip2|--use-bz2)
 				shift
-				compressTool=j
+				compressSetting=j compressDeflate='bzip2 -6' compressInflate='bunzip2'
 			;;
 			--use-xz)
 				shift
-				compressTool=J
+				compressSetting=J compressDeflate='xz -6' compressInflate='unxz'
 			;;
 			*)
 				break
@@ -718,9 +724,9 @@ DeployProjectSsh(){
 					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
 					if ! DeployProjectSshInternalPrintRemoteScript \
 					| tee "$cacheFolder/deploy-script.$deployType.txt" \
-					| bzip2 --best \
+					| ${compressDeflate} \
 					| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \
-					| DistroSshConnect $sshTarget "'bunzip2 | bash'"  ; then
+					| DistroSshConnect $sshTarget "'${compressInflate} | bash'"  ; then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
 					fi
 				done
