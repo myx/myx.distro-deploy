@@ -731,7 +731,7 @@ DeployProjectSsh(){
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
 						| eval ${compressDeflate} \
-						| tee "$cacheFolder/deploy-script.$deployType.txt.bz2" \
+						# | tee "$cacheFolder/deploy-script.$deployType.txt.compressed" \
 						| DistroSshConnect $sshTarget "'${compressInflate} | bash'"
 					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
