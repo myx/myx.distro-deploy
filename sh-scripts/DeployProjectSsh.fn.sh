@@ -391,7 +391,9 @@ DeployProjectsSsh(){
 
 
 	# gzip - default, supported in pristine linux
-	local compressSetting=g compressDeflate='gzip -6' compressInflate='gunzip'
+	local compressSetting="${compressSetting:-'g'}" 
+	local compressDeflate="${compressDeflate:-'gzip -6'}" 
+	local compressInflate="${compressInflate:-'gunzip'}"
 
 	while true ; do
 		case "$1" in
@@ -613,16 +615,6 @@ DeployProjectSsh(){
 		esac
 	done
 
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-	
-	if [ ! -d "$MDSC_CACHED/$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not found: $MDSC_CACHED/$MDSC_PRJ_NAME" >&2
-		set +e ; return 1
-	fi
-	
 	local cacheFolder="$MMDAPP/output/deploy/$MDSC_PRJ_NAME"
 	
 	mkdir -p "$cacheFolder"
