@@ -755,7 +755,7 @@ DeployProjectSsh(){
 				return 0
 			;;
 			'')
-				echo "$MDSC_CMD: ⛔ ERROR: --do-XXXX option must be specified" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: --prepare-XXXX --deploy-XXXX options must be specified" >&2
 				set +e ; return 1
 			;;
 			*)
