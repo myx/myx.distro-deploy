@@ -746,7 +746,7 @@ DeployProjectSsh(){
 					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
-						| eval ${compressDeflate} \
+						| ${compressDeflate} \
 						| DistroSshConnect $sshTarget "'${compressInflate} | bash'"
 					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
