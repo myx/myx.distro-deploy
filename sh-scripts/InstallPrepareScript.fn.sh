@@ -38,9 +38,19 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 	fi
 
 	local match
-	( \
+	(
 		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-before ;
-		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-after | tail -r ;
+		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-after \
+		| {
+			if command -v tac >/dev/null; then
+				tac # <-- Linux
+			elif tail -r /dev/null >/dev/null 2>&1; then
+				tail -r
+			else
+				sed '1!G;h;$!d'
+			fi
+		}
+		# | tail -r ;
 	) \
 	| while read -r sourceName scriptPath ; do
 		local fileName="$MDSC_SOURCE/$sourceName/$scriptPath"
@@ -126,7 +136,7 @@ InstallPrepareScriptInternalPrintScript(){
 		# local SC_HASH="BLK_$(cat "$fileName" | md5)" # <<< Linux doesn't support md5.
 		local SC_HASH="BLK_$(cksum < "$fileName" | cut -d' ' -f1,2 | tr ' ' '_')"
 		local SC_NAME="$(basename "$fileName")"
-		
+
 		echo
 		echo "##**--  start, $fileName"
 		echo
