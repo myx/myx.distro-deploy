@@ -391,9 +391,9 @@ DeployProjectsSsh(){
 
 
 	# gzip - default, supported in pristine linux
-	local compressSetting="${compressSetting:-'g'}" 
-	local compressDeflate="${compressDeflate:-'gzip -6'}" 
-	local compressInflate="${compressInflate:-'gunzip'}"
+	local compressSetting="${compressSetting:-"g"}" 
+	local compressDeflate="${compressDeflate:-"gzip -6"}" 
+	local compressInflate="${compressInflate:-"gunzip"}"
 
 	while true ; do
 		case "$1" in
@@ -532,9 +532,9 @@ DeployProjectSsh(){
 	executeSleep="${executeSleep:-true}"
 
 	# gzip - default, supported in pristine linux
-	local compressSetting="${compressSetting:-'g'}" 
-	local compressDeflate="${compressDeflate:-'gzip -6'}" 
-	local compressInflate="${compressInflate:-'gunzip'}"
+	local compressSetting="${compressSetting:-"g"}" 
+	local compressDeflate="${compressDeflate:-"gzip -6"}" 
+	local compressInflate="${compressInflate:-"gunzip"}"
 
 	local deployType=""
 
