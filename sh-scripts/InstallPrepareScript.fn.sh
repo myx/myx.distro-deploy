@@ -39,7 +39,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 
 	local match
 	(
-		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-before ;
+		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-before
 		ListProjectProvides "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install:exec-update-after \
 		| {
 			if command -v tac >/dev/null; then
