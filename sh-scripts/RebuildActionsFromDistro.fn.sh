@@ -15,8 +15,8 @@ RebuildActionsFromDistro(){
 	if [ "$MDSC_INMODE" = "deploy" ] ; then
 		RebuildActions "$@"
 	else
-		( \
-			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.include" ; \
+		(
+			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.include"
 			DistroSystemContext --distro-path-auto
 			RebuildActions "$@"
 		)
