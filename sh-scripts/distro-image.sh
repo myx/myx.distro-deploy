@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/sh
 
 if [ -z "$MMDAPP" ] ; then
 	set -e
