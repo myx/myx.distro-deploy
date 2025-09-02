@@ -12,9 +12,8 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-if ! type ImageInstall >/dev/null 2>&1 ; then
+type ImageInstall >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
-fi
 
 
 #[ -n "${TAR_ARGS_GENERIC-}" ] || \
@@ -353,8 +352,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 DeployProjectsSsh(){
 	set -e
-
-	Require ListSshTargets
 
 	type Prefix >/dev/null 2>&1 || \
 		. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"

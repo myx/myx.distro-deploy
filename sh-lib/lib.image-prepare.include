@@ -3,9 +3,8 @@
 
 [ -z "$MDSC_DETAIL" ] || echo "+ ImagePrepare: library included" >&2
 
-if ! type DistroImage >/dev/null 2>&1 ; then
+type DistroImage >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
-fi
 
 # prints project merged provides that are prefixed 'image-prepare:' only, see DistroImageProjectProvidesMerged for full list
 ImagePrepareProjectProvidesMerged(){

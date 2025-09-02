@@ -9,9 +9,8 @@ fi
 
 if [ "--eval" = "$1" ] ; then
 	set -e
-	if ! type DistroImage >/dev/null 2>&1 ; then
+	type DistroImage >/dev/null 2>&1 || \
 		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
-	fi
 	shift
 	eval "$@"
 	exit 0

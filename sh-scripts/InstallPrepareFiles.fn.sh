@@ -12,9 +12,8 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-if ! type ImagePrepare >/dev/null 2>&1 ; then
+type ImagePrepare >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-prepare.include"
-fi
 
 ##
 ## Internal - prints script using prepared variables
