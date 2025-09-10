@@ -12,8 +12,6 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-Require ListDistroProvides
-
 type DistroImage >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
@@ -108,6 +106,7 @@ ListSshTargets(){
 				local setSshUser="${useSshUser:-}"
 				local setSshHome="${useSshHome:-}"
 			
+				Require ListDistroProvides
 				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
 				| while read -r projectName sshTarget ; do
 					local useSshHost="${setSshHost:-}"

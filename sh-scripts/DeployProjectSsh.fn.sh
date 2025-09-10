@@ -429,6 +429,9 @@ DeployProjectsSsh(){
 
 	local extraArguments="$( local argument ; for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
+	Require ListDistroProjects
+	Require ListDistroProvides
+
 	local taskList="$(
 		ListDistroProjects --select-from-env \
 			--select-execute-default \
