@@ -434,9 +434,9 @@ DistroImageEnsureProvidesMergedFile(){
 	
 		set -e
 		Require ListDistroProvides
+		ListDistroProvides --explicit-noop --no-cache --all-provides-merged > "$cacheFile.tmp"
+		mv -f "$cacheFile.tmp" "$cacheFile"
 		MDSC_IDAPRV_NAME="$cacheFile"
-		ListDistroProvides --explicit-noop --no-cache --all-provides-merged > "$MDSC_IDAPRV_NAME.tmp"
-		mv -f "$MDSC_IDAPRV_NAME.tmp" "$MDSC_IDAPRV_NAME"
 		return 0
 	fi
 	
@@ -476,9 +476,9 @@ DistroImageEnsureProvidesOwnedFile(){
 	
 		set -e
 		Require ListDistroProvides
+		ListDistroProvides --explicit-noop --all-provides > "$cacheFile.tmp"
+		mv -f "$cacheFile.tmp" "$cacheFile"
 		MDSC_IDOPRV_NAME="$cacheFile"
-		ListDistroProvides --explicit-noop --all-provides > "$MDSC_IDOPRV_NAME.tmp"
-		mv -f "$MDSC_IDOPRV_NAME.tmp" "$MDSC_IDOPRV_NAME"
 		return 0
 	fi
 	
