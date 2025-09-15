@@ -12,8 +12,6 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-Require ListSshTargets
-
 type Prefix >/dev/null 2>&1 || \
 	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
 
@@ -119,6 +117,7 @@ ExecuteSequence(){
 	local argument
 	local targetCommand="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
+	Require ListSshTargets
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \
 			--line-prefix 'Prefix -3' \
