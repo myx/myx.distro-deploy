@@ -57,7 +57,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 			echo "$MDSC_CMD: ⛔ ERROR: file is missing: $fileName" >&2; 
 			set +e ; return 1
 		fi
-		if [ -n "$PROJECT_MATCH" ] && [ "" == "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
+		if [ -n "$PROJECT_MATCH" ] && [ "" = "$( echo "$scriptPath" | grep $( for m in $PROJECT_MATCH ; do
 			printf ' -e %q' "$m"
 		done ) )" ] ; then
 			[ -z "$MDSC_DETAIL" ] || echo "- $MDSC_CMD: skip (scripts filter): $sourceName/$scriptPath" >&2
@@ -124,7 +124,7 @@ InstallPrepareScriptInternalPrintScript(){
 
 	[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
 
-	[ "none" == "$MDSC_DETAIL" ] || echo "echo '>> deploy script start, project: $MDSC_PRJ_NAME' >&2"
+	[ "none" = "$MDSC_DETAIL" ] || echo "echo '>> deploy script start, project: $MDSC_PRJ_NAME' >&2"
 
 	DistroImageProjectContextVariables --install --export
 
@@ -139,16 +139,16 @@ InstallPrepareScriptInternalPrintScript(){
 		echo
 		echo "##**--  start, $fileName"
 		echo
-		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script start: $SC_NAME' >&2"
+		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script start: $SC_NAME' >&2"
 		#echo "$SC_HASH=\"\`"
 		#echo "\`\""
 		echo "( eval \"\$( cat << '$SC_HASH'"
 			cat "$fileName"
 			echo
-			[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
+			[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
 		echo "$SC_HASH"
 		echo ")\" )"
-		[ "none" == "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
+		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
 		echo
 		echo "##**--  end, $fileName"
 		echo
@@ -156,7 +156,7 @@ InstallPrepareScriptInternalPrintScript(){
 
 	echo
 	echo
-	[ "none" == "$MDSC_DETAIL" ] || echo "echo '>> deploy script end, project: $MDSC_PRJ_NAME' >&2"
+	[ "none" = "$MDSC_DETAIL" ] || echo "echo '>> deploy script end, project: $MDSC_PRJ_NAME' >&2"
 	echo "#*- 	EOF, generated for $MDSC_PRJ_NAME"
 
 	return 0 

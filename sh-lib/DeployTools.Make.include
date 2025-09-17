@@ -5,7 +5,7 @@ case "$1" in
 	--make-workspace-integration-files)
 		shift
 
-		if [ "$MDLT_ORIGIN" == "$MMDAPP/.local" ] ; then
+		if [ "$MDLT_ORIGIN" = "$MMDAPP/.local" ] ; then
 			touch $MMDAPP/.local/MDSC.deploy.settings.env
 		fi
 
