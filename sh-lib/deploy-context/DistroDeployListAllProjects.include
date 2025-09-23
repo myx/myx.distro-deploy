@@ -1,0 +1,22 @@
+#!/bin/sh
+# ^^^ for syntax checking in the editor only
+
+[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: DistroDeployListAllProjects.include" >&2
+
+set -e
+
+if [ "$MDSC_NO_CACHE" != "--no-cache" ] && [ -d "$MMDAPP/.local/deploy-cache" ] ; then
+	local cacheFile="$MMDAPP/.local/deploy-cache/all-projects.index.txt"
+	local buildDate="$MMDAPP/.local/deploy-cache/distro-ingest.timestamp.txt"
+	if [ -f "$cacheFile" ] && [ -f "$buildDate" ] && [ ! "$cacheFile" -ot "$buildDate" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| DistroDeployListAllProjects.include: using cached: all-projects.index.txt" >&2
+		cat "$cacheFile"
+		return 0
+	fi
+	echo "| ListDistroProjects: caching projects ($MDSC_OPTION)" >&2
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/system-context/DistroSystemListAllProjectsNoCache.include" | tee "$cacheFile"
+	return 0
+fi
+
+. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/system-context/DistroSystemListAllProjectsNoCache.include"
+return 0
