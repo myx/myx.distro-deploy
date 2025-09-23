@@ -58,9 +58,9 @@ Variables (context environment) specific to build-step scripts:
 App Folders:
 
 	/ - workspace root directory
-	/.local - system tools, utilities and system integrations
 	/source - source codes and projects - editable and commitable or pullable
-	/cached - build system cache space (generated)
+	/.local - system tools, utilities and system integrations
+	/.local/source-cache - build system cache space (generated)
 	/output - output products (generated, cloned or omitted (in pure deploy mode))
 	/export - export resources (generated or cloned)
 	/distro - distro structure, whole project tree, prepared (generated or cloned)
