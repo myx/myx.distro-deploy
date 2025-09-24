@@ -14,7 +14,8 @@ if [ "$MDSC_NO_CACHE" != "--no-cache" ] && [ -d "$MMDAPP/.local/deploy-cache" ] 
 		return 0
 	fi
 	echo "| ListDistroProjects: caching projects ($MDSC_OPTION)" >&2
-	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/system-context/DistroSystemListAllProjectsNoCache.include" | tee "$cacheFile"
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/system-context/DistroSystemListAllProjectsNoCache.include" | tee "$cacheFile.$$.tmp"
+	mv "$cacheFile.$$.tmp" "$cacheFile"
 	return 0
 fi
 
