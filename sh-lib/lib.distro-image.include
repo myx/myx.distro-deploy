@@ -486,7 +486,7 @@ DistroImageEnsureProvidesOwnedFile(){
 	fi
 
 	mkdir -p "$MDSC_CACHED"
-	Distro ListDistroProvides --explicit-noop --all-provides > "$cacheFile.$$.tmp"
+	Distro ListDistroProvides --no-cache --explicit-noop --all-provides > "$cacheFile.$$.tmp"
 	mv -f "$cacheFile.$$.tmp" "$cacheFile"
 	MDSC_IDOPRV_NAME="$cacheFile"
 	return 0
