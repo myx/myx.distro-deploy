@@ -210,7 +210,7 @@ InstallPrepareFiles(){
 	local MDSC_CMD='InstallPrepareFiles'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	local saveScriptTo=""

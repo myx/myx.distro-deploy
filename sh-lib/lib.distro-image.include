@@ -131,7 +131,7 @@ DistroSshConnect(){
 				sshHosts=""
 			fi
 			
-			[ "full" != "$MDSC_DETAIL" ] || echo "set -x"
+			[ full != "$MDSC_DETAIL" ] || echo "set -x"
 
 			printf 'ssh %s -p %s -l %s %s %s %s %s %s\n' \
 				"$useSshHost" \
@@ -412,7 +412,7 @@ DistroImageEnsureProvidesMergedFile(){
 		set +e ; return 1
 	fi
 	if [ -n "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
+		[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
 
@@ -465,7 +465,7 @@ DistroImageEnsureProvidesOwnedFile(){
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
 			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
+				[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
 				MDSC_IDOPRV_NAME="$cacheFile"
 				return 0
 			fi
@@ -703,7 +703,7 @@ DistroImageCheckSourcePath(){
 	if [ "$sourceName" = "*" -o "$sourceName" = "**" ] ; then
 		commandOutput="$( \
 			while read -r checkProject ; do
-				[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check wildcard path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
+				[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check wildcard path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
 					if [ "$sourceName" = "**" ] || grep -q -x "$declaredAt" "$( DistroImageProjectSequenceFile --project "$checkProject" )" ; then
 						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
@@ -726,7 +726,7 @@ DistroImageCheckSourcePath(){
 	fi
 	
 	if [ $check "$MDSC_SOURCE/$sourceName/$sourcePath" ] ; then
-		[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path: " $check "$MDSC_SOURCE/$sourceName/$sourcePath" >&2
+		[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path: " $check "$MDSC_SOURCE/$sourceName/$sourcePath" >&2
 		echo "$declaredAt" "$sourceName" "$sourcePath" "$@"
 		return 0
 	fi
@@ -735,9 +735,9 @@ DistroImageCheckSourcePath(){
 	commandOutput="$( \
 		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | cut -d" " -f1 | awk '!x[$0]++' \
 		| while read -r checkProject ; do
-			[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check exact path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
+			[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check exact path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-				[ "full" != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path in a loop: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
+				[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path in a loop: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 				echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 			fi
 		done \

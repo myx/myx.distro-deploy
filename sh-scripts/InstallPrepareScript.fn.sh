@@ -122,7 +122,7 @@ InstallPrepareScriptInternalPrintScript(){
 
 	echo "export MDSC_PRJ_NAME='$MDSC_PRJ_NAME'"
 
-	[ "full" != "$MDSC_DETAIL" ] || echo 'set -x'
+	[ full != "$MDSC_DETAIL" ] || echo 'set -x'
 
 	[ "none" = "$MDSC_DETAIL" ] || echo "echo '>> deploy script start, project: $MDSC_PRJ_NAME' >&2"
 
@@ -169,7 +169,7 @@ InstallPrepareScript(){
 	local MDSC_CMD='InstallPrepareScript'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
 
-	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	local PROJECT_MATCH="${PROJECT_MATCH:-}"

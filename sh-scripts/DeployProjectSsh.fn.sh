@@ -238,7 +238,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 							DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/$matchSourcePath"
 						;;
 						*)
-							[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
+							[ full != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: path skipped: $matchSourcePath ?= $sourcePath" >&2
 						;;
 					esac
 				done
@@ -285,7 +285,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 							DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptFile" "sync/${sourcePath##/}/${matchTargetPath#$targetPath}"
 						;;
 						*)
-							[ "full" != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: 🦠 path skipped: $matchTargetPath ?= $targetPath" >&2
+							[ full != "$MDSC_DETAIL" ] || echo "PatchScriptFilter: 🦠 path skipped: $matchTargetPath ?= $targetPath" >&2
 						;;
 					esac
 				done
@@ -504,7 +504,7 @@ DeployProjectSsh(){
 		fi
 	fi
 
-	[ "full" != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
+	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 
 	case "$1" in
 		--project)

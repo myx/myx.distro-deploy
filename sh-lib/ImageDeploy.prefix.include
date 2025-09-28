@@ -104,7 +104,7 @@ NotifySmart(){
 NotifySmart --debug --text "ImageDeploy (debug): 🛠 deploy task started: 👤 $(whoami) @ $(hostname)" --emoji ":cog:"
 
 DeployTaskCleanup(){
-	[ "full" != "$MDSC_DETAIL" ] || echo "ImageDeploy: ⏫ leaving directory..." >&2
+	[ full != "$MDSC_DETAIL" ] || echo "ImageDeploy: ⏫ leaving directory..." >&2
 	cd /
 	
 	if [ "true" = "$IMAGE_USE_TEMPFS" ] ; then
