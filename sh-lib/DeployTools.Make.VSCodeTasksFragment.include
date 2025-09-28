@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+cat <<CODEWORKSPACE
+			{
+				"label": "🖥️ Start Deploy Console...",
+				"type": "shell",
+				"command": "bash '$MMDAPP/DistroDeployConsole.sh'",
+				"group": { 
+					"kind": "build", 
+					"isDefault": true 
+				}
+			},
+			{
+				"label": "🏋️ Re-Build Deploy Data from Source (distro from source)...",
+				"type": "shell",
+				"command": "bash -c 'echo \"BuildDistroFromSource.fn.sh\" | $MMDAPP/DistroSourceConsole.sh --non-interactive'",
+				"group": { 
+					"kind": "build", 
+					"isDefault": true 
+				}
+			},
+CODEWORKSPACE

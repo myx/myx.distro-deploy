@@ -43,8 +43,8 @@ Variables (context environment) available in: actions, build-step scripts and co
 	MDSC_INMODE - console mode ("deploy")
 	MDLT_ORIGIN - source of System (Source or Deploy) Console commands (something like: "/Volumes/ws-2017/myx-work/.local/")
 	MDSC_OPTION - console mode settings (something like: "--distro-from-output")
-	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/output/distro")
-	MDSC_CACHED - current cache root (something like: "/Volumes/ws-2017/myx-work/cached")
+	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/.local/output-cache/distro")
+	MDSC_CACHED - current index cache root (something like: "/Volumes/ws-2017/myx-work/.local/system-index")
 	MDSC_OUTPUT - current target root (something like: "/Volumes/ws-2017/myx-work/output/distro")
 	MDSC_DETAIL - debug settings, values: <empty>, "true", "full"
 	useSshUser - override from ssh user calculated from project sequence variables
@@ -59,8 +59,6 @@ App Folders:
 
 	/ - workspace root directory
 	/source - source codes and projects - editable and commitable or pullable
-	/.local - system tools, utilities and system integrations
-	/.local/source-cache - build system cache space (generated)
 	/output - output products (generated, cloned or omitted (in pure deploy mode))
 	/export - export resources (generated or cloned)
 	/distro - distro structure, whole project tree, prepared (generated or cloned)
@@ -68,7 +66,10 @@ App Folders:
 	/distro/distro-namespaces.txt - repository names db file (prepared)
 	/distro/build-time-stamp.txt - distro timestamp file (prepared)
 	/distro/distro-index.inf - distro index shell-env file (prepared)
-	/actions - workspace actions - non-editable (generated)
+	/actions - workspace actions - executable, non-editable (generated)
+	/.local - system tools, utilities and system integrations
+	/.local/distro-index - system index space (generated)
+	/.local/source-cache - build system cache space (generated), before source-prepare
 
 image-receive, image-install directives:
 

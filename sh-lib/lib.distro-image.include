@@ -446,15 +446,14 @@ DistroImageEnsureProvidesMergedFile(){
 
 # sets MDSC_IDOPRV_NAME variable to all merged provides table file name
 DistroImageEnsureProvidesOwnedFile(){
-	local MDSC_CMD='DistroImageEnsureProvidesOwnedFile'
-	set -e
+	set -e; local MDSC_CMD=DistroImageEnsureProvidesOwnedFile
 
 	if [ "$1" != "MDSC_IDOPRV_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDOPRV_NAME" >&2
 		set +e ; return 1
 	fi
 	if [ -n "${MDSC_IDOPRV_NAME:0:1}" ] ; then
-		[ "$MDSC_DETAIL" != "full" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
+		[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
 		return 0
 	fi
 	
@@ -475,15 +474,22 @@ DistroImageEnsureProvidesOwnedFile(){
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
 		fi
 	
-		Require ListDistroProvides
-		ListDistroProvides --explicit-noop --all-provides > "$cacheFile.tmp"
-		mv -f "$cacheFile.tmp" "$cacheFile"
+		Distro ListDistroProvides --explicit-noop --all-provides > "$cacheFile.$$.tmp"
+		mv -f "$cacheFile.$$.tmp" "$cacheFile"
 		MDSC_IDOPRV_NAME="$cacheFile"
 		return 0
 	fi
-	
-	echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-owned index" >&2
-	set +e ; return 1
+
+	if [ -z "$MDSC_CACHED" ] || [ "$MDSC_CACHED" != "$MMDAPP/.local/system-index" ] ; then
+		echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-owned index" >&2
+		set +e ; return 1
+	fi
+
+	mkdir -p "$MDSC_CACHED"
+	Distro ListDistroProvides --explicit-noop --all-provides > "$cacheFile.$$.tmp"
+	mv -f "$cacheFile.$$.tmp" "$cacheFile"
+	MDSC_IDOPRV_NAME="$cacheFile"
+	return 0
 }
 
 #

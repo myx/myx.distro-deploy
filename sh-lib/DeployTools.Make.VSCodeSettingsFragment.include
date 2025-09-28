@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# ^^^ for syntax checking in the editor only
+
+cat <<CODEWORKSPACE
+CODEWORKSPACE
