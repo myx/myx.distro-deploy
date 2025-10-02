@@ -24,9 +24,10 @@ fi
 
 # add paths, replace if any
 PATH=$(
-  printf '%s:%s:%s:%s' \
+  printf '%s:%s:%s:%s:%s' \
     "${PATH//:$MDLT_ORIGIN\/myx\/myx.distro-*\/sh-scripts/}" \
     "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts" \
+    "$MDLT_ORIGIN/myx/myx.distro-system/sh-scripts" \
     "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts" \
     "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts"
 )
