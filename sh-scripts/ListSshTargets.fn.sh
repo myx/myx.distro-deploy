@@ -145,7 +145,7 @@ case "$0" in
 				
 				echo '    ListSshTargets.fn.sh --select-projects l6 -l root' >&2
 				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2-' >&2
-				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || true ; done )' >&2
+				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || : ; done )' >&2
 				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )' >&2
 			fi
 			exit 1

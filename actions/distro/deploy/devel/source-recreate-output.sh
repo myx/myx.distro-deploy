@@ -13,7 +13,7 @@
 
 # need to re-run, classes could have been loaded from output.
 
-. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/DistroSourceCommand.fn.sh"
+. "$MDLT_ORIGIN/myx/myx.distro-system/sh-scripts/DistroSourceCommand.fn.sh"
 
 DistroSourceCommand \
 	--source-root "$MMDAPP/source" \
