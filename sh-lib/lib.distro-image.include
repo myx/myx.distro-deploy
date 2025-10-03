@@ -390,7 +390,7 @@ DistroImageProjectSequenceFile(){
 	
 		set -e
 		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f2 | awk '!x[$0]++' > "$cacheFile"
+		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | awk '$2 && !seen[$2]++ { print $2; }' > "$cacheFile"
 		echo "$cacheFile"
 		return 0
 	fi
@@ -733,7 +733,7 @@ DistroImageCheckSourcePath(){
 
 	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	commandOutput="$( \
-		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | cut -d" " -f1 | awk '!x[$0]++' \
+		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | awk '$1 && !seen[$1]++ { print $1; }' \
 		| while read -r checkProject ; do
 			[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check exact path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
