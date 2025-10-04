@@ -35,8 +35,7 @@ ListSshTargets(){
 			fi
 		;;
 		--*)
-			Require ListDistroProjects
-			ListDistroProjects --select-execute-default ListSshTargets "$@"
+			Distro ListDistroProjects --select-execute-default ListSshTargets "$@"
 			return 0
 		;;
 	esac

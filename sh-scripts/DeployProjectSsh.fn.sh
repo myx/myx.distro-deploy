@@ -87,6 +87,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 		fi
 	fi
 
+	# local projectProvides="$( awk -v p="$MDSC_PRJ_NAME" ' $1==p && index($3,"image-install:")==1 && !seen[$2" "$3]++ { print $2, $3; } ' "$MDSC_IDAPRV_NAME" )"
 	# local projectProvides="$( grep -e "^$MDSC_PRJ_NAME \\S* image-install:" < "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' )"
 	local projectProvides="$( ImageInstallProjectProvidesMerged )"
 	

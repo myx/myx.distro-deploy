@@ -38,8 +38,7 @@ ExecuteParallel(){
 			fi
 		;;
 		--*)
-			Require ListDistroProjects
-			ListDistroProjects --select-execute-default ExecuteParallel "$@"
+			Distro ListDistroProjects --select-execute-default ExecuteParallel "$@"
 			return 0
 		;;
 	esac

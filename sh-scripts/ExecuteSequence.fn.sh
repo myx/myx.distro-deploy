@@ -38,8 +38,7 @@ ExecuteSequence(){
 			fi
 		;;
 		--*)
-			Require ListDistroProjects
-			ListDistroProjects --select-execute-default ExecuteSequence "$@"
+			Distro ListDistroProjects --select-execute-default ExecuteSequence "$@"
 			return 0
 		;;
 	esac
