@@ -78,8 +78,10 @@ ListSshTargets(){
 				local setSshUser="${useSshUser:-}"
 				local setSshHome="${useSshHome:-}"
 			
-				DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
-				grep -e ' deploy-ssh-target:' "$MDSC_IDOPRV_NAME" | sed 's| deploy-ssh-target:| |' | awk '!x[$0]++' \
+				DistroSystemContext --index-provides \
+				grep -e ' deploy-ssh-target:' \
+				| sed 's| deploy-ssh-target:| |' \
+				| awk '!x[$0]++' \
 				| while read -r projectName sshTarget ; do
 					local useSshHost="${setSshHost:-}"
 					local useSshPort="${setSshPort:-}"

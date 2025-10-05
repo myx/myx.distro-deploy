@@ -233,34 +233,23 @@ DistroImageProjectSshTargets(){
 			setSshArgs="${useSshArgs:-}" \
 			sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
 	
-	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
 	local sshTargetsSpec="$( \
-		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDOPRV_NAME" \
+		DistroSystemContext --index-provides \
+		grep -e "^$MDSC_PRJ_NAME " \
 		| cut -d" " -f2 \
 		| grep '^deploy-ssh-target:' \
 		| sed 's|^deploy-ssh-target:||' \
 		| awk '!x[$0]++' \
 	)"
 
-	if [ "$MDSC_NO_CACHE" != "--no-cache" ] ; then
-		Require ListProjectSequence
-		local clientSettingsSpec="$( \
-			ListProjectSequence "$MDSC_PRJ_NAME" --print-provides \
-			| cut -d" " -f2 \
-			| grep '^deploy-ssh-client-settings:' \
-			| sed 's|^deploy-ssh-client-settings:||' \
-			| tr ':' ' ' \
-		)"
-	else
-		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		local clientSettingsSpec="$( \
-			grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" \
-			| cut -d" " -f3 \
-			| grep '^deploy-ssh-client-settings:' \
-			| sed 's|^deploy-ssh-client-settings:||' \
-			| tr ':' ' ' \
-		)"
-	fi
+	local clientSettingsSpec="$( 
+		DistroSystemContext --index-merged-provides \
+		grep -e "^$MDSC_PRJ_NAME " \
+		| cut -d" " -f3 \
+		| grep '^deploy-ssh-client-settings:' \
+		| sed 's|^deploy-ssh-client-settings:||' \
+		| tr ':' ' ' 
+	)"
 
 	local sshTarget
 	while read -r sshTarget ; do
@@ -330,8 +319,8 @@ DistroImageProjectProvidesMerged(){
 		set +e ; return 1
 	fi
 	local checkFile="$MDSC_CACHED/distro-provides.txt"
-	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
 	if [ -f "$checkFile" ] ; then
+		local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
 			if [ "$cacheFile" -nt "$checkFile" ] ; then
@@ -344,8 +333,11 @@ DistroImageProjectProvidesMerged(){
 		fi
 	
 		set -e
-		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | cut -d" " -f2,3 | awk '!x[$0]++' | tee "$cacheFile"
+		DistroSystemContext --index-merged-provides \
+		grep -e "^$MDSC_PRJ_NAME " \
+		| cut -d" " -f2,3 \
+		| awk '!x[$0]++' \
+		| tee "$cacheFile"
 		return 0
 	fi
 	
@@ -389,8 +381,9 @@ DistroImageProjectSequenceFile(){
 		fi
 	
 		set -e
-		DistroImageEnsureProvidesMergedFile MDSC_IDAPRV_NAME
-		grep -e "^$MDSC_PRJ_NAME " "$MDSC_IDAPRV_NAME" | awk '$2 && !seen[$2]++ { print $2; }' > "$cacheFile"
+		DistroSystemContext --index-merged-provides \
+		grep -e "^$MDSC_PRJ_NAME " \
+		| awk '$2 && !seen[$2]++ { print $2; }' > "$cacheFile"
 		echo "$cacheFile"
 		return 0
 	fi
@@ -402,95 +395,6 @@ DistroImageProjectSequenceFile(){
 	set +e ; return 1
 }
 
-# sets MDSC_IDAPRV_NAME variable to all merged provides table file name
-DistroImageEnsureProvidesMergedFile(){
-	local MDSC_CMD='DistroImageEnsureProvidesMergedFile'
-	set -e
-
-	if [ "$1" != "MDSC_IDAPRV_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDAPRV_NAME" >&2
-		set +e ; return 1
-	fi
-	if [ -n "${MDSC_IDAPRV_NAME:0:1}" ] ; then
-		[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
-		return 0
-	fi
-
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
-
-	local checkFile="$MDSC_CACHED/distro-index.inf"
-	local cacheFile="$MDSC_CACHED/distro-merged-provides.txt"
-	if [ -f "$checkFile" ] ; then
-		if [ -f "$cacheFile" ] ; then
-			# remake if it is too young (re: one second precision of -nt)
-			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
-				MDSC_IDAPRV_NAME="$cacheFile"
-				return 0
-			fi
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
-		else
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
-		fi
-	
-		Require ListDistroProvides
-		ListDistroProvides --explicit-noop --no-cache --all-provides-merged > "$cacheFile.tmp"
-		mv -f "$cacheFile.tmp" "$cacheFile"
-		MDSC_IDAPRV_NAME="$cacheFile"
-		return 0
-	fi
-	
-	echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-merged index" >&2
-	set +e ; return 1
-}
-
-# sets MDSC_IDOPRV_NAME variable to all merged provides table file name
-DistroImageEnsureProvidesOwnedFile(){
-	set -e; local MDSC_CMD=DistroImageEnsureProvidesOwnedFile
-
-	if [ "$1" != "MDSC_IDOPRV_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_IDOPRV_NAME" >&2
-		set +e ; return 1
-	fi
-	if [ -n "${MDSC_IDOPRV_NAME:0:1}" ] ; then
-		[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using cache file ($MDSC_OPTION)" >&2
-		return 0
-	fi
-	
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
-
-	local checkFile="$MDSC_CACHED/distro-index.inf"
-	local cacheFile="$MDSC_CACHED/distro-provides.txt"
-	if [ -f "$checkFile" ] ; then
-		if [ -f "$cacheFile" ] ; then
-			# remake if it is too young (re: one second precision of -nt)
-			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				[ full != "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: using index, up to date ($MDSC_OPTION)" >&2
-				MDSC_IDOPRV_NAME="$cacheFile"
-				return 0
-			fi
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
-		else
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
-		fi
-	
-		Distro ListDistroProvides --explicit-noop --all-provides > "$cacheFile.$$.tmp"
-		mv -f "$cacheFile.$$.tmp" "$cacheFile"
-		MDSC_IDOPRV_NAME="$cacheFile"
-		return 0
-	fi
-
-	if [ -z "$MDSC_CACHED" ] || [ "$MDSC_CACHED" != "$MMDAPP/.local/system-index" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: can't ensure provides-owned index" >&2
-		set +e ; return 1
-	fi
-
-	mkdir -p "$MDSC_CACHED"
-	Distro ListDistroProvides --no-cache --explicit-noop --all-provides > "$cacheFile.$$.tmp"
-	mv -f "$cacheFile.$$.tmp" "$cacheFile"
-	MDSC_IDOPRV_NAME="$cacheFile"
-	return 0
-}
 
 #
 # call with --install|--prepare [--export|--local] argument
@@ -731,16 +635,17 @@ DistroImageCheckSourcePath(){
 		return 0
 	fi
 
-	DistroImageEnsureProvidesOwnedFile MDSC_IDOPRV_NAME
-	commandOutput="$( \
-		grep " $sourceName$" "$MDSC_IDOPRV_NAME" | awk '$1 && !seen[$1]++ { print $1; }' \
+	commandOutput="$(
+		DistroSystemContext --index-provides \
+		grep " $sourceName$" \
+		| awk '$1 && !seen[$1]++ { print $1; }' \
 		| while read -r checkProject ; do
 			[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check exact path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 			if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
 				[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found exact path in a loop: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 				echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 			fi
-		done \
+		done
 	)"
 	
 	if [ -n "${commandOutput:0:1}" ] ; then
