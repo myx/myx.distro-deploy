@@ -243,7 +243,7 @@ DistroImageProjectSshTargets(){
 	)"
 
 	local clientSettingsSpec="$( 
-		DistroSystemContext --index-merged-provides \
+		DistroSystemContext --index-provides-merged \
 		grep -e "^$MDSC_PRJ_NAME " \
 		| cut -d" " -f3 \
 		| grep '^deploy-ssh-client-settings:' \
@@ -333,7 +333,7 @@ DistroImageProjectProvidesMerged(){
 		fi
 	
 		set -e
-		DistroSystemContext --index-merged-provides \
+		DistroSystemContext --index-provides-merged \
 		grep -e "^$MDSC_PRJ_NAME " \
 		| cut -d" " -f2,3 \
 		| awk '!x[$0]++' \
@@ -367,7 +367,7 @@ DistroImageProjectSequenceFile(){
 		set +e ; return 1
 	fi
 	local checkFile="$MDSC_CACHED/distro-provides.txt"
-	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-build-sequence.txt"
+	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-sequence.txt"
 	if [ -f "$checkFile" ] ; then
 		if [ -f "$cacheFile" ] ; then
 			# remake if it is too young (re: one second precision of -nt)
@@ -381,7 +381,7 @@ DistroImageProjectSequenceFile(){
 		fi
 	
 		set -e
-		DistroSystemContext --index-merged-provides \
+		DistroSystemContext --index-provides-merged \
 		grep -e "^$MDSC_PRJ_NAME " \
 		| awk '$2 && !seen[$2]++ { print $2; }' > "$cacheFile"
 		echo "$cacheFile"

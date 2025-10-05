@@ -22,7 +22,7 @@ ImageInstallProjectProvidesMerged(){
 	# ListProjectProvides.fn.sh "$MDSC_PRJ_NAME" --merge-sequence | grep "^\\S\\S* image-install:"
 	# ListProjectProvides.fn.sh "$MDSC_PRJ_NAME" --merge-sequence --filter-and-cut image-install # cuts "image-install:"
 	
-	DistroSystemContext --index-merged-provides \
+	DistroSystemContext --index-provides-merged \
 	awk -v p="$MDSC_PRJ_NAME" ' $1==p && index($3,"image-install:")==1 && !seen[$2" "$3]++ { print $2, $3; } '
 }
 

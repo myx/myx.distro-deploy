@@ -18,7 +18,7 @@ ImagePrepareProjectProvidesMerged(){
 	DistroImageProjectProvidesMerged | awk 'index($2,"image-prepare:")==1 && !seen[$0]++ { print; }'
 	return 0
 	
-	DistroSystemContext --index-merged-provides \
+	DistroSystemContext --index-provides-merged \
 	awk -v p="$MDSC_PRJ_NAME" ' $1==p && index($3,"image-prepare:")==1 && !seen[$2" "$3]++ { print $2, $3; } '
 }
 
