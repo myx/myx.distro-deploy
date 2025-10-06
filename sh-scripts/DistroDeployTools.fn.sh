@@ -37,7 +37,7 @@ DistroDeployTools(){
 			echo "📘 syntax: DistroDeployTools.fn.sh <option>" >&2
 			echo "📘 syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
 			echo "📘 syntax: DistroDeployTools.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
+			if [ "$1"="--help" ] ; then
 				cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/HelpDistroDeployTools.text" >&2
 			fi
 			return 0
@@ -58,7 +58,7 @@ case "$0" in
 		fi
 		DistroSystemContext --distro-path-auto
 
-		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+		if [ -z "$1" ] || [ "$1"="--help" ] ; then
 			DistroDeployTools "${1:-"--help-syntax"}"
 			exit 1
 		fi
