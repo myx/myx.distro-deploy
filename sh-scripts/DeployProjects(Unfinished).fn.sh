@@ -163,10 +163,10 @@ DeployProjectSsh(){
 
 case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
-		if [ -z "$1" ] || [ "$1"="--help" ] ; then
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "syntax: DeployProjectSsh.fn.sh <project> --do-exec/--do-sync/--do-both/--do-none" >&2
 			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
-			if [ "$1"="--help" ] ; then
+			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
 			fi

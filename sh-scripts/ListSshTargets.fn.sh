@@ -125,11 +125,11 @@ ListSshTargets(){
 
 case "$0" in
 	*/sh-scripts/ListSshTargets.fn.sh)
-		if [ -z "$1" ] || [ "$1"="--help" ] ; then
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			echo "📘 syntax: ListSshTargets.fn.sh [--line-prefix <prefix>] [--line-suffix <suffix>] --all-targets [<ssh arguments>...]" >&2
 			echo "📘 syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
 			echo "📘 syntax: ListSshTargets.fn.sh [--help]" >&2
-			if [ "$1"="--help" ] ; then
+			if [ "$1" = "--help" ] ; then
 				. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ListSshTargets.fn.sh --all-targets" >&2
