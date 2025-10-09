@@ -129,13 +129,13 @@ ExecuteParallel(){
 	Require ListSshTargets
 	local sshTargets="$( \
 		ListSshTargets --select-from-env \
-			--line-prefix 'Prefix -3' \
+			--line-prefix 'Prefix -o -3' \
 			--line-suffix ' & ' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
 			$executeCommand $targetCommand \
-		| cut -d" " -f 1,2,4-
+		| cut -d" " -f 1,2,3,5-
 	)"
-	
+
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "Will execute ($MDSC_CMD): " >&2
 		local textLine
