@@ -43,9 +43,9 @@ Variables (context environment) available in: actions, build-step scripts and co
 	MDSC_INMODE - console mode ("deploy")
 	MDLT_ORIGIN - source of System (Source or Deploy) Console commands (something like: "/Volumes/ws-2017/myx-work/.local/")
 	MDSC_OPTION - console mode settings (something like: "--distro-from-output")
-	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/.local/output-cache/distro")
+	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/.local/source-cache/sources")
 	MDSC_CACHED - current index cache root (something like: "/Volumes/ws-2017/myx-work/.local/system-index")
-	MDSC_OUTPUT - current target root (something like: "/Volumes/ws-2017/myx-work/output/distro")
+	MDSC_OUTPUT - current target root (something like: "/Volumes/ws-2017/myx-work/.local/output-cache/")
 	MDSC_DETAIL - debug settings, values: <empty>, "true", "full"
 	useSshUser - override from ssh user calculated from project sequence variables
 	useSshHome - override from ssh home calculated from project sequence variables
@@ -59,7 +59,6 @@ App Folders:
 
 	/ - workspace root directory
 	/source - source codes and projects - editable and commitable or pullable
-	/output - output products (generated, cloned or omitted (in pure deploy mode))
 	/export - export resources (generated or cloned)
 	/distro - distro structure, whole project tree, prepared (generated or cloned)
 	/distro/repo[/group]/project - project folders structure
@@ -70,6 +69,7 @@ App Folders:
 	/.local - system tools, utilities and system integrations
 	/.local/distro-index - system index space (generated)
 	/.local/source-cache - build system cache space (generated), before source-prepare
+	/.local/output-cache - output products (generated, cloned or omitted (in pure deploy mode))
 
 image-receive, image-install directives:
 
