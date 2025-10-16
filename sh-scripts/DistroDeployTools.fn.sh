@@ -13,12 +13,14 @@ if [ -z "$MMDAPP" ] ; then
 fi
 
 DistroDeployTools(){
-	local MDSC_CMD='DistroDeployTools'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD" $MDSC_NO_CACHE $MDSC_NO_INDEX "$@" >&2
 
 	set -e
 
+	local MDSC_CMD='DistroDeployTools'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD" $MDSC_NO_CACHE $MDSC_NO_INDEX "$@" >&2
+
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
+
 	case "$1" in
 		--make-*)
 			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployTools.Make.include"

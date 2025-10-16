@@ -26,7 +26,6 @@ ExecuteInteractive(){
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
-
 	case "$1" in
 		--project)
 			shift
