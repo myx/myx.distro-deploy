@@ -78,7 +78,6 @@ ListSshTargets(){
 				local setSshUser="${useSshUser:-}"
 				local setSshHome="${useSshHome:-}"
 			
---ingest-distro-index-from-source
 				DistroSystemContext --index-provides \
 				grep -e ' deploy-ssh-target:' \
 				| sed 's| deploy-ssh-target:| |' \
