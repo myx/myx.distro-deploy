@@ -116,14 +116,13 @@ ExecuteSequence(){
 	local argument
 	local targetCommand="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
-	Require ListSshTargets
-	local sshTargets="$( \
-		ListSshTargets --select-from-env \
+	local sshTargets="$(
+		Distro ListSshTargets --select-from-env \
 			--line-prefix 'Prefix -3' \
 			--line-suffix ' ; ' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
 			$executeCommand $targetCommand \
-		| cut -d" " -f 1,2,4-
+		| cut -d" " -f 2-
 	)"
 	
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
@@ -194,7 +193,7 @@ case "$0" in
 			echo "📘 syntax: ExecuteSequence.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "📘 syntax: ExecuteSequence.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ExecuteSequence.fn.sh --select-projects l6 --execute-stdin -l root" >&2
 				echo "    ExecuteSequence.fn.sh --select-projects l6 --ssh-user root --execute-stdin" >&2

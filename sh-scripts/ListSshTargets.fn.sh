@@ -78,18 +78,10 @@ ListSshTargets(){
 				local setSshUser="${useSshUser:-}"
 				local setSshHome="${useSshHome:-}"
 			
-				DistroSystemContext --index-provides \
-				grep -e ' deploy-ssh-target:' \
-				| sed 's| deploy-ssh-target:| |' \
-				| awk '!x[$0]++' \
-				| while read -r projectName sshTarget ; do
-					local useSshHost="${setSshHost:-}"
-					local useSshPort="${setSshPort:-}"
-					local useSshUser="${setSshUser:-}"
-					local useSshHome="${setSshHome:-}"
-					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix"
-					# printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$useSshHost" "$useSshPort" "$useSshUser" "$extraArguments" "$lineSuffix"
-				done
+				Distro ListDistroProvides --select-all \
+					--filter-own-provides-column "deploy-ssh-target:" \
+					--add-merged-provides-column "deploy-ssh-client-settings:" \
+				| DistroImageExtractSshConnections --line-prefix "${linePrefix}DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
 				return 0
 			;;
 			--line-prefix)
@@ -107,16 +99,10 @@ ListSshTargets(){
 				local setSshUser="${useSshUser:-}"
 				local setSshHome="${useSshHome:-}"
 			
-				Require ListDistroProvides
-				ListDistroProvides --select-from-env | grep ' deploy-ssh-target:' | sed 's|deploy-ssh-target:||' \
-				| while read -r projectName sshTarget ; do
-					local useSshHost="${setSshHost:-}"
-					local useSshPort="${setSshPort:-}"
-					local useSshUser="${setSshUser:-}"
-					local useSshHome="${setSshHome:-}"
-					DistroImageProjectSshTargets --project "$projectName" --line-prefix "$linePrefix$projectName DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
-					# printf '%s%s ssh %s -p %s -l %s %s%s\n' "$linePrefix" "$projectName" "$useSshHost" "$useSshPort" "$useSshUser" "$extraArguments" "$lineSuffix"
-				done
+				Distro ListDistroProvides --select-from-env \
+					--filter-own-provides-column "deploy-ssh-target:" \
+					--add-merged-provides-column "deploy-ssh-client-settings:" \
+				| DistroImageExtractSshConnections --line-prefix "${linePrefix}DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
 				return 0
 			;;
 		esac
@@ -130,7 +116,7 @@ case "$0" in
 			echo "📘 syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
 			echo "📘 syntax: ListSshTargets.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ListSshTargets.fn.sh --all-targets" >&2
 

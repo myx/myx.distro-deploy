@@ -97,12 +97,14 @@ Reinstall(){
 
 	shift
 
-	Require ListSshTargets
-	. "`myx.common which lib/linesToArguments`"
+	. "$(myx.common which lib/linesToArguments)"
 
 	# set -x
 	
-	local targets="$( ListSshTargets --select-projects "$filterProject" "$@" | LinesToArguments )"
+	local targets="$( 
+		Distro ListSshTargets --select-projects "$filterProject" "$@" \
+		| LinesToArguments 
+	)"
 
 	# set +x
 

@@ -12,10 +12,11 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-Require ListSshTargets
-
 type Prefix >/dev/null 2>&1 || \
 	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
+
+type DistroImage >/dev/null 2>&1 || \
+	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 ExecuteInteractive(){
 	
@@ -52,11 +53,13 @@ ExecuteInteractive(){
 	esac
 	
 	local sshTargets="$( \
-		ListSshTargets --select-from-env \
+		Distro ListSshTargets --select-from-env \
 			--line-prefix 'ExecuteInteractive --project' \
 			--line-suffix ' ;' \
 			-t "$@" \
+		| awk '{ print $2, $3, $1, substr($0, index($0,$4)) }'
 	)"
+	# | cut -d" " -f 2,3,1,4- # cut can't reorder columns
 	
 	echo "Will execute: " >&2
 	local textLine
@@ -81,7 +84,7 @@ case "$0" in
 			echo "📘 syntax: ExecuteInteractive.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "📘 syntax: ExecuteInteractive.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/help/HelpSelectProjects.include"
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
 				echo "  Examples:" >&2
 				echo "    ExecuteInteractive.fn.sh --select-projects l6 -l root uname -a" >&2
 				echo "    ExecuteInteractive.fn.sh --select-merged-keywords l6 -l root uname -a" >&2

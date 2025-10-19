@@ -53,13 +53,14 @@ ShellTo(){
 
 	shift
 
-	Require ListSshTargets
-
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
 			
-	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
+	local targets="$( 
+		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} \
+		| cut -d" " -f 2- 
+	)"
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2

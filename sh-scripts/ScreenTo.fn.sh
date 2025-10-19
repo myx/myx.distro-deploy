@@ -29,12 +29,13 @@ ScreenTo(){
 
 	shift
 
-	Require ListSshTargets
-
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t 'command -v screen >/dev/null && exec env SHELL=\"\`command -v bash || command -v sh\`\" screen -q -O -U -D -R || exec \`command -v bash || command -v sh\` -i'"
 
-	local targets="$( ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} | cut -d" " -f 2- )"
+	local targets="$( 
+		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} \
+		| cut -d" " -f 2- 
+	)"
 
 	if [ -z "$targets" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: No matching projects with ssh deploy target is found, was looking for: $filterProject" >&2

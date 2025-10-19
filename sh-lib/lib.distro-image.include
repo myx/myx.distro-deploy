@@ -56,12 +56,6 @@ DistroSelectProject(){
 
 #
 #
-DistroListSshTargets(){
-	echo "Not Implemented!" >&2
-}
-
-#
-#
 DistroSshConnect(){
 	local MDSC_CMD='DistroSshConnect'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
@@ -158,19 +152,19 @@ DistroImageParseSshOptions(){
 				shift 2
 			;;
 			--ssh-host)
-				shift ; useSshHost="$1" ; shift
+				useSshHost="$2" ; shift 2
 			;;
 			--ssh-port)
-				shift ; useSshPort="$1" ; shift
+				useSshPort="$2" ; shift 2
 			;;
 			--ssh-user)
-				shift ; useSshUser="$1" ; shift
+				useSshUser="$2" ; shift 2
 			;;
 			--ssh-home)
-				shift ; useSshHome="${1#$MMDAPP/source/}" ; shift
+				useSshHome="${2#$MMDAPP/source/}" ; shift 2
 			;;
 			--ssh-args)
-				shift ; useSshArgs="$1" ; shift
+				useSshArgs="$2" ; shift 2
 			;;
 			*)
 				return 0
@@ -189,28 +183,13 @@ DistroImageProjectSshTargets(){
 	
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
-	local useSshArgs="${useSshArgs:-}"
-	local linePrefix=""
-	local lineSuffix=""
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
+	local linePrefix= lineSuffix=
 	
 	while true ; do
 		case "$1" in
 			--project)
-				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
-			;;
-			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
-			;;
-			--line-prefix)
-				shift ; linePrefix="$1" ; shift
-			;;
-			--line-suffix)
-				shift ; lineSuffix="$1" ; shift
+				DistroSelectProject MDSC_PRJ_NAME "$2" ; shift 2
 			;;
 			*)
 				break
@@ -223,70 +202,102 @@ DistroImageProjectSshTargets(){
 		set +e ; return 1
 	fi
 	
-	local argument
-	local extraArguments="$( for argument in "$@" ; do printf '%s ' "$argument" ; done )"
+	Distro ListDistroProvides --select-one-project "$MDSC_PRJ_NAME" \
+		--filter-own-provides-column "deploy-ssh-target:" \
+		--add-merged-provides-column "deploy-ssh-client-settings:" \
+	| DistroImageExtractSshConnections "$@"
+	return 0
+}
 
-	local	setSshHost="${useSshHost:-}" \
-			setSshPort="${useSshPort:-}" \
-			setSshUser="${useSshUser:-}" \
-			setSshHome="${useSshHome:-}" \
-			setSshArgs="${useSshArgs:-}" \
-			sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
+DistroImageExtractSshConnections(){
+	local MDSC_CMD='DistroImageExtractSshConnections'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
+	local linePrefix= lineSuffix=
 	
-	local sshTargetsSpec="$( \
-		DistroSystemContext --index-provides \
-		grep -e "^$MDSC_PRJ_NAME " \
-		| cut -d" " -f2 \
-		| grep '^deploy-ssh-target:' \
-		| sed 's|^deploy-ssh-target:||' \
-		| awk '!x[$0]++' \
-	)"
+	while true ; do
+		case "$1" in
+			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
+				DistroImageParseSshOptions "$1" "$2"
+				shift 2
+			;;
+			--line-prefix)
+				linePrefix="$2" ; shift 2
+			;;
+			--line-suffix)
+				lineSuffix="$2" ; shift 2
+			;;
+			*)
+				break
+			;;
+		esac
+	done
 
-	local clientSettingsSpec="$( 
-		DistroSystemContext --index-provides-merged \
-		grep -e "^$MDSC_PRJ_NAME " \
-		| cut -d" " -f3 \
-		| grep '^deploy-ssh-client-settings:' \
-		| sed 's|^deploy-ssh-client-settings:||' \
-		| tr ':' ' ' 
-	)"
+	local extraArguments="$*"
 
-	local sshTarget
-	while read -r sshTarget ; do
+	local setSshHost="${useSshHost:-}" setSshPort="${useSshPort:-}" setSshUser="${useSshUser:-}" setSshHome="${useSshHome:-}" setSshArgs="${useSshArgs:-}"
+	local sshName sshHost sshPort sshUser sshHome sshArgs sshSpec clientSpec
 	
-		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget" >&2
-		
+	awk '
+		{
+			n1 = split($2, a, "|")
+			n2 = split($3, t, "|")
+			args = ""
+			for (i = 1; i <= n2; i++) {
+				tok = t[i]
+				sub(/:/, " ", tok)
+				args = ( args ? args " " tok : tok )
+			}
+
+			for (i = 1; i <= n1; i++) {
+				print $1, a[i], args
+			}
+		}
+	' \
+	| while read -r projectName sshTarget sshOptions ; do
+		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget, ssh options: $sshOptions" >&2
+
 		sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
 		sshUser="${sshTarget%${sshTarget%@$sshSpec}}"
 		sshName="$( echo "$sshSpec" | sed 's,:.*$,,' )"
 		sshPort="$( echo "$sshSpec" | sed 's,^.*:,,' )"
-		
+
 		useSshHost="${setSshHost:-$sshName}"
 		useSshPort="${setSshPort:-$sshPort}"
 		useSshUser="${setSshUser:-$sshUser}"
 		useSshHome="$setSshHome"
 		useSshArgs="$setSshArgs"
 
-		while read -r clientSpec; do
-			[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh options: $clientSpec" >&2
-			DistroImageParseSshOptions $clientSpec
-		done <<< "$clientSettingsSpec"
-
+		DistroImageParseSshOptions $sshOptions
+		
 		sshHost="${setSshHost:-$useSshHost}"
 		sshPort="${setSshPort:-$useSshPort}"
 		sshHome="${setSshHome:-$useSshHome}"
 		sshUser="${setSshUser:-$useSshUser}"
 		sshArgs="${setSshArgs:-$useSshArgs}"
 		
-		if [ "$sshHost" != "$sshName" ] ; then
-			linePrefix="$linePrefix --ssh-name $( printf '%q' "$sshName" )"
-		fi
-
 		if [ -z "$sshHome" ] ; then
 			sshHome="$( echo ~/.ssh )"
 		fi
 
-		printf '%s --ssh-host %q --ssh-port %s --ssh-user %q --ssh-home %q %s %s%s\n' \
+		if [ "$sshHost" != "$sshName" ] ; then
+			printf '%s %s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
+				"$projectName" \
+				"$linePrefix" \
+				"$sshName" \
+				"$sshHost" \
+				"$sshPort" \
+				"$sshUser" \
+				"$sshHome" \
+				"$sshArgs" \
+				"$extraArguments" \
+				"$lineSuffix"
+			continue				
+		fi
+
+		printf '%s %s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
+			"$projectName" \
 			"$linePrefix" \
 			"$sshHost" \
 			"$sshPort" \
@@ -295,14 +306,11 @@ DistroImageProjectSshTargets(){
 			"$sshArgs" \
 			"$extraArguments" \
 			"$lineSuffix"
-			
 		continue
-		
-	done <<< "$sshTargetsSpec" \
+	done \
 	| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
 	
 	return 0
-	# DistroListSshTargets --select-projects "$MDSC_PRJ_NAME" "${1:'--print-table'}" "$@"
 }
 
 # prints project merged provides
@@ -555,8 +563,6 @@ DistroImageProjectContextVariables(){
 		done
 		echo "$buildBuffer"
 		for variableName in $variableNames ; do
-			#printf 'printf %s %q "%s"\n' "'$prefix%s=\\"%q\\"\n'" "$variableName" "\\\$VAR_$variableName"
-			#printf 'printf %s %q "%s"\n' "'$prefix%s=\\"%s\\"\n'" "$variableName" "\\\$VAR_$variableName"
 			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=\\"%s\\"\n" "$variableName" "$variableName"
 		done
 	`"

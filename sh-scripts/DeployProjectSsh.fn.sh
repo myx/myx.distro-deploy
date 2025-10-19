@@ -376,8 +376,7 @@ DeployProjectsSsh(){
 			fi
 		;;
 		--*)
-			Require ListDistroProjects
-			ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
+			Distro ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
 			return 0
 		;;
 	esac
@@ -428,17 +427,26 @@ DeployProjectsSsh(){
 
 	local extraArguments="$( local argument ; for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
-	Require ListDistroProjects
-	Require ListDistroProvides
-
 	local taskList="$(
-		ListDistroProjects --select-from-env \
-			--select-execute-default \
-		ListDistroProvides \
+		Distro ListDistroProvides --select-from-env \
 			--filter-own-provides-column "deploy-ssh-target:" \
-		| while read -r projectName sshTarget ; do
-			echo "$projectName" "$sshTarget"
-		done
+			--add-merged-provides-column "deploy-ssh-client-settings:" \
+		| awk '
+			{
+				n1 = split($2, a, "|")
+				n2 = split($3, t, "|")
+				args = ""
+				for (i = 1; i <= n2; i++) {
+					tok = t[i]
+					sub(/:/, " ", tok)
+					args = ( args ? args " " tok : tok )
+				}
+
+				for (i = 1; i <= n1; i++) {
+					print $1, a[i], args
+				}
+			}
+		'
 	)"
 
 	if [ -z "$taskList" ] ; then
@@ -447,15 +455,16 @@ DeployProjectsSsh(){
 	fi
 	
 	echo "Targets selected: " >&2
-	local textLine
-	echo "$taskList" | while read textLine ; do
-		echo "  $textLine" >&2
-	done
+	local project target textLine
+	echo "$taskList" | while read project target textLine ; do
+		echo ">  $(basename "$project") $target" >&2
+	done \
+	2>&1 | column -t 1>&1
 
 	local evalList="$(
 		echo "$taskList" \
-		| while read -r projectName sshTarget ; do
-			echo    Prefix -o "'$sshTarget'" DeployProjectSsh --project "'$projectName'" --no-sleep $extraArguments
+		| while read -r projectName sshTarget sshOptions ; do
+			echo    Prefix -o "'$sshTarget'" DeployProjectSsh --project "'$projectName'" --no-sleep $sshOptions $extraArguments
 		done
 	)"
 
@@ -509,8 +518,7 @@ DeployProjectSsh(){
 		--project)
 		;;
 		--*)
-			Require ListDistroProjects
-			ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
+			Distro ListDistroProjects --select-execute-default DeployProjectsSsh "$@"
 			return 0
 		;;
 	esac
@@ -788,9 +796,9 @@ case "$0" in
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-deploy-patch-scripts" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-context-variables" >&2
 				
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-port 22 --prepare-none --print-ssh-targets" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --prepare-none --print-ssh-targets" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-port 22 --prepare-none --print-ssh-targets" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-user guest --prepare-none --print-ssh-targets" >&2
 			fi
 			exit 1

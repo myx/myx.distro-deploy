@@ -40,16 +40,6 @@ DeployProjectSsh(){
 				set +e ; return 1
 			fi
 		;;
-		--set-env)
-			shift
-			if [ -z "$1" ] ; then
-				echo "ERROR: DeploySettings: --set-env argument expected!" >&2
-				set +e ; return 1
-			fi
-			local envName="$1" ; shift
-			eval "$envName='` DeploySettings --explicit-noop "$@" `'"
-			return 0
-		;;
 		--*)
 			Require ListDistroProjects
 			ListDistroProjects --select-execute-default DeployProjectSsh "$@"
