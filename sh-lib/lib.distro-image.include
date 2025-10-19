@@ -201,7 +201,7 @@ DistroImageProjectSshTargets(){
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
 	fi
-	
+
 	Distro ListDistroProvides --select-one-project "$MDSC_PRJ_NAME" \
 		--filter-own-provides-column "deploy-ssh-target:" \
 		--add-merged-provides-column "deploy-ssh-client-settings:" \
@@ -246,7 +246,7 @@ DistroImageExtractSshConnections(){
 			args = ""
 			for (i = 1; i <= n2; i++) {
 				tok = t[i]
-				sub(/:/, " ", tok)
+				gsub(/:/, " ", tok)
 				args = ( args ? args " " tok : tok )
 			}
 
