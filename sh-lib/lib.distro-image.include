@@ -305,7 +305,7 @@ DistroImageExtractSshConnections(){
 		fi
 
 		if [ "$sshHost" != "$sshName" ] ; then
-			printf '%s%s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q%s%s\n' \
+			printf '%s%s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q %s%s\n' \
 				"$sshTarget" \
 				"$linePrefix" \
 				"$sshName" \
@@ -319,7 +319,7 @@ DistroImageExtractSshConnections(){
 			continue				
 		fi
 
-		printf '%s%s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q%s%s\n' \
+		printf '%s%s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q %s%s\n' \
 			"$sshTarget" \
 			"$linePrefix" \
 			"$sshHost" \
