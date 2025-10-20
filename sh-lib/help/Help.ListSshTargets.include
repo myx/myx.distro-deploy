@@ -8,11 +8,11 @@ echo "    --no-cache"
 echo "                Use no cache."
 echo
 echo "    --no-project-column"
-echo "                Do not print project column. Project column is printed by default. First column, if printed."
+echo "                Do not print 'project' column. Project column is printed by default. First column, if printed."
 echo
 echo "    --no-target-column"
-echo "                Do not print `target` column. Target column is printed by default. Second column after"
-echo "                project. First column, when no project column."
+echo "                Do not print 'target' column. Target column is printed by default. Second column after"
+echo "                project. First column, when 'project' column is disabled."
 echo
 echo "    --line-prefix <prefix>"
 echo "    --line-suffix <suffix>"
@@ -26,8 +26,8 @@ echo "  Examples:"
 echo
 echo "    ListSshTargets.fn.sh --all-targets"
 echo "    ListSshTargets.fn.sh --no-project-column --all-targets"
-echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix "DistroSshConnect " --line-suffix " uptime &" --all-targets"
-echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix "Prefix -o -3 DistroSshConnect " --line-suffix " uptime" --ssh-user root --ssh-home ~/.ssh --all-targets"
+echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix 'DistroSshConnect ' --line-suffix ' uptime &' --all-targets"
+echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix 'Prefix -o -3 DistroSshConnect ' --line-suffix ' uptime' --ssh-user root --ssh-home ~/.ssh --all-targets"
 
 echo "    ListSshTargets.fn.sh --select-projects l6"
 echo "    ListSshTargets.fn.sh --select-keywords l6"
