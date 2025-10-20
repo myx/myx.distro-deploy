@@ -364,13 +364,13 @@ case "$0" in
 			echo "📘 syntax: InstallPrepareFiles.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-sync-folders" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-clone-files" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-source-patch-scripts" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --print-target-patch-scripts" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp find . | sort | grep web/default" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp 'pwd ; find . | sort'" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --to-temp tar czvf - . > /dev/null" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-sync-folders" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-clone-files" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-source-patch-scripts" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-target-patch-scripts" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp find . | sort | grep web/default" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp 'pwd ; find . | sort'" >&2
+				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp tar czvf - . > /dev/null" >&2
 			fi
 			exit 1
 		fi

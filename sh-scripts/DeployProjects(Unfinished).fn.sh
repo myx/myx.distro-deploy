@@ -158,7 +158,7 @@ case "$0" in
 			echo "syntax: DeployProjectSsh.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
-				echo "    DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
+				echo "    DeployProjectSsh.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org" >&2
 			fi
 			exit 1
 		fi

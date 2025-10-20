@@ -775,7 +775,7 @@ case "$0" in
 			echo "📘 syntax: DeployProjectSsh.fn.sh [--help]" >&2
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --prepare-sync --deploy-sync" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --prepare-sync --deploy-sync" >&2
 				echo "    DeployProjectSsh.fn.sh --select-projects ndss001 --no-sleep --ssh-user root --ssh-home ~/.ssh --prepare-full --deploy-exec" >&2
 
 				echo "    DeployProjectSsh.fn.sh --select-one-project ndns001 --prepare-sync --deploy-sync" >&2
@@ -783,16 +783,16 @@ case "$0" in
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-sync" >&2
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-exec --deploy-exec" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --deploy-full" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --print-full-script" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --deploy-full" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --print-full-script" >&2
 
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-deploy-patch-scripts" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --print-context-variables" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-deploy-patch-scripts" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-context-variables" >&2
 				
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --prepare-none --print-ssh-targets" >&2
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
 				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-port 22 --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --ssh-user guest --prepare-none --print-ssh-targets" >&2
+				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --ssh-user guest --prepare-none --print-ssh-targets" >&2
 			fi
 			exit 1
 		fi

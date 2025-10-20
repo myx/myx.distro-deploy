@@ -91,8 +91,8 @@ case "$0" in
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    ScreenTo.fn.sh ndss113" >&2
-				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz" >&2
-				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.ndm9.xyz -l mysql" >&2
+				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org" >&2
+				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql" >&2
 			fi
 			exit 1
 		fi
