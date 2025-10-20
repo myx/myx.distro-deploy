@@ -140,7 +140,7 @@ ExecuteParallel(){
 		echo "$sshTargets" | while read -r project _ textLine ; do
 			echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
 		done \
-		2>&1 | column -t 1>&1
+		2>&1 | column -t 1>&2
 	fi
 
 	case "$executeType" in
