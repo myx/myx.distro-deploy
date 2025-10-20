@@ -776,12 +776,13 @@ case "$0" in
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.ndm9.net --prepare-sync --deploy-sync" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndss001 --no-sleep --ssh-user root --ssh-home ~/.ssh --prepare-full --deploy-exec" >&2
 
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-sync --deploy-sync" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-sync --deploy-none" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-sync" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-none --deploy-exec" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-exec --deploy-exec" >&2
+				echo "    DeployProjectSsh.fn.sh --select-one-project ndns001 --prepare-sync --deploy-sync" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-sync --deploy-none" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-sync" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-exec" >&2
+				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-exec --deploy-exec" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --deploy-full" >&2
 				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.ndm9.xyz --prepare-full --print-full-script" >&2
 
