@@ -124,7 +124,7 @@ InstallPrepareFilesInternalPrintScript(){
 			echo '{'
 				echo 'echo "ImagePrepareFiles: 🔂 clone/multiply files..." >&2'
 				echo "$executeScript"
-			echo "} 2>&1 | (awk 'index(\$1,\">f..t..\") == 1 { print }' >&2 || :)"
+			echo "} 2>&1 | (awk 'index(\$1,\">f..t..\") != 1 { print }' >&2 || :)"
 		fi
 	fi
 
@@ -348,7 +348,8 @@ InstallPrepareFiles(){
 				echo "$MDSC_CMD: ⛔ ERROR: deploy-output directory is missing: $MMDAPP/output" >&2; 
 				set +e ; return 1
 			fi
-			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rwX ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || :)"
+			InstallPrepareFiles --to-temp "rsync -iprltOoD --delete --chmod=ug+rwX ./ '$MMDAPP/output/deploy/$MDSC_PRJ_NAME' 2>&1 \
+			| (awk 'index(\$1,\">f..t..\") != 1 { print }' >&2 || :)"
 			return 0
 		;;
 	esac
