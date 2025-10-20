@@ -60,12 +60,7 @@ DistroSshConnect(){
 	local MDSC_CMD='DistroSshConnect'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
-	local useSshHost=""
-	local useSshPort=""
-	local useSshUser=""
-	local useSshHome=""
-	local useSshArgs=""
-
+	local useSshHost= useSshPort= useSshUser= useSshHome= useSshArgs=
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
@@ -83,6 +78,7 @@ DistroSshConnect(){
 	done
 
 	local extraArguments="$@"
+
 	if [ -z "$useSshHome" ] ; then
 		useSshHome="$( echo ~/.ssh )"
 	elif [ "$useSshHome" = "${useSshHome#'/'}" ] ; then
@@ -137,7 +133,7 @@ DistroSshConnect(){
 				"$sshSecret" \
 				"$extraArguments"
 		fi \
-		| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
+		| tee /dev/fd/2 | sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
 	)"
 	
 }
