@@ -444,16 +444,17 @@ DeployProjectsSsh(){
 	fi
 	
 	echo "> 📋 $MDSC_CMD: Targets selected: " >&2
-	local project _ textLine
-	echo "$sshTargets" | while read -r project _ textLine ; do
-		echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
+	local project sshTarget sshOptions
+	echo "$sshTargets" | while read -r project sshTarget sshOptions; do
+		echo "  > $( basename "$project" ) $sshTarget $( DistroImagePrintSshTarget $sshOptions 2>/dev/null )" >&2
 	done \
 	2>&1 | column -t 1>&2
 
 	local evalList="$(
+		local projectName sshTarget sshOptions
 		echo "$sshTargets" \
-		| while read -r projectName _ sshOptions ; do
-			echo Prefix -o "'$( DistroImagePrintSshTarget $sshOptions 2>/dev/null )'" DeployProjectSsh --project "'$projectName'" --no-sleep $sshOptions $extraArguments
+		| while read -r projectName sshTarget sshOptions ; do
+			echo Prefix -o "'$sshTarget'" DeployProjectSsh --project "'$projectName'" --no-sleep $sshOptions $extraArguments
 		done
 	)"
 
@@ -736,16 +737,16 @@ DeployProjectSsh(){
 
 				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
-				local _ sshTarget
+				local _ sshOptions
 				echo "$projectSshTargets" \
-				| while read -r _ sshTarget; do
-					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
+				| while read -r _ _ sshOptions; do
+					echo "$MDSC_CMD: using ssh, options: $sshOptions" >&2
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
 						| ${compressDeflate} \
-						| DistroSshConnect $sshTarget -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
+						| DistroSshConnect $sshOptions -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
 					then
-						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
+						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed, options: $sshOptions" >&2
 					fi
 				done
 				return 0

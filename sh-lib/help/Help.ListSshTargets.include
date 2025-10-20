@@ -14,6 +14,11 @@ echo "    --no-target-column"
 echo "                Do not print `target` column. Target column is printed by default. Second column after"
 echo "                project. First column, when no project column."
 echo
+echo "    --line-prefix <prefix>"
+echo "    --line-suffix <suffix>"
+echo "                Add prefix and/or suffix around ssh options and arguments block. Project and target columns"
+echo "                still stay in their places."
+echo
 echo "    --all-targets"
 echo "                Print all known ssh targets and exit."
 echo
@@ -21,7 +26,8 @@ echo "  Examples:"
 echo
 echo "    ListSshTargets.fn.sh --all-targets"
 echo "    ListSshTargets.fn.sh --no-project-column --all-targets"
-echo "    ListSshTargets.fn.sh --no-target-colunn --no-project-column --line-prefix "DistroSshConnect " --line-suffix " &" --all-targets"
+echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix "DistroSshConnect " --line-suffix " uptime &" --all-targets"
+echo "    ListSshTargets.fn.sh --no-target-column --no-project-column --line-prefix "Prefix -o -3 DistroSshConnect " --line-suffix " uptime" --ssh-user root --ssh-home ~/.ssh --all-targets"
 
 echo "    ListSshTargets.fn.sh --select-projects l6"
 echo "    ListSshTargets.fn.sh --select-keywords l6"

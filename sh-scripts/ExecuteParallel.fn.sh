@@ -136,9 +136,9 @@ ExecuteParallel(){
 
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "> 📋 $MDSC_CMD: Will execute: " >&2
-		local project _ textLine
-		echo "$sshTargets" | while read -r project _ textLine ; do
-			echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
+		local project sshTarget sshOptions
+		echo "$sshTargets" | while read -r project sshTarget sshOptions; do
+			echo "  > $( basename "$project" ) $sshTarget $( DistroImagePrintSshTarget $sshOptions 2>/dev/null )" >&2
 		done \
 		2>&1 | column -t 1>&2
 	fi
@@ -155,8 +155,9 @@ ExecuteParallel(){
 			executeCommand="$(cat)"
 
 			sshTargets="$( 
-				echo "$sshTargets" | while read _ textLine ; do 
-					echo '( echo "$executeCommand" | Prefix -o -3 '${textLine}' ) &' 
+				local _ textLine
+				echo "$sshTargets" | while read _ _ textLine ; do 
+					echo '( echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${textLine}' ) &' 
 				done
 			)"
 
@@ -167,8 +168,9 @@ ExecuteParallel(){
 		--execute-script)
 			executeCommand="$(cat "$executeScriptName")"
 			sshTargets="$( 
-				echo "$sshTargets" | while read _ textLine ; do 
-					echo '( echo "$executeCommand" | Prefix -o -3 '${textLine}' ) &' 
+				local _ textLine
+				echo "$sshTargets" | while read _ _ textLine ; do 
+					echo '( echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${textLine}' ) &' 
 				done
 			)"
 			
@@ -193,8 +195,9 @@ ExecuteParallel(){
 				sleep 5
 			fi
 			sshTargets="$( 
-				echo "$sshTargets" | while read _ textLine ; do 
-					echo 'Prefix -o -3 '${textLine}' &' 
+				local _ textLine
+				echo "$sshTargets" | while read _ _ textLine ; do 
+					echo 'Prefix -o -3 DistroSshConnect '${textLine}' &' 
 				done
 			)"
 		;;

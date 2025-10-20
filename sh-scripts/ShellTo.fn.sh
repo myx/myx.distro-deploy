@@ -44,7 +44,7 @@ ShellTo(){
 
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
-		echo -e "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: 'filterProject' argument (name or keyword or substring) is required!" >&2
 		set +e ; return 1
 	fi
 
@@ -53,10 +53,16 @@ ShellTo(){
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
-			
+
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	local targets="$( 
-		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} \
-		| cut -d" " -f 2- 
+		Distro ListSshTargets --select-projects "$filterProject" \
+			--line-prefix 'DistroSshConnect ' \
+			--no-project-column \
+			--no-target-column \
+			${extraArguments:-$defaultCommand}
 	)"
 
 	if [ -z "$targets" ] ; then
@@ -65,15 +71,12 @@ ShellTo(){
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
-		echo "$MDSC_CMD: 🙋 STOP: More than one match: $@" >&2
-		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
+		echo "> 🌐 $MDSC_CMD: 🙋 STOP: More than one match! Matching targets:" >&2
+		printf "%s\n" "$( echo "$targets" | sed -e 's|^|    |g' )" >&2
 		set +e ; return 2
 	fi
 
 	set -e
-
-	type DistroImage >/dev/null 2>&1 || \
-		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 	printf "> 🌐 $MDSC_CMD: Using Command: \n  %s\n" "$targets" >&2
 	eval "$targets"

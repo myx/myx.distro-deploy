@@ -7,7 +7,7 @@
 # $3 is empty or 'local' or 'export'
 DistroSelectProject(){
 	local MDSC_CMD='DistroSelectProject'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	if [ "$1" != "MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_PRJ_NAME!" >&2
@@ -58,7 +58,7 @@ DistroSelectProject(){
 #
 DistroSshConnect(){
 	local MDSC_CMD='DistroSshConnect'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local useSshHost=""
 	local useSshPort=""
@@ -189,7 +189,7 @@ DistroImageParseSshOptions(){
 #
 DistroImageProjectSshTargets(){
 	local MDSC_CMD='DistroImageProjectSshTargets'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
@@ -223,16 +223,22 @@ DistroImageProjectSshTargets(){
 
 DistroImageExtractSshConnections(){
 	local MDSC_CMD='DistroImageExtractSshConnections'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
-	local linePrefix= lineSuffix=
+	local linePrefix= lineSuffix= noProjectColumn="${noProjectColumn:-}" noTargetColumn="${noTargetColumn:-}"
 	
 	while true ; do
 		case "$1" in
-			--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
 				shift 2
+			;;
+			--no-target-column)
+				noTargetColumn="$1" ; shift
+			;;
+			--no-project-column)
+				noProjectColumn="$1" ; shift
 			;;
 			--line-prefix)
 				linePrefix="$2" ; shift 2
@@ -289,13 +295,22 @@ DistroImageExtractSshConnections(){
 		sshUser="${setSshUser:-$useSshUser}"
 		sshArgs="${setSshArgs:-$useSshArgs}"
 		
-		if [ -z "$sshHome" ] ; then
+		if [ -z "$sshHome" ]; then
 			sshHome="$( echo ~/.ssh )"
 		fi
 
+		if [ -z "$noTargetColumn" ]; then
+			sshTarget="$sshTarget "
+		else
+			sshTarget=
+		fi
+		if [ -z "$noProjectColumn" ]; then
+			sshTarget="$projectName $sshTarget"
+		fi
+
 		if [ "$sshHost" != "$sshName" ] ; then
-			printf '%s %s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
-				"$projectName" \
+			printf '%s%s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
+				"$sshTarget" \
 				"$linePrefix" \
 				"$sshName" \
 				"$sshHost" \
@@ -308,8 +323,8 @@ DistroImageExtractSshConnections(){
 			continue				
 		fi
 
-		printf '%s %s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
-			"$projectName" \
+		printf '%s%s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q %s %s%s\n' \
+			"$sshTarget" \
 			"$linePrefix" \
 			"$sshHost" \
 			"$sshPort" \
@@ -328,7 +343,7 @@ DistroImageExtractSshConnections(){
 # prints project merged provides
 DistroImageProjectProvidesMerged(){
 	local MDSC_CMD='DistroImageProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	#if [ -n "${MDSC_PRJ_MPRV:0:1}" ] ; then
 	#	echo "$MDSC_PRJ_MPRV"
@@ -369,7 +384,7 @@ DistroImageProjectProvidesMerged(){
 ##
 DistroImageProjectSequenceFile(){
 	local MDSC_CMD='DistroImageProjectSequenceFile'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
@@ -420,7 +435,7 @@ DistroImageProjectSequenceFile(){
 # call with --install|--prepare [--export|--local] argument
 DistroImageProjectContextVariables(){
 	local MDSC_CMD='DistroImageProjectContextVariables'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -590,7 +605,7 @@ DistroImageProjectContextVariables(){
 # output: declaredAt sourceName sourcePath <extraArguments>
 DistroImageCheckSourcePath(){
 	local MDSC_CMD='DistroImageCheckSourcePath'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 
@@ -677,7 +692,7 @@ DistroImageCheckSourcePath(){
 
 DistroImageEmbedScript(){ # "1-scriptFileName" "2-changeDir"
 	local MDSC_CMD='DistroImageEmbedScript'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	if [ -z "$1" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: script file name argument is expected!" >&2

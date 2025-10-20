@@ -20,12 +20,26 @@ ListSshTargets(){
 	set -e
 
 	local MDSC_CMD='ListSshTargets'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
+
+	case "$1" in
+		''|--help|--help-syntax)
+			echo "📘 syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
+			echo "📘 syntax: ListSshTargets.fn.sh [--no-project-column] [--no-target-column] --all-targets [<ssh arguments>...]" >&2
+			echo "📘 syntax: ListSshTargets.fn.sh [--line-prefix <prefix>] [--line-suffix <suffix>] --all-targets [<ssh arguments>...]" >&2
+			echo "📘 syntax: ListSshTargets.fn.sh [--help]" >&2
+			if [ "$1" = "--help" ] ; then
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include" >&2
+				. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ListSshTargets.include" >&2
+			fi
+			return 0
+		;;
+	esac
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
 	case "$1" in
-		--all-targets|--line-prefix|--line-suffix)
+		--all-targets|--line-*|--no-*-column|--ssh-*)
 		;;
 		--select-from-env)
 			shift
@@ -46,26 +60,15 @@ ListSshTargets(){
 	local useSshHome="${useSshHome:-}"
 	local useSshArgs="${useSshArgs:-}"
 
-	local linePrefix=""
-	local lineSuffix=""
+	local linePrefix= lineSuffix= noProjectColumn= noTargetColumn=
 	
 	while true ; do
 		case "$1" in
-			--ssh-host)
-				shift ; useSshHost="$1" ; shift
-			;;
-			--ssh-port)
-				shift ; useSshPort="$1" ; shift
-			;;
-			--ssh-user)
-				shift ; useSshUser="$1" ; shift
-			;;
-			--ssh-home)
-				shift ; useSshHome="$1" ; shift
-			;;
-			--ssh-args)
-				shift ; useSshArgs="$1" ; shift
-			;;
+			--ssh-host) useSshHost="$2"; shift 2; continue; ;;
+			--ssh-port) useSshPort="$2"; shift 2; continue; ;;
+			--ssh-user) useSshUser="$2"; shift 2; continue; ;;
+			--ssh-home) useSshHome="$2"; shift 2; continue; ;;
+			--ssh-args) useSshArgs="$2"; shift 2; continue; ;;
 			--all-targets)
 				shift
 				if [ -n "$1" ] ; then
@@ -81,14 +84,20 @@ ListSshTargets(){
 				Distro ListDistroProvides --select-all \
 					--filter-own-provides-column "deploy-ssh-target:" \
 					--add-merged-provides-column "deploy-ssh-client-settings:" \
-				| DistroImageExtractSshConnections --line-prefix "${linePrefix}DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
+				| DistroImageExtractSshConnections --line-prefix "$linePrefix" --line-suffix "$lineSuffix" $extraArguments
 				return 0
 			;;
 			--line-prefix)
-				shift ; linePrefix="$1 " ; shift
+				linePrefix="$2"; shift 2
 			;;
 			--line-suffix)
-				shift ; lineSuffix="$1" ; shift
+				lineSuffix="$2"; shift 2
+			;;
+			--no-target-column)
+				noTargetColumn="$1" ; shift
+			;;
+			--no-project-column)
+				noProjectColumn="$1" ; shift
 			;;
 			*)
 				local argument
@@ -102,7 +111,7 @@ ListSshTargets(){
 				Distro ListDistroProvides --select-from-env \
 					--filter-own-provides-column "deploy-ssh-target:" \
 					--add-merged-provides-column "deploy-ssh-client-settings:" \
-				| DistroImageExtractSshConnections --line-prefix "${linePrefix}DistroSshConnect " --line-suffix "$lineSuffix" $extraArguments
+				| DistroImageExtractSshConnections --line-prefix "$linePrefix" --line-suffix "$lineSuffix" $noProjectColumn $noTargetColumn $extraArguments
 				return 0
 			;;
 		esac
@@ -111,33 +120,21 @@ ListSshTargets(){
 
 case "$0" in
 	*/sh-scripts/ListSshTargets.fn.sh)
-		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ListSshTargets.fn.sh [--line-prefix <prefix>] [--line-suffix <suffix>] --all-targets [<ssh arguments>...]" >&2
-			echo "📘 syntax: ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]" >&2
-			echo "📘 syntax: ListSshTargets.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
-				echo "  Examples:" >&2
-				echo "    ListSshTargets.fn.sh --all-targets" >&2
+		set -e 
 
-				echo "    ListSshTargets.fn.sh --select-projects l6" >&2
-				echo "    ListSshTargets.fn.sh --select-keywords l6" >&2
-				echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve" >&2
-				
-				echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve --filter-projects myx" >&2
-				echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve --remove-projects xyz" >&2
-				
-				echo "    ListSshTargets.fn.sh --select-projects l6 --line-prefix prefix --line-suffix suffix" >&2
-				echo "    ListSshTargets.fn.sh --select-all --line-prefix '#' --line-suffix uname -l root" >&2
-				
-				echo '    ListSshTargets.fn.sh --select-projects l6 -l root' >&2
-				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2-' >&2
-				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || : ; done )' >&2
-				echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )' >&2
-			fi
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			ListSshTargets "${1:-"--help-syntax"}"
 			exit 1
 		fi
 		
 		ListSshTargets "$@"
+
+		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
+			if [ "$1" = "--help" ] ; then
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
+			fi
+			exit 1
+		fi
+		
 	;;
 esac

@@ -18,8 +18,29 @@ ScreenTo(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	set -e
-	
+
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
+
+	local useSshHost="${useSshHost:-}"
+	local useSshPort="${useSshPort:-}"
+	local useSshUser="${useSshUser:-}"
+	local useSshHome="${useSshHome:-}"
+
+	while true ; do
+		case "$1" in
+			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
+				DistroImageParseSshOptions "$1" "$2"
+				shift 2
+			;;
+			--ssh-*)
+				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
+				set +e ; return 1
+			;;
+			*)
+				break
+			;;
+		esac
+	done
 
 	local filterProject="$1"
 	if [ -z "$filterProject" ] ; then
@@ -29,12 +50,19 @@ ScreenTo(){
 
 	shift
 
+	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t 'command -v screen >/dev/null && exec env SHELL=\"\`command -v bash || command -v sh\`\" screen -q -O -U -D -R || exec \`command -v bash || command -v sh\` -i'"
 
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	local targets="$( 
-		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} \
-		| cut -d" " -f 2- 
+		Distro ListSshTargets --select-projects "$filterProject" \
+			--line-prefix 'DistroSshConnect ' \
+			--no-project-column \
+			--no-target-column \
+			${extraArguments:-$defaultCommand}
 	)"
 
 	if [ -z "$targets" ] ; then
@@ -43,15 +71,12 @@ ScreenTo(){
 	fi
 	
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
-		echo "$MDSC_CMD: 🙋 STOP: More than one match: $@" >&2
-		printf "Targets: \n%s\n" "$( echo "$targets" | sed -e 's|^|   |g' )" >&2
+		echo "> 🌐 $MDSC_CMD: 🙋 STOP: More than one match! Matching targets:" >&2
+		printf "%s\n" "$( echo "$targets" | sed -e 's|^|    |g' )" >&2
 		set +e ; return 2
 	fi
 
 	set -e
-
-	type DistroImage >/dev/null 2>&1 || \
-		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 	printf "> 🌐 $MDSC_CMD: Using Command: \n  %s\n" "$targets" >&2
 	eval "$targets"
