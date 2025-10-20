@@ -142,6 +142,18 @@ DistroSshConnect(){
 	
 }
 
+
+#
+#
+DistroImagePrintSshTarget(){
+	[ full != "$MDSC_DETAIL" ] || echo "+ DistroImagePrintSshTarget: $@" >&2
+	local useSshHost useSshPort useSshUser useSshHome useSshArgs
+	DistroImageParseSshOptions $@ 2>/dev/null
+	printf '%s@%s:%s' "$useSshUser" "$useSshHost" "$useSshPort"
+	return 0
+}
+
+
 #
 #
 DistroImageParseSshOptions(){
@@ -256,7 +268,7 @@ DistroImageExtractSshConnections(){
 		}
 	' \
 	| while read -r projectName sshTarget sshOptions ; do
-		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: ssh target: $sshTarget, ssh options: $sshOptions" >&2
+		[ -z "$MDSC_DETAIL" ] || echo "+ $MDSC_CMD: $sshTarget, options: $sshOptions" >&2
 
 		sshSpec="$( echo "$sshTarget" | sed 's,^.*@,,' )"
 		sshUser="${sshTarget%${sshTarget%@$sshSpec}}"

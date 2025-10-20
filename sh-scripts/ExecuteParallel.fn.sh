@@ -135,14 +135,10 @@ ExecuteParallel(){
 	)"
 
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
-		echo "Will execute ($MDSC_CMD): " >&2
+		echo "📋 Will execute ($MDSC_CMD): " >&2
 		local project _ textLine
 		echo "$sshTargets" | while read -r project _ textLine ; do
-			echo ">  $(basename "$project") $(
-				local useSshHost useSshPort useSshUser useSshHome useSshArgs
-				DistroImageParseSshOptions $textLine
-				printf '%s:%s' "$useSshHost" "$useSshPort"
-			)" >&2
+			echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
 		done \
 		2>&1 | column -t 1>&1
 	fi
@@ -156,21 +152,25 @@ ExecuteParallel(){
 			echo 
 			echo "📝 ...Enter script and press CTRL+D to execute or press CTRL+C to cancel..." >&2
 			echo 
-			local executeCommand="`cat`"
+			executeCommand="$(cat)"
 
-			local sshTargets="$( echo "$sshTargets" | while read textLine ; do 
-				echo '( echo "$executeCommand" | Prefix -o -3 '${textLine%?}' ) &' 
-			done )"
+			sshTargets="$( 
+				echo "$sshTargets" | while read _ textLine ; do 
+					echo '( echo "$executeCommand" | Prefix -o -3 '${textLine}' ) &' 
+				done
+			)"
 
 			printf "\n%s\n" \
 				"📋 ...got command, executing..." \
 				>&2
 		;;
 		--execute-script)
-			local executeCommand="`cat "$executeScriptName"`"
-			local sshTargets="$( echo "$sshTargets" | while read textLine ; do 
-				echo '( echo "$executeCommand" | Prefix -o -3 '${textLine%?}' ) &' 
-			done )"
+			executeCommand="$(cat "$executeScriptName")"
+			sshTargets="$( 
+				echo "$sshTargets" | while read _ textLine ; do 
+					echo '( echo "$executeCommand" | Prefix -o -3 '${textLine}' ) &' 
+				done
+			)"
 			
 			if [ "true" = "$executeSleep" ] ; then
 				printf "\n%s\n%s\n" \
@@ -192,9 +192,9 @@ ExecuteParallel(){
 					>&2
 				sleep 5
 			fi
-			local sshTargets="$( 
-				echo "$sshTargets" | while read textLine ; do 
-					echo 'Prefix -o -3 '${textLine%?}' &' 
+			sshTargets="$( 
+				echo "$sshTargets" | while read _ textLine ; do 
+					echo 'Prefix -o -3 '${textLine}' &' 
 				done
 			)"
 		;;
