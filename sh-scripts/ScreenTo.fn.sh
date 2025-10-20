@@ -53,7 +53,7 @@ ScreenTo(){
 	type DistroImage >/dev/null 2>&1 || \
 		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
-	printf "> 🌐 $MDSC_CMD: Using Command: \n  $targets\n" >&2
+	printf "> 🌐 $MDSC_CMD: Using Command: \n  %s\n" "$targets" >&2
 	eval "$targets"
 }
 

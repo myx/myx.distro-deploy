@@ -135,7 +135,7 @@ ExecuteParallel(){
 	)"
 
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
-		echo "📋 Will execute ($MDSC_CMD): " >&2
+		echo "> 📋 $MDSC_CMD: Will execute: " >&2
 		local project _ textLine
 		echo "$sshTargets" | while read -r project _ textLine ; do
 			echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
