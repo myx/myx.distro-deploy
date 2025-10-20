@@ -9,7 +9,7 @@ type DistroImage >/dev/null 2>&1 || \
 # prints project merged provides that are prefixed 'image-prepare:' only, see DistroImageProjectProvidesMerged for full list
 ImagePrepareProjectProvidesMerged(){
 	local MDSC_CMD='ImagePrepareProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -26,7 +26,7 @@ ImagePrepareProjectProvidesMerged(){
 # format: "$sourceName" "$sourcePath" "$mergePath" "$filterGlob"
 ImagePrepareProjectSyncFolders(){
 	local MDSC_CMD='ImagePrepareProjectSyncFolders'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -50,7 +50,7 @@ ImagePrepareProjectSyncFolders(){
 
 ImagePrepareProjectSourcePatchScripts(){
 	local MDSC_CMD='ImagePrepareProjectSourcePatchScripts'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -77,7 +77,7 @@ ImagePrepareProjectSourcePatchScripts(){
 
 ImagePrepareProjectTargetPatchScripts(){
 	local MDSC_CMD='ImagePrepareProjectTargetPatchScripts'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -103,7 +103,7 @@ ImagePrepareProjectTargetPatchScripts(){
 # format: "$sourceName" "$sourcePath" "$sourceFileName" "$targetFileName1" ...
 ImagePrepareProjectCloneTasks(){
 	local MDSC_CMD='ImagePrepareProjectCloneTasks'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2

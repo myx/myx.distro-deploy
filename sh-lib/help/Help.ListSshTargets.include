@@ -1,0 +1,40 @@
+echo
+echo "  Options:"
+echo
+echo "    --no-index"
+echo "                Use no index."
+echo
+echo "    --no-cache"
+echo "                Use no cache."
+echo
+echo "    --no-project-column"
+echo "                Do not print project column. Project column is printed by default. First column, if printed."
+echo
+echo "    --no-target-column"
+echo "                Do not print `target` column. Target column is printed by default. Second column after"
+echo "                project. First column, when no project column."
+echo
+echo "    --all-targets"
+echo "                Print all known ssh targets and exit."
+echo
+echo "  Examples:"
+echo
+echo "    ListSshTargets.fn.sh --all-targets"
+echo "    ListSshTargets.fn.sh --no-project-column --all-targets"
+echo "    ListSshTargets.fn.sh --no-target-colunn --no-project-column --line-prefix "DistroSshConnect " --line-suffix " &" --all-targets"
+
+echo "    ListSshTargets.fn.sh --select-projects l6"
+echo "    ListSshTargets.fn.sh --select-keywords l6"
+echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve"
+
+echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve --filter-projects myx"
+echo "    ListSshTargets.fn.sh --select-merged-keywords bhyve --remove-projects xyz"
+
+echo "    ListSshTargets.fn.sh --select-projects l6 --line-prefix prefix --line-suffix suffix"
+echo "    ListSshTargets.fn.sh --select-all --line-prefix '#' --line-suffix uname -l root"
+
+echo '    ListSshTargets.fn.sh --select-projects l6 -l root'
+echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2-'
+echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- -l root | ( while read -r sshCommand ; do $sshCommand 'uname -a' || : ; done )'
+echo '    ListSshTargets.fn.sh --select-all | cut -d" " -f2- | ( source "`myx.common which lib/prefix`" ;  while read -r sshCommand ; do Prefix -2 $sshCommand 'uname -a' & wait ; done )'
+echo

@@ -23,7 +23,7 @@ InstallPrepareFilesInternalPrintScript(){
 	set -e
 
 	local MDSC_CMD="InstallPrepareFiles[--print-script]"
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	##
 	## coarse-check parameters are legit
@@ -208,7 +208,7 @@ InstallPrepareFiles(){
 	set -e
 
 	local MDSC_CMD='InstallPrepareFiles'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	

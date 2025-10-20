@@ -26,7 +26,7 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 	set -e
 
 	local MDSC_CMD="InstallPrepareScript[--print-files]"
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	
 	##
 	## coarse-check parameters are legit
@@ -76,7 +76,7 @@ InstallPrepareScriptInternalPrintScript(){
 	set -e
 
 	local MDSC_CMD="InstallPrepareScript[--print-script]"
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	
 	##
 	## coarse-check parameters are legit
@@ -167,7 +167,7 @@ InstallPrepareScript(){
 	set -e
 
 	local MDSC_CMD='InstallPrepareScript'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 	

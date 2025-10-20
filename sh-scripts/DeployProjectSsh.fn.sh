@@ -49,7 +49,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	set -e
 
 	local MDSC_CMD="DeployProjectSsh[--print-$deployType-script]"
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	
 	##
 	## coarse-check parameters are legit
@@ -360,7 +360,7 @@ DeployProjectsSsh(){
 		. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
 
 	local MDSC_CMD='DeployProjectsSsh'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
@@ -492,7 +492,7 @@ DeployProjectSsh(){
 	set -e
 
 	local MDSC_CMD='DeployProjectSsh'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 	
 	if [ ! -d "$MMDAPP/output" ] ; then
 		if [ ! -d "$MMDAPP/source" ] ; then

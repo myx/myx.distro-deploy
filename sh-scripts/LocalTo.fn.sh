@@ -20,7 +20,7 @@ LocalTo(){
 	set -e
 
 	local MDSC_CMD='LocalTo'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $@" >&2
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local useSshHost="${useSshHost:-}"
 	local useSshPort="${useSshPort:-}"
