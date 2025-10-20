@@ -4,7 +4,7 @@
 while true ; do
 case "$1" in 
 	--shell-prompt)
-		set +x
+		set +ex
 		if [ -n "$MDSC_INT_CD" ] ; then
 			echo "⤵️ Deploy: Changing directory: $MDSC_INT_CD" >&2
 			cd "$MDSC_INT_CD"

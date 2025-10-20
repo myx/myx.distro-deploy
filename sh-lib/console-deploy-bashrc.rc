@@ -153,10 +153,9 @@ complete -F Distro \
 
 export LANG=en_US.UTF-8
 
-PROMPT_COMMAND="set +e"
-PS1="\` Deploy --shell-prompt \`: $PS1"
+PROMPT_COMMAND='set +ex ; history -w; history -r ; PS1="$( Deploy --shell-prompt ): '"$PS1"'"'
 
-export PS1 PATH
+export PATH
 
 if [ -n "$MDSC_PRJ_NAME" ] ; then
 	# DistroSelectProject MDSC_PRJ_NAME "$MDSC_PRJ_NAME"
