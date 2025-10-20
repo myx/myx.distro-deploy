@@ -309,12 +309,16 @@ DeployProjectSshInternalPrintRemoteScript(){
 
 			if [ -d "$cacheFolder/sync/$sourcePath" ] ; then
 				echo "mkdir -p -m 770 '$targetPath'"
-				echo "rsync -iprltOoD --delete --delete-excluded --chmod=ug+rwX --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' \
-					2>&1 | (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 | awk '{print \"> $sourcePath: \"\$0}' | tee -a 'host-files-rsync.log' >&2 || :)"
+				echo "rsync -iprltOoD --delete --delete-excluded --chmod=ug+rwX --exclude='.*' --exclude='.*/' 'sync/$sourcePath/' '$targetPath' 2>&1 \
+					| (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 \
+					| awk '{print \"> $sourcePath: \"\$0}' \
+					| tee -a 'host-files-rsync.log' >&2 || :)"
 			else
 				echo "mkdir -p -m 770 '$( dirname $targetPath )'"
-				echo "rsync -iprltoD --delete --chmod=ug+rwX 'sync/$sourcePath' '$targetPath' \
-					2>&1 | (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 | awk '{print \"> $sourcePath: \"\$0}' | tee -a 'host-files-rsync.log' >&2 || :)"
+				echo "rsync -iprltoD --delete --chmod=ug+rwX 'sync/$sourcePath' '$targetPath' 2>&1 \
+					| (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 \
+					| awk '{print \"> $sourcePath: \"\$0}' \
+					| tee -a 'host-files-rsync.log' >&2 || :)"
 			fi
 
 		done
@@ -427,44 +431,29 @@ DeployProjectsSsh(){
 
 	local extraArguments="$( local argument ; for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
-	local taskList="$(
-		Distro ListDistroProvides --select-from-env \
-			--filter-own-provides-column "deploy-ssh-target:" \
-			--add-merged-provides-column "deploy-ssh-client-settings:" \
-		| awk '
-			{
-				n1 = split($2, a, "|")
-				n2 = split($3, t, "|")
-				args = ""
-				for (i = 1; i <= n2; i++) {
-					tok = t[i]
-					sub(/:/, " ", tok)
-					args = ( args ? args " " tok : tok )
-				}
-
-				for (i = 1; i <= n1; i++) {
-					print $1, a[i], args
-				}
-			}
-		'
+	local sshTargets="$(
+		Distro ListSshTargets --select-from-env \
+			--line-prefix '' \
+			--line-suffix '' \
+			$executeCommand $targetCommand
 	)"
 
-	if [ -z "$taskList" ] ; then
+	if [ -z "$sshTargets" ] ; then
 		echo "No tasks!" >&2
 		set +e ; return 1
 	fi
 	
-	echo "Targets selected: " >&2
-	local project target textLine
-	echo "$taskList" | while read project target textLine ; do
-		echo ">  $(basename "$project") $target" >&2
+	echo "> 📋 $MDSC_CMD: Targets selected: " >&2
+	local project _ textLine
+	echo "$sshTargets" | while read -r project _ textLine ; do
+		echo "  > $( basename "$project" ) $( DistroImagePrintSshTarget $textLine 2>/dev/null )" >&2
 	done \
-	2>&1 | column -t 1>&1
+	2>&1 | column -t 1>&2
 
 	local evalList="$(
-		echo "$taskList" \
-		| while read -r projectName sshTarget sshOptions ; do
-			echo    Prefix -o "'$sshTarget'" DeployProjectSsh --project "'$projectName'" --no-sleep $sshOptions $extraArguments
+		echo "$sshTargets" \
+		| while read -r projectName _ sshOptions ; do
+			echo Prefix -o "'$( DistroImagePrintSshTarget $sshOptions 2>/dev/null )'" DeployProjectSsh --project "'$projectName'" --no-sleep $sshOptions $extraArguments
 		done
 	)"
 
@@ -552,20 +541,23 @@ DeployProjectSsh(){
 			--project)
 				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
 			;;
+			--ssh-name)
+				shift 2
+			;;
 			--ssh-host)
-				shift ; useSshHost="$1" ; shift
+				useSshHost="$2" ; shift 2
 			;;
 			--ssh-port)
-				shift ; useSshPort="$1" ; shift
+				useSshPort="$2" ; shift 2
 			;;
 			--ssh-user)
-				shift ; useSshUser="$1" ; shift
+				useSshUser="$2" ; shift 2
 			;;
 			--ssh-home)
-				shift ; useSshHome="$1" ; shift
+				useSshHome="$2" ; shift 2
 			;;
 			--ssh-args)
-				shift ; useSshArgs="$1" ; shift
+				useSshArgs="$2" ; shift 2
 			;;
 			--prepare-exec)
 				shift
@@ -590,13 +582,12 @@ DeployProjectSsh(){
 				executeSleep="false"
 			;;
 			--match)
-				shift
-				if [ -z "$1" ] ; then
-					echo "$MDSC_CMD: ⛔ ERROR: match filter expected after --match option" >&2
+				if [ -z "$2" ] ; then
+					echo "$MDSC_CMD: ⛔ ERROR: filter expected after $1 option" >&2
 					set +e ; return 1
 				fi
-				local MATCH_SCRIPT_FILTER="--match $1"
-				shift
+				local MATCH_SCRIPT_FILTER="--match $2"
+				shift 2
 			;;
 			--use-gzip|--use-gz)
 				shift
@@ -745,14 +736,14 @@ DeployProjectSsh(){
 
 				trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM
 
-				local sshTarget
+				local _ sshTarget
 				echo "$projectSshTargets" \
-				| while read -r sshTarget; do
+				| while read -r _ sshTarget; do
 					echo "$MDSC_CMD: using ssh: $sshTarget" >&2
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
 						| ${compressDeflate} \
-						| DistroSshConnect $sshTarget "'${compressInflate} | bash'"
+						| DistroSshConnect $sshTarget -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
 					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed: $sshTarget" >&2
 					fi
