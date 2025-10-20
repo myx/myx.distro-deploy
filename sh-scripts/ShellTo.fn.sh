@@ -25,21 +25,21 @@ ShellTo(){
 	local useSshPort="${useSshPort:-}"
 	local useSshUser="${useSshUser:-}"
 	local useSshHome="${useSshHome:-}"
+	local useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
 				DistroImageParseSshOptions "$1" "$2"
 				shift 2
+				continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
 				set +e ; return 1
 			;;
-			*)
-				break
-			;;
 		esac
+		break
 	done
 
 	local filterProject="$1"
@@ -91,6 +91,7 @@ case "$0" in
 			if [ "$1" = "--help" ] ; then
 				echo "  Examples:" >&2
 				echo "    ShellTo.fn.sh ndss113" >&2
+				echo "    ShellTo.fn.sh l63h2 --ssh-user root --ssh-home ~/.ssh uname" >&2
 				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org" >&2
 				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami" >&2
 			fi
