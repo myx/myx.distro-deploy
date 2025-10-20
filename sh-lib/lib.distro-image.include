@@ -133,7 +133,8 @@ DistroSshConnect(){
 				"$sshSecret" \
 				"$extraArguments"
 		fi \
-		| tee /dev/fd/2 | sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
+		| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g' \
+		| tee /dev/fd/2 
 	)"
 	
 }
