@@ -51,7 +51,7 @@ ShellTo(){
 	shift
 
 	local argument
-	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+	local extraArguments="$( printf '%q ' "$@" )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
 
 	type DistroImage >/dev/null 2>&1 || \
