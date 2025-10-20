@@ -124,7 +124,7 @@ InstallPrepareFilesInternalPrintScript(){
 			echo '{'
 				echo 'echo "ImagePrepareFiles: 🔂 clone/multiply files..." >&2'
 				echo "$executeScript"
-			echo "} 2>&1 | (grep -v --line-buffered -E '>f\\.\\.t\\.+ ' >&2 || :)"
+			echo "} 2>&1 | (grep -v --line-buffered '^>f\\.\\.t\\.' >&2 || :)"
 		fi
 	fi
 
