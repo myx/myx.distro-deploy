@@ -12,9 +12,6 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-type DistroImage >/dev/null 2>&1 || \
-	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
-
 ShellTo(){
 
 	local MDSC_CMD='ShellTo'
@@ -74,6 +71,10 @@ ShellTo(){
 	fi
 
 	set -e
+
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	echo "$MDSC_CMD: Using Command: $targets" >&2
 	eval "$targets"
 }

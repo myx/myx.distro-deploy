@@ -126,21 +126,25 @@ ExecuteParallel(){
 	local argument
 	local targetCommand="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 
-	local sshTargets="$( \
+	local sshTargets="$(
 		Distro ListSshTargets --select-from-env \
-			--line-prefix 'Prefix -o -3' \
-			--line-suffix ' & ' \
+			--line-prefix '' \
+			--line-suffix '' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
-			$executeCommand $targetCommand \
-		| cut -d" " -f 2-
+			$executeCommand $targetCommand
 	)"
 
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "Will execute ($MDSC_CMD): " >&2
-		local textLine
-		echo "$sshTargets" | while read -r textLine ; do
-			echo "  $textLine" >&2
-		done
+		local project _ textLine
+		echo "$sshTargets" | while read -r project _ textLine ; do
+			echo ">  $(basename "$project") $(
+				local useSshHost useSshPort useSshUser useSshHome useSshArgs
+				DistroImageParseSshOptions $textLine
+				printf '%s:%s' "$useSshHost" "$useSshPort"
+			)" >&2
+		done \
+		2>&1 | column -t 1>&1
 	fi
 
 	case "$executeType" in
@@ -155,7 +159,7 @@ ExecuteParallel(){
 			local executeCommand="`cat`"
 
 			local sshTargets="$( echo "$sshTargets" | while read textLine ; do 
-				echo '( echo "$executeCommand" | '${textLine%?}' ) &' 
+				echo '( echo "$executeCommand" | Prefix -o -3 '${textLine%?}' ) &' 
 			done )"
 
 			printf "\n%s\n" \
@@ -165,7 +169,7 @@ ExecuteParallel(){
 		--execute-script)
 			local executeCommand="`cat "$executeScriptName"`"
 			local sshTargets="$( echo "$sshTargets" | while read textLine ; do 
-				echo '( echo "$executeCommand" | '${textLine%?}' ) &' 
+				echo '( echo "$executeCommand" | Prefix -o -3 '${textLine%?}' ) &' 
 			done )"
 			
 			if [ "true" = "$executeSleep" ] ; then
@@ -188,6 +192,11 @@ ExecuteParallel(){
 					>&2
 				sleep 5
 			fi
+			local sshTargets="$( 
+				echo "$sshTargets" | while read textLine ; do 
+					echo 'Prefix -o -3 '${textLine%?}' &' 
+				done
+			)"
 		;;
 	esac
 
