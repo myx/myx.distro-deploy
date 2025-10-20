@@ -476,7 +476,7 @@ DistroImageProjectContextVariables(){
 		| eval $filter \
 		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
 		| while read -r declaredAt variableName operationType variableValue ; do
-			[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
+			[ full !=  "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
 			printf '\n## ## %s\n' "$variableName"
 			case "$operationType" in
 			
