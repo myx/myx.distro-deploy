@@ -145,9 +145,9 @@ ExecuteSequence(){
 			executeCommand="$(cat)"
 
 			sshTargets="$( 
-				local _ textLine
-				echo "$sshTargets" | while read _ _ textLine ; do 
-					echo 'echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${textLine} 
+				local _ sshOptions
+				echo "$sshTargets" | while read -r _ _ sshOptions ; do 
+					echo 'echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${sshOptions}
 				done
 			)"
 
@@ -158,9 +158,9 @@ ExecuteSequence(){
 		--execute-script)
 			executeCommand="$(cat "$executeScriptName")"
 			sshTargets="$( 
-				local _ textLine
-				echo "$sshTargets" | while read _ _ textLine ; do 
-					echo 'echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${textLine}
+				local _ sshOptions
+				echo "$sshTargets" | while read -r _ _ sshOptions ; do 
+					echo 'echo "$executeCommand" | Prefix -o -3 DistroSshConnect '${sshOptions}' '
 				done
 			)"
 			
@@ -185,15 +185,15 @@ ExecuteSequence(){
 				sleep 5
 			fi
 			sshTargets="$( 
-				local _ textLine
-				echo "$sshTargets" | while read _ _ textLine ; do 
-					echo 'Prefix -o -3 DistroSshConnect '${textLine}
+				local _ sshOptions
+				echo "$sshTargets" | while read -r _ _ sshOptions ; do 
+					echo 'Prefix -o -3 DistroSshConnect '${sshOptions}' '
 				done
 			)"
 		;;
 	esac
 
-	eval $sshTargets
+	eval "$sshTargets"
 }
 
 case "$0" in
