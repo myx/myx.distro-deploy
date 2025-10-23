@@ -740,7 +740,7 @@ DeployProjectSsh(){
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
 						| ${compressDeflate} \
-						| DistroSshConnect $sshOptions -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
+						| eval "DistroSshConnect $sshOptions -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \"'${compressInflate} | bash'\""
 					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed, options: $sshOptions" >&2
 					fi
