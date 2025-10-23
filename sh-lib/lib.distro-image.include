@@ -61,11 +61,11 @@ DistroSshConnect(){
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
+
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
+				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -137,8 +137,7 @@ DistroSshConnect(){
 				"$sshSecret" \
 				"$extraArguments"
 		fi \
-		| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g' \
-		| tee /dev/fd/2 
+		| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
 	)"
 	
 }
@@ -228,12 +227,11 @@ DistroImageExtractSshConnections(){
 
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 	local linePrefix= lineSuffix= noProjectColumn="${noProjectColumn:-}" noTargetColumn="${noTargetColumn:-}"
-	
+
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
+				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
 			;;
 			--no-target-column)
 				noTargetColumn="$1" ; shift
@@ -311,29 +309,18 @@ DistroImageExtractSshConnections(){
 
 		if [ "$sshHost" != "$sshName" ] ; then
 			printf '%s%s--ssh-name %q --ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q %s%s\n' \
-				"$sshTarget" \
-				"$linePrefix" \
-				"$sshName" \
-				"$sshHost" \
-				"$sshPort" \
-				"$sshUser" \
-				"$sshHome" \
-				"$sshArgs" \
-				"$extraArguments" \
-				"$lineSuffix"
+				"$sshTarget" "$linePrefix" \
+				"$sshName" "$sshHost" "$sshPort" "$sshUser" \
+				"$sshHome" "$sshArgs" \
+				"$extraArguments" "$lineSuffix"
 			continue				
 		fi
 
 		printf '%s%s--ssh-host %q --ssh-port %q --ssh-user %q --ssh-home %q --ssh-args %q %s%s\n' \
-			"$sshTarget" \
-			"$linePrefix" \
-			"$sshHost" \
-			"$sshPort" \
-			"$sshUser" \
-			"$sshHome" \
-			"$sshArgs" \
-			"$extraArguments" \
-			"$lineSuffix"
+			"$sshTarget" "$linePrefix" \
+			"$sshHost" "$sshPort" "$sshUser" \
+			"$sshHome" "$sshArgs" \
+			"$extraArguments" "$lineSuffix"
 		continue
 	done \
 	| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
@@ -614,7 +601,7 @@ DistroImageCheckSourcePath(){
 	while true ; do	
 		case "$1" in
 			--project)
-				shift ; MDSC_PRJ_NAME="$1" ; shift ; continue ;;
+				MDSC_PRJ_NAME="$2" ; shift 2 ; continue ;;
 			--path)
 				shift ;	local check="-d" ; continue ;;
 			--file)
@@ -629,9 +616,9 @@ DistroImageCheckSourcePath(){
 		set +e ; return 1
 	fi
 	
-	local declaredAt="$1" ; shift
-	local sourceName="$1" ; shift
-	local sourcePath="$1" ; shift
+	local declaredAt="$1" sourceName="$2" sourcePath="$3"
+	shift 3
+
 	local checkProject commandOutput
 
 	if [ -z "$sourceName" ] ; then

@@ -21,13 +21,15 @@ ScreenTo(){
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
+				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -50,9 +52,6 @@ ScreenTo(){
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="-t 'command -v screen >/dev/null && exec env SHELL=\"\`command -v bash || command -v sh\`\" screen -q -O -U -D -R || exec \`command -v bash || command -v sh\` -i'"
-
-	type DistroImage >/dev/null 2>&1 || \
-		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 	local targets="$( 
 		Distro ListSshTargets --select-projects "$filterProject" \

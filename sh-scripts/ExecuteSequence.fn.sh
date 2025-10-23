@@ -60,8 +60,7 @@ ExecuteSequence(){
 				explainTasks="false"
 			;;
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
+				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2

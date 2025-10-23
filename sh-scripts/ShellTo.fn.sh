@@ -21,14 +21,15 @@ ShellTo(){
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"
-				shift 2
-				continue
+				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -49,9 +50,6 @@ ShellTo(){
 	local argument
 	local extraArguments="$( printf '%q ' "$@" )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
-
-	type DistroImage >/dev/null 2>&1 || \
-		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 	local targets="$( 
 		Distro ListSshTargets --select-projects "$filterProject" \
