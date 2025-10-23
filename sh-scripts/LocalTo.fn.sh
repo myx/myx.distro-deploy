@@ -12,9 +12,6 @@ if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
 	DistroSystemContext --distro-path-auto
 fi
 
-type DistroImage >/dev/null 2>&1 || \
-	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
-
 LocalTo(){
 
 	set -e
@@ -22,10 +19,7 @@ LocalTo(){
 	local MDSC_CMD='LocalTo'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
@@ -55,6 +49,9 @@ LocalTo(){
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 	local defaultCommand="`which bash || which sh`"
 			
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
 	local targets="$( 
 		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} 
 	)"

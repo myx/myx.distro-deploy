@@ -54,11 +54,7 @@ ListSshTargets(){
 		;;
 	esac
 
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
-	local useSshArgs="${useSshArgs:-}"
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 
 	local linePrefix= lineSuffix= noProjectColumn= noTargetColumn=
 	
@@ -76,10 +72,7 @@ ListSshTargets(){
 					set +e ; return 1
 				fi
 				
-				local setSshHost="${useSshHost:-}"
-				local setSshPort="${useSshPort:-}"
-				local setSshUser="${useSshUser:-}"
-				local setSshHome="${useSshHome:-}"
+				local setSshHost="${useSshHost:-}" setSshPort="${useSshPort:-}" setSshUser="${useSshUser:-}" setSshHome="${useSshHome:-}"
 			
 				Distro ListDistroProvides --select-all \
 					--filter-own-provides-column "deploy-ssh-target:" \
@@ -103,10 +96,7 @@ ListSshTargets(){
 				local argument
 				local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 			
-				local setSshHost="${useSshHost:-}"
-				local setSshPort="${useSshPort:-}"
-				local setSshUser="${useSshUser:-}"
-				local setSshHome="${useSshHome:-}"
+				local setSshHost="${useSshHost:-}" setSshPort="${useSshPort:-}" setSshUser="${useSshUser:-}" setSshHome="${useSshHome:-}"
 			
 				Distro ListDistroProvides --select-from-env \
 					--filter-own-provides-column "deploy-ssh-target:" \

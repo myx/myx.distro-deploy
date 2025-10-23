@@ -60,7 +60,7 @@ DistroSshConnect(){
 	local MDSC_CMD='DistroSshConnect'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
-	local useSshHost= useSshPort= useSshUser= useSshHome= useSshArgs=
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
@@ -131,7 +131,7 @@ DistroSshConnect(){
 				"$useSshHost" \
 				"$useSshPort" \
 				"$useSshUser" \
-				"-o ConnectTimeout=10" \
+				"$useSshArgs -o ConnectTimeout=10" \
 				"$sshHosts" \
 				"$sshConfig" \
 				"$sshSecret" \
