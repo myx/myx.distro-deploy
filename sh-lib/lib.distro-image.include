@@ -27,23 +27,23 @@ DistroSelectProject(){
 			return 0
 		fi
 		[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
-		export MDSC_PRJ_NAME=""
-		# export MDSC_PRJ_MPRV=""
-		# export MDSC_PRJ_BSEQ=""
+		export MDSC_PRJ_NAME=
+		# export MDSC_PRJ_MPRV=
+		# export MDSC_PRJ_BSEQ=
 		return 0
 	fi
 	case "$3" in
 		export)
 			export MDSC_PRJ_NAME="$2"
-			# export MDSC_PRJ_MPRV=""
-			# export MDSC_PRJ_BSEQ=""
+			# export MDSC_PRJ_MPRV=
+			# export MDSC_PRJ_BSEQ=
 			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected and exported ($2)" >&2
 			return 0
 		;;
 		'')
 			MDSC_PRJ_NAME="$2"
-			# MDSC_PRJ_MPRV=""
-			# MDSC_PRJ_BSEQ=""
+			# MDSC_PRJ_MPRV=
+			# MDSC_PRJ_BSEQ=
 			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected ($2)" >&2
 			return 0
 		;;
@@ -97,28 +97,32 @@ DistroSshConnect(){
 	
 			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: client spec parsed: $useSshUser $useSshHome" >&2
 			
-			local sshConfig="$useSshHome/config-dummy.txt"
-			if [ -f "$sshConfig" ] ; then
-				sshConfig=" -F $sshConfig"
-			else
-				sshConfig=""
-			fi
-			
-			local sshSecret="$useSshHome/client.rsa"
-			if [ -f "$sshSecret" ] ; then
-				if [ -O "$sshSecret" ] ; then
-					chmod 600 "$sshSecret"
+			local sshConfig= x
+			for x in "ssh_config" "config-dummy.txt"; do
+				if [ -f "$useSshHome/$x" ]; then
+					sshConfig="$useSshHome/$x"
+					sshConfig=" -F $sshConfig"
+					break
 				fi
-				sshSecret=" -o PreferredAuthentications=publickey -i $sshSecret"
-			else
-				sshSecret=""
-			fi
+			done
+			
+			local sshSecret= x
+			for x in "client.key" "id_ecdsa" "id_ed25519" "id_rsa" "client.rsa"; do
+				if [ -f "$useSshHome/$x" ]; then
+					sshSecret="$useSshHome/$x"
+					if [ -O "$sshSecret" ] ; then
+						chmod 600 "$sshSecret"
+					fi
+					sshSecret=" -o PreferredAuthentications=publickey -i $sshSecret"
+					break
+				fi
+			done
 
 			local sshHosts="$useSshHome/known_hosts" 
 			if [ -f "$sshHosts" ] ; then
 				sshHosts=" -o UserKnownHostsFile=$sshHosts"
 			else
-				sshHosts=""
+				sshHosts=
 			fi
 			
 			[ full != "$MDSC_DETAIL" ] || echo "set -x"
@@ -438,7 +442,7 @@ DistroImageProjectContextVariables(){
 		set +e ; return 1
 	fi
 
-	local prefix="" filter=""
+	local prefix= filter=
 
 	while true ; do 
 		case "$1" in
@@ -525,7 +529,8 @@ DistroImageProjectContextVariables(){
 				# if variable is defined - removes given value from array. Un-defines variable if no value given.
 				remove)
 					if [ -z "$variableValue" ] ; then
-						printf 'VAR_%s=""\n' 									"$variableName"
+						printf 'VAR_%s=\n' \
+							"$variableName"
 					else
 						printf	'[ -z "$VAR_%s" ] || VAR_%s="$( echo "$VAR_%s" | grep -x -v %q )"\n' \
 							"$variableName" \
@@ -559,10 +564,10 @@ DistroImageProjectContextVariables(){
 				# Un-defines variable. Only when variable value matches, if variableValue specified.
 				delete)
 					if [ -z "$variableValue" ] ; then
-						printf 'VAR_%s=""\n' \
+						printf 'VAR_%s=\n' \
 							"$variableName"
 					else
-						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=""\n' \
+						printf '[ "%s" != "$VAR_%s" ] || VAR_%s=\n' \
 							"$variableValue" "$variableName" \
 							"$variableName"
 					fi
