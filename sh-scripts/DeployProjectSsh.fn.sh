@@ -516,11 +516,7 @@ DeployProjectSsh(){
 
 	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
 	
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
-	local useSshArgs="${useSshArgs:-}"
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}"  useSshArgs="${useSshArgs:-}"
 
 	local prepareFiles="${prepareFiles:-auto}" 
 	local prepareScript="${prepareScript:-auto}"

@@ -43,10 +43,7 @@ ExecuteSequence(){
 		;;
 	esac
 
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}"  useSshArgs="${useSshArgs:-}"
 
 	local executeSleep="${executeSleep:-true}"
 	local explainTasks="${explainTasks:-true}"

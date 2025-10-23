@@ -144,7 +144,7 @@ DistroSshConnect(){
 #
 DistroImagePrintSshTarget(){
 	[ full != "$MDSC_DETAIL" ] || echo "+ DistroImagePrintSshTarget: $@" >&2
-	local useSshHost useSshPort useSshUser useSshHome useSshArgs
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome=  useSshArgs=
 	DistroImageParseSshOptions $@ 2>/dev/null
 	printf '%s@%s:%s' "$useSshUser" "$useSshHost" "$useSshPort"
 	return 0

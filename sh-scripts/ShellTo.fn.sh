@@ -21,11 +21,7 @@ ShellTo(){
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 
-	local useSshHost="${useSshHost:-}"
-	local useSshPort="${useSshPort:-}"
-	local useSshUser="${useSshUser:-}"
-	local useSshHome="${useSshHome:-}"
-	local useSshArgs="${useSshArgs:-}"
+	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}"  useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
