@@ -618,13 +618,13 @@ DeployProjectSsh(){
 	
 	mkdir -p "$cacheFolder"
 	
-	if [ "true" = "$prepareFiles" ] ; then
+	if [ true = "$prepareFiles" ] ; then
 		echo "$MDSC_CMD: --prepare-sync" >&2
 		Require InstallPrepareFiles
 		InstallPrepareFiles --project "$MDSC_PRJ_NAME" --save-script "$cacheFolder/sync-prepare-script.txt" --to-directory "$cacheFolder/sync"
 		local prepareFiles="auto" 
 	fi
-	if [ "true" = "$prepareScript" ] ; then
+	if [ true = "$prepareScript" ] ; then
 		echo "$MDSC_CMD: --prepare-exec" >&2
 		Require InstallPrepareScript
 		InstallPrepareScript --project "$MDSC_PRJ_NAME" $MATCH_SCRIPT_FILTER --to-file "$cacheFolder/exec"
@@ -744,7 +744,7 @@ DeployProjectSsh(){
 					if ! DeployProjectSshInternalPrintRemoteScript \
 						| tee "$cacheFolder/deploy-script.$deployType.txt" \
 						| ${compressDeflate} \
-						| eval DistroSshConnect "$sshOptions" -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
+						| DistroSshConnect $sshOptions -T -o PreferredAuthentications=publickey -o ConnectTimeout=15 "'${compressInflate} | bash'"
 					then
 						echo "$MDSC_CMD: ⛔ ERROR: ssh target failed, options: $sshOptions" >&2
 					fi
