@@ -1,0 +1,13 @@
+#!/bin/sh
+# ^^^ for syntax checking in the editor only
+
+[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD: ScanDeployNamespaces.include: scanning local cached namespaces ($MDSC_OPTION)" >&2
+
+set -e
+
+find "$MDSC_CACHED" -mindepth 2 -maxdepth 2 -type f -name repository.inf \
+| sort -z \
+| while IFS= read -r file; do
+	file=${file%/repository.inf}
+	echo "${file#$MDSC_CACHED/}"
+done

@@ -1,0 +1,41 @@
+#!/bin/sh
+# ^^^ for syntax checking in the editor only
+
+[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD: ScanDeployProjects.include: scanning local source projects ($MDSC_OPTION)" >&2
+
+set -e
+
+local NAMESPACES
+NAMESPACES=$( . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/deploy-context/ScanDeployNamespaces.include" )
+
+[ -n "$NAMESPACES" ] ||	return 0
+
+( 
+	cd "$MDSC_CACHED" || {
+		echo "⛔ ERROR: $MDSC_CMD: ScanDeployProjects.include: no source folder!" >&2
+		set +e ; return 1
+	}
+
+	# Recursion function scoped to this subshell
+	scan() {
+		# If this dir has project.inf, emit and stop
+		if [ -f "$1/project.inf" ]; then
+			printf '%s\n' "$1"
+			return
+		fi
+
+		# Otherwise descend one level into each child directory
+		local sub
+		for sub in "$1"/*; do
+			[ -d "$sub" ] || continue
+			scan "$sub"
+		done
+	}
+
+	# Kick off scanning, splitting $NAMESPACES on whitespace
+	local ns
+	for ns in $NAMESPACES; do
+		scan "$ns" &
+	done
+	wait
+)
