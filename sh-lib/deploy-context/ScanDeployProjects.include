@@ -6,7 +6,7 @@
 set -e
 
 local NAMESPACES
-NAMESPACES=$( . "$MDLT_ORIGIN/myx/myx.distro-source/sh-lib/deploy-context/ScanDeployNamespaces.include" )
+NAMESPACES=$( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/deploy-context/ScanDeployNamespaces.include" )
 
 [ -n "$NAMESPACES" ] ||	return 0
 
