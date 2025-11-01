@@ -1,6 +1,6 @@
 Name: myx.distro-deploy
 Title: Basic distro package management tools 
-Requires: myx.distro-source lib.apache-commons-compress
+Requires: myx/myx.distro-source lib/lib.apache-commons-compress
 Augments: developer-sdk:recommended
 Suggests: 
 Declares: \
