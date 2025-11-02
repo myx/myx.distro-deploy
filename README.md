@@ -64,7 +64,7 @@ App Folders:
 	/distro/repo[/group]/project - project folders structure
 	/distro/distro-namespaces.txt - repository names db file (prepared)
 	/distro/build-time-stamp.txt - distro timestamp file (prepared)
-	/distro/distro-index.inf - distro index shell-env file (prepared)
+	/distro/distro-index.env.inf.txt - distro index shell-env file (prepared)
 	/actions - workspace actions - executable, non-editable (generated)
 	/.local - system tools, utilities and system integrations
 	/.local/distro-index - system index space (generated)
