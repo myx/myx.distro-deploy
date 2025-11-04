@@ -333,10 +333,6 @@ DistroImageProjectProvidesMerged(){
 	local MDSC_CMD='DistroImageProjectProvidesMerged'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
-	#if [ -n "${MDSC_PRJ_MPRV:0:1}" ] ; then
-	#	echo "$MDSC_PRJ_MPRV"
-	#	return 0
-	#fi
 	if [ -z "$MDSC_PRJ_NAME" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
@@ -356,16 +352,15 @@ DistroImageProjectProvidesMerged(){
 		fi
 	
 		set -e
-		DistroSystemContext --index-provides-merged \
-		grep -e "^$MDSC_PRJ_NAME " \
-		| cut -d" " -f2,3 \
-		| awk '!x[$0]++' \
+		DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+		| awk '{ out = $2 " " $3; if (!seen[out]++) print out }' \
 		| tee "$cacheFile"
 		return 0
 	fi
 	
-	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
-	set +e ; return 1
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	| awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
+	return 0
 }
 
 ## echoes specified or selected project sequence index file name
@@ -379,7 +374,7 @@ DistroImageProjectSequenceFile(){
 	while true ; do	
 		case "$1" in
 			--project)
-				shift ; local MDSC_PRJ_NAME="$1" ; shift ; continue ;;
+				shift ; MDSC_PRJ_NAME="$1" ; shift ; continue ;;
 			*)
 				break ;;
 		esac
@@ -404,18 +399,21 @@ DistroImageProjectSequenceFile(){
 		fi
 	
 		set -e
-		DistroSystemContext --index-provides-merged \
-		grep -e "^$MDSC_PRJ_NAME " \
-		| awk '$2 && !seen[$2]++ { print $2; }' > "$cacheFile"
+
+		DistroSystemContext --project-index-sequence-merged "$MDSC_PRJ_NAME" \
+		| awk '!seen[$2]' \
+		> "$cacheFile"
+
 		echo "$cacheFile"
 		return 0
 	fi
 	
-	# Require ListProjectSequence
-	# ListProjectSequence "$MDSC_PRJ_NAME"
-	
 	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
 	set +e ; return 1
+
+	DistroSystemContext --project-index-sequence-merged "$MDSC_PRJ_NAME" \
+	| awk '!seen[$2]'
+	return 0
 }
 
 
