@@ -384,35 +384,9 @@ DistroImageProjectSequenceFile(){
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
 	fi
-	local checkFile="$MDSC_CACHED/distro-provides.txt"
-	local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-sequence.txt"
-	if [ -f "$checkFile" ] ; then
-		if [ -f "$cacheFile" ] ; then
-			# remake if it is too young (re: one second precision of -nt)
-			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				echo "$cacheFile"
-				return 0
-			fi
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
-		else
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
-		fi
-	
-		set -e
 
-		DistroSystemContext --project-index-sequence-merged "$MDSC_PRJ_NAME" \
-		| awk '!seen[$2]' \
-		> "$cacheFile"
-
-		echo "$cacheFile"
-		return 0
-	fi
-	
-	echo "$MDSC_CMD: ⛔ ERROR: can't come up with a name" >&2
-	set +e ; return 1
-
-	DistroSystemContext --project-index-sequence-merged "$MDSC_PRJ_NAME" \
-	| awk '!seen[$2]'
+	DistroSystemContext --project-index-sequence "$MDSC_PRJ_NAME" \
+	| awk '!x[$2]++ { print $2 }'
 	return 0
 }
 
