@@ -20,22 +20,22 @@ Project Files & Folders (following masks have fixed meaning in the root folder o
 
 	project.inf - project description file
 	actions/** - usable actions (predefined parameters for other scripts)
-	source-prepare/builders/1???-* - builders to work on project sets while building source-prepare
-	source-process/builders/2???-* - builders to work on project sets while building source-process
-	image-prepare/builders/3???-* - builders to work on project sets while building image-prepare
-	image-process/builders/4???-* - builders to work on project sets while building image-process
-	image-install/builders/5???-* - builders to work on project sets while building image-install
+	builders/source-prepare/1???-* - builders to work on project sets while building source-prepare
+	builders/source-process/2???-* - builders to work on project sets while building source-process
+	builders/image-prepare/3???-* - builders to work on project sets while building image-prepare
+	builders/image-process/4???-* - builders to work on project sets while building image-process
+	builders/image-install/5???-* - builders to work on project sets while building image-install
 	sh-libs/**
 	sh-scripts/**
 
 Builders Examples (actual builders, relative to the root of the workspace):
 
-	source/myx/myx.distro-source/source-prepare/builders/1000-env-from-source.sh
-	source/myx/myx.distro-source/source-process/builders/2000-env-from-cached.sh
-	source/myx/myx.distro-source/source-process/builders/2899-output-ready.sh
-	source/myx/myx.distro-source/image-prepare/builders/3899-distro-ready.sh
-	source/myx/myx.distro-distro/image-process/builders/4911-deploy-apply.sh
-	source/myx/myx.distro-distro/image-install/builders/5911-deploy-apply.sh
+	source/myx/myx.distro-source/builders/source-prepare/1000-env-from-source.sh
+	source/myx/myx.distro-source/builders/source-process/2000-env-from-cached.sh
+	source/myx/myx.distro-source/builders/source-process/2899-output-ready.sh
+	source/myx/myx.distro-source/builders/image-prepare/3899-distro-ready.sh
+	source/myx/myx.distro-distro/builders/image-process/4911-deploy-apply.sh
+	source/myx/myx.distro-distro/builders/image-install/5911-deploy-apply.sh
 
 Variables (context environment) available in: actions, build-step scripts and console (deploy mode):
 
