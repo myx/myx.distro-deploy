@@ -324,8 +324,6 @@ DistroImageExtractSshConnections(){
 		continue
 	done \
 	| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
-	
-	return 0
 }
 
 # prints project merged provides
@@ -341,7 +339,6 @@ DistroImageProjectProvidesMerged(){
 	set -e
 	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
 	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
-	return 0
 }
 
 #
@@ -382,9 +379,11 @@ DistroImageProjectContextVariables(){
 		esac
 	done
 
-	local variableName operationType variableValue
+	local variableName operationType variableValue 
+	local buildBuffer variableNames
 
-	local buildBuffer="$(
+	buildBuffer="`
+
 		DistroImageProjectProvidesMerged \
 		| eval $filter \
 		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
@@ -490,15 +489,18 @@ DistroImageProjectContextVariables(){
 				;;
 			esac
 		done
-	)"
+
+	`"
 	
 	if [ -z "${buildBuffer:0:1}" ] ; then
 		return 0
 	fi
 	
-	local variableNames="$( echo "$buildBuffer" | grep -e '^## ## ' | sed -e 's|^## ## ||g' | sort -u )"
+	variableNames="$( 
+		echo "$buildBuffer" | grep -e '^## ## ' | sed -e 's|^## ## ||g' | sort -u 
+	)"
 	
-	local buildBuffer="$(
+	buildBuffer="$(
 		for variableName in $variableNames ; do
 			printf 'local VAR_%s\n' "$variableName"
 		done
