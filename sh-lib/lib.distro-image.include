@@ -353,13 +353,13 @@ DistroImageProjectProvidesMerged(){
 	
 		set -e
 		DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-		| awk '{ out = $2 " " $3; if (!seen[out]++) print out }' \
+		awk '{ out = $2 " " $3; if (!seen[out]++) print out }' \
 		| tee "$cacheFile"
 		return 0
 	fi
 	
 	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-	| awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
+	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
 	return 0
 }
 
