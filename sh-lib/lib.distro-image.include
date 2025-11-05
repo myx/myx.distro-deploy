@@ -349,6 +349,7 @@ DistroImageProjectProvidesMerged(){
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
 		else
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
+			mkdir -p "${cacheFile%/*}"
 		fi
 	
 		set -e
