@@ -500,7 +500,7 @@ DistroImageProjectContextVariables(){
 		echo "$buildBuffer" | grep -e '^## ## ' | sed -e 's|^## ## ||g' | sort -u 
 	)"
 	
-	buildBuffer="$(
+	buildBuffer="`
 		for variableName in $variableNames ; do
 			printf 'local VAR_%s\n' "$variableName"
 		done
@@ -508,7 +508,7 @@ DistroImageProjectContextVariables(){
 		for variableName in $variableNames ; do
 			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=\\"%s\\"\n" "$variableName" "$variableName"
 		done
-	)"
+	`"
 	
 	# hope for a new process
 	echo | ( eval "$buildBuffer" )
