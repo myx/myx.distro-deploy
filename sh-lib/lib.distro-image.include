@@ -511,7 +511,7 @@ DistroImageProjectContextVariables(){
 	`"
 	
 	# hope for a new process
-	echo | ( eval "$buildBuffer" )
+	( eval "$buildBuffer" ) </dev/null
 	
 	return 0
 }
