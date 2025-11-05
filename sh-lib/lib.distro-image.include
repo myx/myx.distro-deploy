@@ -386,7 +386,8 @@ DistroImageProjectSequenceFile(){
 	fi
 
 	DistroSystemContext --project-index-sequence "$MDSC_PRJ_NAME" \
-	| awk '!x[$2]++ { print $2 }'
+	awk '!x[$2]++ { print $2 }'
+	
 	return 0
 }
 
