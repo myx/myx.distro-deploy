@@ -337,28 +337,8 @@ DistroImageProjectProvidesMerged(){
 		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
 		set +e ; return 1
 	fi
-	local checkFile="$MDSC_CACHED/distro-provides.txt"
-	if [ -f "$checkFile" ] ; then
-		local cacheFile="$MDSC_CACHED/$MDSC_PRJ_NAME/project-provides-merged.txt"
-		if [ -f "$cacheFile" ] ; then
-			# remake if it is too young (re: one second precision of -nt)
-			if [ "$cacheFile" -nt "$checkFile" ] ; then
-				cat "$cacheFile"
-				return 0
-			fi
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: stale index, making index file ($MDSC_OPTION)" >&2
-		else
-			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: making index file ($MDSC_OPTION)" >&2
-			mkdir -p "${cacheFile%/*}"
-		fi
-	
-		set -e
-		DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-		awk '{ out = $2 " " $3; if (!seen[out]++) print out }' \
-		| tee "$cacheFile"
-		return 0
-	fi
-	
+
+	set -e
 	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
 	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
 	return 0
@@ -380,11 +360,11 @@ DistroImageProjectContextVariables(){
 		case "$1" in
 			--install)
 				shift
-				filter="grep -e \" image-install:context-variable:\""
+				filter="grep -e ' image-install:context-variable:'"
 			;;
 			--prepare)
 				shift
-				filter="grep -e \" image-prepare:context-variable:\""
+				filter="grep -e ' image-prepare:context-variable:'"
 			;;
 			--export)
 				prefix="export " ; shift
@@ -404,7 +384,7 @@ DistroImageProjectContextVariables(){
 
 	local variableName operationType variableValue
 
-	local buildBuffer="`
+	local buildBuffer="$(
 		DistroImageProjectProvidesMerged \
 		| eval $filter \
 		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
@@ -510,7 +490,7 @@ DistroImageProjectContextVariables(){
 				;;
 			esac
 		done
-	`"
+	)"
 	
 	if [ -z "${buildBuffer:0:1}" ] ; then
 		return 0
@@ -518,7 +498,7 @@ DistroImageProjectContextVariables(){
 	
 	local variableNames="$( echo "$buildBuffer" | grep -e '^## ## ' | sed -e 's|^## ## ||g' | sort -u )"
 	
-	local buildBuffer="`
+	local buildBuffer="$(
 		for variableName in $variableNames ; do
 			printf 'local VAR_%s\n' "$variableName"
 		done
@@ -526,7 +506,7 @@ DistroImageProjectContextVariables(){
 		for variableName in $variableNames ; do
 			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=\\"%s\\"\n" "$variableName" "$variableName"
 		done
-	`"
+	)"
 	
 	# hope for a new process
 	echo | ( eval "$buildBuffer" )
