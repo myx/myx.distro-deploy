@@ -363,35 +363,6 @@ DistroImageProjectProvidesMerged(){
 	return 0
 }
 
-## echoes specified or selected project sequence index file name
-##
-DistroImageProjectSequenceFile(){
-	local MDSC_CMD='DistroImageProjectSequenceFile'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-
-	local MDSC_PRJ_NAME="${MDSC_PRJ_NAME:-}"
-
-	while true ; do	
-		case "$1" in
-			--project)
-				shift ; MDSC_PRJ_NAME="$1" ; shift ; continue ;;
-			*)
-				break ;;
-		esac
-	done
-
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-
-	DistroSystemContext --project-index-sequence "$MDSC_PRJ_NAME" \
-	awk '!x[$2]++ { print $2 }'
-	
-	return 0
-}
-
-
 #
 # call with --install|--prepare [--export|--local] argument
 DistroImageProjectContextVariables(){
@@ -600,15 +571,17 @@ DistroImageCheckSourcePath(){
 	fi
 
 	if [ "$sourceName" = "*" -o "$sourceName" = "**" ] ; then
-		commandOutput="$( \
+		commandOutput="$(
 			while read -r checkProject ; do
 				[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD check wildcard path: " $check "$MDSC_SOURCE/$checkProject/$sourcePath" >&2
 				if [ $check "$MDSC_SOURCE/$checkProject/$sourcePath" ] ; then
-					if [ "$sourceName" = "**" ] || grep -q -x "$declaredAt" "$( DistroImageProjectSequenceFile --project "$checkProject" )" ; then
+					if [ "$sourceName" = "**" ] || grep -q -x "$declaredAt" <( 
+						DistroSystemContext --project-index-sequence "$checkProject"  awk '!x[$2]++ { print $2 }' 
+					) ; then
 						echo "$declaredAt" "$checkProject" "$sourcePath" "$@"
 					fi
 				fi
-			done < "$( DistroImageProjectSequenceFile )" \
+			done < <( DistroSystemContext --project-index-sequence "$MDSC_PRJ_NAME" awk '!x[$2]++ { print $2 }' )
 		)"
 	
 		if [ -n "${commandOutput:0:1}" ] ; then
