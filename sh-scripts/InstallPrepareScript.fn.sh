@@ -46,10 +46,11 @@ InstallPrepareScriptInternalPrintScriptFiles(){
 			elif tail -r /dev/null >/dev/null 2>&1; then
 				tail -r
 			else
-				sed '1!G;h;$!d'
+				awk '{ a[++n] = $0 } END { for (i = n; i >= 1; --i) print a[i] }'
 			fi
 		}
 		# | tail -r ;
+		# | sed '1!G;h;$!d'
 	) \
 	| while read -r sourceName scriptPath ; do
 		local fileName="$MDSC_SOURCE/$sourceName/$scriptPath"
