@@ -54,6 +54,21 @@ DistroSelectProject(){
 	esac
 }
 
+# prints project merged provides
+DistroImageProjectProvidesMerged(){
+	local MDSC_CMD='DistroImageProjectProvidesMerged'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
+
+	if [ -z "$MDSC_PRJ_NAME" ] ; then
+		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
+		set +e ; return 1
+	fi
+
+	set -e
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
+}
+
 #
 #
 DistroSshConnect(){
@@ -326,21 +341,6 @@ DistroImageExtractSshConnections(){
 	| sed -e 's|^ *||g' -e 's| *$||g' -e 's|  | |g'
 }
 
-# prints project merged provides
-DistroImageProjectProvidesMerged(){
-	local MDSC_CMD='DistroImageProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-
-	set -e
-	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
-}
-
 #
 # call with --install|--prepare [--export|--local] argument
 DistroImageProjectContextVariables(){
@@ -379,7 +379,7 @@ DistroImageProjectContextVariables(){
 		esac
 	done
 
-	local variableName operationType variableValue 
+	local variableName operationType variableValue
 	local buildBuffer variableNames
 
 	buildBuffer="`
@@ -388,7 +388,7 @@ DistroImageProjectContextVariables(){
 		| eval $filter \
 		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
 		| while read -r declaredAt variableName operationType variableValue ; do
-			[ full !=  "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
+			[ full != "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2
 			printf '\n## ## %s\n' "$variableName"
 			case "$operationType" in
 			
@@ -546,12 +546,14 @@ DistroImageCheckSourcePath(){
 	local declaredAt="$1" sourceName="$2" sourcePath="$3"
 	shift 3
 
-	local checkProject commandOutput
-
 	if [ -z "$sourceName" ] ; then
 		echo "$MDSC_CMD: ⛔ ERROR: arguments missing" >&2
 		set +e ; return 1
 	fi
+
+	set -e
+
+	local checkProject commandOutput
 
 	if [ "$sourceName" = "*" -o "$sourceName" = "**" ] ; then
 		commandOutput="$(
