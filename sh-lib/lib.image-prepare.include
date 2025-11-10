@@ -6,22 +6,6 @@
 type DistroImage >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
-# prints project merged provides that are prefixed 'image-prepare:' only, see DistroImageProjectProvidesMerged for full list
-ImagePrepareProjectProvidesMerged(){
-	local MDSC_CMD='ImagePrepareProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-
-	DistroImageProjectProvidesMerged | awk 'index($2,"image-prepare:")==1 && !seen[$0]++ { print; }'
-	return 0
-	
-	DistroSystemContext --index-provides-merged \
-	awk -v p="$MDSC_PRJ_NAME" ' $1==p && index($3,"image-prepare:")==1 && !seen[$2" "$3]++ { print $2, $3; } '
-}
-
 # prints actual project's sync folders (image-prepare:sync-source-files:)
 # format: "$sourceName" "$sourcePath" "$mergePath" "$filterGlob"
 ImagePrepareProjectSyncFolders(){
@@ -33,8 +17,9 @@ ImagePrepareProjectSyncFolders(){
 	fi
 
 	local declaredAt sourceName sourcePath mergePath filterGlob
-	ImagePrepareProjectProvidesMerged \
-	| grep " image-prepare:sync-source-files:" | tr ':' ' ' | cut -d" " -f1,4- \
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-prepare:sync-source-files:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
+	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r declaredAt sourceName sourcePath mergePath filterGlob ; do
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $mergePath $filterGlob" >&2
 		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$mergePath" "$filterGlob" \
@@ -56,8 +41,9 @@ ImagePrepareProjectSourcePatchScripts(){
 		set +e ; return 1
 	fi
 
-	ImagePrepareProjectProvidesMerged \
-	| grep " image-prepare:source-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-prepare:source-patch-script:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
+	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r declaredAt sourceName sourcePath scriptSourceName scriptName ; do
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $sourceName $sourcePath $scriptSourceName $scriptName" >&2
 		DistroImageCheckSourcePath --path "$declaredAt" "$sourceName" "$sourcePath" "$scriptSourceName" "$scriptName"
@@ -84,8 +70,9 @@ ImagePrepareProjectTargetPatchScripts(){
 	fi
 
 	local declaredAt scriptSourceName scriptName targetPath
-	ImagePrepareProjectProvidesMerged \
-	| grep " image-prepare:target-patch-script:" | tr ':' ' ' | cut -d" " -f1,4- \
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-prepare:target-patch-script:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
+	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r declaredAt scriptSourceName scriptName targetPath ; do
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $scriptSourceName $scriptName $targetPath" >&2
 		DistroImageCheckSourcePath --file "$declaredAt" "$scriptSourceName" "$scriptName" "$targetPath" \
@@ -111,8 +98,9 @@ ImagePrepareProjectCloneTasks(){
 	fi
 
 	local declaredAt sourceName sourcePath fileName targetPattern useVariable useValues
-	ImagePrepareProjectProvidesMerged \
-	| grep " image-prepare:clone-source-file:" | tr ':' ' ' | cut -d" " -f1,4- \
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-prepare:clone-source-file:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
+	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r declaredAt sourceName sourcePath fileName targetPattern useVariable useValues ; do
 		DistroImageCheckSourcePath --file "$declaredAt" "$sourceName" "$sourcePath/$fileName" "$sourcePath" "$fileName" "$targetPattern" "$useVariable" "$useValues" \
 		| cut -d" " -f2,4-

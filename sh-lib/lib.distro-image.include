@@ -357,11 +357,11 @@ DistroImageProjectContextVariables(){
 		case "$1" in
 			--install)
 				shift
-				filter="grep -e ' image-install:context-variable:'"
+				filter="image-install:context-variable:"
 			;;
 			--prepare)
 				shift
-				filter="grep -e ' image-prepare:context-variable:'"
+				filter="image-prepare:context-variable:"
 			;;
 			--export)
 				prefix="export " ; shift
@@ -384,8 +384,8 @@ DistroImageProjectContextVariables(){
 
 	buildBuffer="`
 
-		DistroImageProjectProvidesMerged \
-		| eval $filter \
+		DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+		awk -v filter="$filter" 'index($3,filter)==1 { out = $2 " " $3; if (!seen[out]++) print out }' \
 		| sed 's/:/ /; s/:/ /; s/:/ /; s/:/ /' | cut -d" " -f1,4- \
 		| while read -r declaredAt variableName operationType variableValue ; do
 			[ full != "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $variableName $operationType $variableValue" >&2

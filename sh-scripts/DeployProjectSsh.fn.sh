@@ -87,8 +87,6 @@ DeployProjectSshInternalPrintRemoteScript(){
 		fi
 	fi
 
-	local projectProvides="$( ImageInstallProjectProvidesMerged )"
-	
 	if [ "$deployType" != "exec" ] ; then
 		##
 		## select sync tasks
@@ -246,7 +244,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 				## clone/multiply files
 				##
 				local declaredAt sourcePath filePath fileName targetPattern useVariable useValues localFileName
-				echo "$projectProvides" \
+				ImageInstallProjectProvidesMerged \
 				| grep " image-install:clone-deploy-file:$sourcePath:" \
 				| tr ':' ' ' | cut -d" " -f1,4- \
 				| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
