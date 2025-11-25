@@ -3,71 +3,10 @@
 
 [ -z "$MDSC_DETAIL" ] || echo "+ DistroImage: library included" >&2
 
-# checks and updates MDSC_PRJ_NAME variable with project in focus
-# $3 is empty or 'local' or 'export'
-DistroSelectProject(){
-	local MDSC_CMD='DistroSelectProject'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-
-	if [ "$1" != "MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: env name required to be MDSC_PRJ_NAME!" >&2
-		set +e ; return 1
-	fi
-	if [ -z "$2" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project name required!" >&2
-		set +e ; return 1
-	fi
-	if [ "$2" = "$MDSC_PRJ_NAME" ] ; then
-		[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: same project ($2)" >&2
-		return 0
-	fi
-	if [ "$2" = "--reset" ] ; then
-		if [ -z "$MDSC_PRJ_NAME" ] ; then
-			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: already clean" >&2
-			return 0
-		fi
-		[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: reset project (previous selection: $MDSC_PRJ_NAME)" >&2
-		export MDSC_PRJ_NAME=
-		# export MDSC_PRJ_MPRV=
-		# export MDSC_PRJ_BSEQ=
-		return 0
-	fi
-	case "$3" in
-		export)
-			export MDSC_PRJ_NAME="$2"
-			# export MDSC_PRJ_MPRV=
-			# export MDSC_PRJ_BSEQ=
-			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected and exported ($2)" >&2
-			return 0
-		;;
-		'')
-			MDSC_PRJ_NAME="$2"
-			# MDSC_PRJ_MPRV=
-			# MDSC_PRJ_BSEQ=
-			[ -z "$MDSC_DETAIL" ] || echo "* $MDSC_CMD: project selected ($2)" >&2
-			return 0
-		;;
-		*)
-			echo "$MDSC_CMD: ⛔ ERROR: invalid extra option: $3" >&2
-			set +e ; return 1
-		;;
-	esac
-}
-
-# prints project merged provides
-DistroImageProjectProvidesMerged(){
-	local MDSC_CMD='DistroImageProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-
-	set -e
-	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-	awk '{ out = $2 " " $3; if (!seen[out]++) print out }'
-}
+if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+	. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+	DistroSystemContext --distro-path-auto
+fi
 
 #
 #
@@ -80,7 +19,7 @@ DistroSshConnect(){
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
+				DistroDeployContext --parse-ssh-options "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -157,49 +96,6 @@ DistroSshConnect(){
 	
 }
 
-
-#
-#
-DistroImagePrintSshTarget(){
-	[ full != "$MDSC_DETAIL" ] || echo "+ DistroImagePrintSshTarget: $@" >&2
-	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome=  useSshArgs=
-	DistroImageParseSshOptions $@ 2>/dev/null
-	printf '%s@%s:%s' "$useSshUser" "$useSshHost" "$useSshPort"
-	return 0
-}
-
-
-#
-#
-DistroImageParseSshOptions(){
-	[ -z "$MDSC_DETAIL" ] || echo "+ DistroImageParseSshOptions: $@" >&2
-	while true ; do
-		case "$1" in
-			--ssh-name) # for prefix only, yet
-				shift 2
-			;;
-			--ssh-host)
-				useSshHost="$2" ; shift 2
-			;;
-			--ssh-port)
-				useSshPort="$2" ; shift 2
-			;;
-			--ssh-user)
-				useSshUser="$2" ; shift 2
-			;;
-			--ssh-home)
-				useSshHome="${2#$MMDAPP/source/}" ; shift 2
-			;;
-			--ssh-args)
-				useSshArgs="$2" ; shift 2
-			;;
-			*)
-				return 0
-			;;
-		esac
-	done
-}
-
 # prints ssh options as argument list (--ssh-host ...)
 #
 DistroImageProjectSshTargets(){
@@ -216,7 +112,7 @@ DistroImageProjectSshTargets(){
 	while true ; do
 		case "$1" in
 			--project)
-				DistroSelectProject MDSC_PRJ_NAME "$2" ; shift 2
+				DistroSystemContext --select-project MDSC_PRJ_NAME "$2" ; shift 2
 			;;
 			*)
 				break
@@ -246,7 +142,7 @@ DistroImageExtractSshConnections(){
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
+				DistroDeployContext --parse-ssh-options "$1" "$2"; shift 2; continue
 			;;
 			--no-target-column)
 				noTargetColumn="$1" ; shift
@@ -301,7 +197,7 @@ DistroImageExtractSshConnections(){
 		useSshHome="$setSshHome"
 		useSshArgs="$setSshArgs"
 
-		DistroImageParseSshOptions $sshOptions
+		DistroDeployContext --parse-ssh-options $sshOptions
 		
 		sshHost="${setSshHost:-$useSshHost}"
 		sshPort="${setSshPort:-$useSshPort}"

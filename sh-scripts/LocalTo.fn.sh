@@ -7,11 +7,6 @@ if [ -z "$MMDAPP" ] ; then
 	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
-if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
-	. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
-	DistroSystemContext --distro-path-auto
-fi
-
 LocalTo(){
 
 	local MDSC_CMD='LocalTo'
@@ -19,17 +14,22 @@ LocalTo(){
 
 	set -e
 
-	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
+	if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+		. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+		DistroSystemContext --distro-path-auto
+	fi
 
 	type DistroImage >/dev/null 2>&1 || \
 		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
+
+	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 
 	local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome="${useSshHome:-}" useSshArgs="${useSshArgs:-}"
 
 	while true ; do
 		case "$1" in
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
+				DistroDeployContext --parse-ssh-options "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -85,8 +85,9 @@ LocalTo(){
 	(
 		echo "$MDSC_CMD: Project-ID: $projectName" >&2
 		echo "$MDSC_CMD: SshOptions: $extraText" >&2
-		DistroSelectProject MDSC_PRJ_NAME "$projectName"
-		export MDSC_PRJ_NAME="$MDSC_PRJ_NAME"
+		local MDSC_PRJ_NAME
+		export MDSC_PRJ_NAME
+		DistroSystemContext --select-project MDSC_PRJ_NAME "$projectName"
 		set -x
 		bash --rcfile "$MDLT_ORIGIN/myx/myx.distro-${MDSC_INMODE:-source}/sh-lib/console-${MDSC_INMODE:-source}-bashrc.rc" --noprofile
 		#"$MMDAPP/actions/distro/source/console.sh" "$@"

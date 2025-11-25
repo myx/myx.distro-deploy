@@ -4,15 +4,89 @@
 # source & deploy are different - they are loaded in rc, but scripts are requesting SystemContext.include, common to both
 
 if type DistroDeployContext >/dev/null 2>&1 ; then
+	DistroSystemContext "$@"
 	return 0
 fi # quick exit
 
 : "${MMDAPP:?⛔ ERROR: MMDAPP is not set}"
 
-DistroDeployContext(){
-	DistroSystemContext "$@"
-}
-
 # include system context
 type DistroSystemContext >/dev/null 2>&1 || \
 	. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
+
+DistroDeployContext(){
+	case "$1" in
+		--is-spec-option)
+			case "$2" in
+				# distro-source & distro-deploy
+				--distro-path-auto|--distro-source-only|--distro-from-source|--distro-from-cached|--distro-from-output|--distro-from-distro)
+					return 0
+				;;
+				# distro-.local & distro-remote
+				--init-variables|--run-from-source|--run-from-.local|--run-from-detect|--run-from-path)
+					return 0
+				;;
+			esac
+			set +e ; return 1
+		;;
+		--init-variables|--run-from-detect|--distro-path-auto)
+			if    [ -n "$MDLT_ORIGIN" ] && [ -n "$MDLT_OPTION" ] \
+				&& [ -n "$MDSC_OPTION" ] && [ -n "$MDSC_INMODE" ]
+			then
+				shift
+				return 0
+			fi
+			[ -z "$MDSC_DETAIL" ] || echo "DistroSystemContext: input spec: $1" >&2
+			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
+			return 0
+		;;
+		--distro-*|--run-from-*|--init-*)
+			if DistroSystemContext --is-spec-option "$1" ; then
+				local adpcChangeSpec="true"
+				[ -z "$MDSC_DETAIL" ] || echo "DistroSystemContext: input spec: $1" >&2
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
+				return 0
+			fi
+		;;
+
+		# DistroDeployContext --parse-ssh-options
+		--parse-ssh-options)
+			[ full != "$MDSC_DETAIL" ] || echo "+ DistroSystemContext: $@" >&2
+			shift
+			while true ; do
+				case "$1" in
+					--ssh-name) # for prefix only, yet
+						shift 2
+					;;
+					--ssh-host)
+						useSshHost="$2" ; shift 2
+					;;
+					--ssh-port)
+						useSshPort="$2" ; shift 2
+					;;
+					--ssh-user)
+						useSshUser="$2" ; shift 2
+					;;
+					--ssh-home)
+						useSshHome="${2#$MMDAPP/source/}" ; shift 2
+					;;
+					--ssh-args)
+						useSshArgs="$2" ; shift 2
+					;;
+					*)
+						return 0
+					;;
+				esac
+			done
+		;;
+		# DistroDeployContext --print-ssh-target
+		--print-ssh-target)
+			[ full != "$MDSC_DETAIL" ] || echo "+ DistroSystemContext: $@" >&2
+			shift
+			local useSshHost="${useSshHost:-}" useSshPort="${useSshPort:-}" useSshUser="${useSshUser:-}" useSshHome=  useSshArgs=
+			DistroDeployContext --parse-ssh-options $@ 2>/dev/null
+			printf '%s@%s:%s' "$useSshUser" "$useSshHost" "$useSshPort"
+			return 0
+		;;
+	esac
+}

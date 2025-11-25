@@ -7,16 +7,8 @@ if [ -z "$MMDAPP" ] ; then
 	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
-if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
-	. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
-	DistroSystemContext --distro-path-auto
-fi
-
 type Prefix >/dev/null 2>&1 || \
 	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/prefix.Common"
-
-type DistroImage >/dev/null 2>&1 || \
-	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 ExecuteParallel(){
 
@@ -24,6 +16,14 @@ ExecuteParallel(){
 
 	local MDSC_CMD='ExecuteParallel'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
+
+	if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+		. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+		DistroSystemContext --distro-path-auto
+	fi
+
+	type DistroImage >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
@@ -62,7 +62,7 @@ ExecuteParallel(){
 				explainTasks="false"
 			;;
 			--ssh-name|--ssh-host|--ssh-port|--ssh-user|--ssh-home|--ssh-args)
-				DistroImageParseSshOptions "$1" "$2"; shift 2; continue
+				DistroDeployContext --parse-ssh-options "$1" "$2"; shift 2; continue
 			;;
 			--ssh-*)
 				echo "$MDSC_CMD: ⛔ ERROR: invalid --ssh-XXXX option: $1" >&2
@@ -134,7 +134,7 @@ ExecuteParallel(){
 		echo "> 📋 $MDSC_CMD: Will execute: " >&2
 		local project sshTarget sshOptions
 		echo "$sshTargets" | while read -r project sshTarget sshOptions; do
-			echo "  > $( basename "$project" ) $sshTarget $( DistroImagePrintSshTarget $sshOptions 2>/dev/null )" >&2
+			echo "  > $( basename "$project" ) $sshTarget $( DistroDeployContext --print-ssh-target $sshOptions 2>/dev/null )" >&2
 		done \
 		2>&1 | column -t 1>&2
 	fi

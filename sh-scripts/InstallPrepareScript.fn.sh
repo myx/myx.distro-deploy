@@ -178,7 +178,7 @@ InstallPrepareScript(){
 	while true ; do
 		case "$1" in
 			--project)
-				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+				shift ; DistroSystemContext --select-project MDSC_PRJ_NAME "$1" ; shift
 			;;
 			--match)
 				shift ; PROJECT_MATCH="$PROJECT_MATCH $1" ; shift

@@ -219,7 +219,7 @@ InstallPrepareFiles(){
 	while true ; do
 		case "$1" in
 			--project)
-				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+				shift ; DistroSystemContext --select-project MDSC_PRJ_NAME "$1" ; shift
 			;;
 			--save-script)
 				shift ; saveScriptTo="$1" ; shift

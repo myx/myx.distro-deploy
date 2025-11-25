@@ -7,14 +7,6 @@ if [ -z "$MMDAPP" ] ; then
 	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
 fi
 
-if [ -z "$MDLT_ORIGIN" ] || ! type DistroSystemContext >/dev/null 2>&1 ; then
-	. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-system/sh-lib/SystemContext.include"
-	DistroSystemContext --distro-path-auto
-fi
-
-type ImageInstall >/dev/null 2>&1 || \
-	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
-
 
 #[ -n "${TAR_ARGS_GENERIC-}" ] || \
 #	. "${MYXROOT:-/usr/local/share/myx.common}/bin/lib/tar.${MYXUNIX:-$( uname -s )}"
@@ -244,8 +236,8 @@ DeployProjectSshInternalPrintRemoteScript(){
 				## clone/multiply files
 				##
 				local declaredAt sourcePath filePath fileName targetPattern useVariable useValues localFileName
-				ImageInstallProjectProvidesMerged \
-				| grep " image-install:clone-deploy-file:$sourcePath:" \
+				DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+				awk -v filter="image-install:clone-deploy-file:$sourcePath:" 'index($3,filter)==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
 				| tr ':' ' ' | cut -d" " -f1,4- \
 				| while read -r declaredAt sourcePath filePath fileName targetPattern useVariable useValues; do
 					localFileName="$cacheFolder/sync/$sourcePath/$filePath/$fileName"
@@ -360,6 +352,11 @@ DeployProjectsSsh(){
 	local MDSC_CMD='DeployProjectsSsh'
 	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
 
+	if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+		. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+		DistroSystemContext --distro-path-auto
+	fi
+
 	. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.UseStandardOptions.include"
 	
 	if [ ! -d "$MMDAPP/output" ] ; then
@@ -444,7 +441,7 @@ DeployProjectsSsh(){
 	echo "> 📋 $MDSC_CMD: Targets selected: " >&2
 	local project sshTarget sshOptions
 	echo "$sshTargets" | while read -r project sshTarget sshOptions; do
-		echo "  > $( basename "$project" ) $sshTarget $( DistroImagePrintSshTarget $sshOptions 2>/dev/null )" >&2
+		echo "  > $( basename "$project" ) $sshTarget $( DistroDeployContext --print-ssh-target $sshOptions 2>/dev/null )" >&2
 	done \
 	2>&1 | column -t 1>&2
 
@@ -500,6 +497,14 @@ DeployProjectSsh(){
 		fi
 	fi
 
+	if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+		. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+		DistroSystemContext --distro-path-auto
+	fi
+
+	type ImageInstall >/dev/null 2>&1 || \
+		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.image-install.include"
+
 	[ full != "$MDSC_DETAIL" ] || printf "| $MDSC_CMD: 🔬🦠 \n\tSOURCE: $MDSC_SOURCE\n\tCACHED: $MDSC_CACHED\n\tOUTPUT: $MDSC_OUTPUT\n" >&2
 
 	case "$1" in
@@ -534,7 +539,7 @@ DeployProjectSsh(){
 	while true ; do
 		case "$1" in
 			--project)
-				shift ; DistroSelectProject MDSC_PRJ_NAME "$1" ; shift
+				shift ; DistroSystemContext --select-project MDSC_PRJ_NAME "$1" ; shift
 			;;
 			--ssh-name)
 				shift 2

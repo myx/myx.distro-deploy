@@ -6,19 +6,6 @@
 type DistroImage >/dev/null 2>&1 || \
 	. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/lib.distro-image.include"
 
-# prints project merged provides that are prefixed 'image-install:' only, see DistroImageProjectProvidesMerged for full list
-ImageInstallProjectProvidesMerged(){
-	local MDSC_CMD='ImageInstallProjectProvidesMerged'
-	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
-	if [ -z "$MDSC_PRJ_NAME" ] ; then
-		echo "$MDSC_CMD: ⛔ ERROR: project is not selected!" >&2
-		set +e ; return 1
-	fi
-
-	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
-	awk 'index($3,"image-install:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }'
-}
-
 # prints actual project's sync tasks (image-install:deploy-sync-files:)
 # format: "$deploySourcePath" "$targetHostPath"
 ImageInstallProjectSyncTasks(){
@@ -30,8 +17,9 @@ ImageInstallProjectSyncTasks(){
 	fi
 
 	local declaredAt deploySourcePath targetHostPath
-	ImageInstallProjectProvidesMerged \
-	| grep " image-install:deploy-sync-files:" \
+	
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-install:deploy-sync-files:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
 	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r declaredAt deploySourcePath targetHostPath ; do
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: input: $declaredAt $deploySourcePath $targetHostPath" >&2
@@ -85,7 +73,8 @@ ImageInstallProjectDeployPatchScripts(){
 	esac
 
 	local declaredAt scriptSourceName scriptFile matchPath
-	ImageInstallProjectProvidesMerged \
+	DistroSystemContext --project-index-provides-merged "$MDSC_PRJ_NAME" \
+	awk 'index($3,"image-install:")==1 && !seen[ $2 " " $3 ]++ { print $2 " " $3; }' \
 	| eval $filter \
 	| tr ':' ' ' | cut -d" " -f1,4- \
 	| while read -r $fields ; do
