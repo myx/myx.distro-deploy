@@ -20,6 +20,7 @@ DistroSystemContext --distro-from-output
 if [ -x "$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin/myx.common" ] ; then
 	export MYXROOT="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/share/myx.common"
 	PATH="$MDLT_ORIGIN/myx/myx.common/os-myx.common/host/tarball/bin:$PATH"
+	complete -W '$(myx.common help --bare)' myx.common # explicit myx.common completion
 fi
 
 # add paths, replace if any
@@ -158,7 +159,7 @@ PROMPT_COMMAND='set +ex ; history -w; history -r ; PS1="$( Deploy --shell-prompt
 export PATH
 
 if [ -n "$MDSC_PRJ_NAME" ] ; then
-	# DistroSelectProject MDSC_PRJ_NAME "$MDSC_PRJ_NAME"
+	# DistroSystemContext --select-project MDSC_PRJ_NAME "$MDSC_PRJ_NAME"
 	export MDSC_SELECT_PROJECTS="$MDSC_PRJ_NAME"
 	cd "$MMDAPP/source/$MDSC_PRJ_NAME"
 	echo "Console: Project Selected: $MDSC_PRJ_NAME" >&2
