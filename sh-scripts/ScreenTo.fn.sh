@@ -16,9 +16,7 @@ ScreenTo(){
 
 	if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
 		. "${MDLT_ORIGIN:-$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
-		set -x
 		DistroSystemContext --distro-path-auto
-		set +x
 	fi
 
 	type DistroImage >/dev/null 2>&1 || \
