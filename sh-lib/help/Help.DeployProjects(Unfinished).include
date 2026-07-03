@@ -1,0 +1,5 @@
+echo "📘 syntax: DeployProjectSsh.fn.sh <project> --do-exec|--do-sync|--do-both|--do-none" >&2
+echo "📘 syntax: DeployProjectSsh.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.DeployProjects(Unfinished).help.md" >&2
+fi

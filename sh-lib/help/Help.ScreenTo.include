@@ -1,0 +1,7 @@
+echo "📘 syntax: ScreenTo.fn.sh <project>" >&2
+echo "📘 syntax: ScreenTo.fn.sh <unique-project-name-part>" >&2
+echo "📘 syntax: ScreenTo.fn.sh <project-selector> [<ssh arguments>...]" >&2
+echo "📘 syntax: ScreenTo.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ScreenTo.help.md" >&2
+fi

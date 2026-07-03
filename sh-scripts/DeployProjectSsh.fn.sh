@@ -768,31 +768,7 @@ DeployProjectSsh(){
 case "$0" in
 	*/sh-scripts/DeployProjectSsh.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--match <install-script-filter>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
-			echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables|full-script}" >&2
-			echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--use-bz2|--use-xz] ..." >&2
-			echo "📘 syntax: DeployProjectSsh.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				echo "  Examples:" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --prepare-sync --deploy-sync" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndss001 --no-sleep --ssh-user root --ssh-home ~/.ssh --prepare-full --deploy-exec" >&2
-
-				echo "    DeployProjectSsh.fn.sh --select-one-project ndns001 --prepare-sync --deploy-sync" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-sync --deploy-none" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-sync" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-none --deploy-exec" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-exec --deploy-exec" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --deploy-full" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --print-full-script" >&2
-
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-deploy-patch-scripts" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-context-variables" >&2
-				
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-host 192.168.1.17 --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-port 22 --prepare-none --print-ssh-targets" >&2
-				echo "    DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --ssh-user guest --prepare-none --print-ssh-targets" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.DeployProjectSsh.include"
 			exit 1
 		fi
 		

@@ -83,14 +83,7 @@ case "$0" in
 			echo "📘 syntax: ExecuteInteractive.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
 			echo "📘 syntax: ExecuteInteractive.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
 			echo "📘 syntax: ExecuteInteractive.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
-				echo "  Examples:" >&2
-				echo "    ExecuteInteractive.fn.sh --select-projects l6 -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --select-merged-keywords l6 -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --select-provides deploy-ssh-target: -l root uname -a" >&2
-				echo "    ExecuteInteractive.fn.sh --select-all -l root uname -a" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ExecuteInteractive.include"
 			exit 1
 		fi
 		

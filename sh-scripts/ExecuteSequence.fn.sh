@@ -195,22 +195,7 @@ ExecuteSequence(){
 case "$0" in
 	*/sh-scripts/ExecuteSequence.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ExecuteSequence.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteSequence.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteSequence.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteSequence.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteSequence.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
-				echo "  Examples:" >&2
-				echo "    ExecuteSequence.fn.sh --select-projects l6 --execute-stdin -l root" >&2
-				echo "    ExecuteSequence.fn.sh --select-projects l6 --ssh-user root --execute-stdin" >&2
-				echo "    ExecuteSequence.fn.sh --select-merged-keywords l6 --execute-stdin -l root bash" >&2
-				echo "    ExecuteSequence.fn.sh --select-all uname -a" >&2
-				echo "    ExecuteSequence.fn.sh --select-all --ssh-user root uname -a" >&2
-				echo "    ExecuteSequence.fn.sh --select-provides 'deploy-ssh-target:' --execute-command 'myx.common install/myx.common-reinstall'" >&2
-				echo "    ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ExecuteSequence.include"
 			exit 1
 		fi
 		

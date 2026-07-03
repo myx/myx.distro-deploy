@@ -212,25 +212,7 @@ ExecuteParallel(){
 case "$0" in
 	*/sh-scripts/ExecuteParallel.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
-			echo "📘 syntax: ExecuteParallel.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
-				echo "  Examples:" >&2
-				echo "    ExecuteParallel.fn.sh --select-all --display-targets -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-projects l6 --execute-stdin -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-merged-keywords l6 --execute-stdin -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-projects l6 -l root uname -a" >&2
-				echo "    ExecuteParallel.fn.sh --select-projects l6 --ssh-user root uname -a" >&2
-				echo "    ExecuteParallel.fn.sh --select-projects l6 --execute-command 'uname -a' -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-all -l root myx.common install/myx.common-reinstall" >&2
-				echo "    ExecuteParallel.fn.sh --select-all --execute-command 'myx.common install/myx.common-reinstall' -l root" >&2
-				echo "    ExecuteParallel.fn.sh --select-provides 'deploy-ssh-target:' --execute-command 'myx.common install/myx.common-reinstall'" >&2
-				echo "    ExecuteParallel.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ExecuteParallel.include"
 			exit 1
 		fi
 		

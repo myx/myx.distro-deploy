@@ -1,0 +1,6 @@
+echo "📘 syntax: InstallPrepareScript.fn.sh --project <project> [--match <name>...] --print-files|--print-script" >&2
+echo "📘 syntax: InstallPrepareScript.fn.sh --project <project> [--match <name>...] --to-file <targetFile>" >&2
+echo "📘 syntax: InstallPrepareScript.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.InstallPrepareScript.help.md" >&2
+fi

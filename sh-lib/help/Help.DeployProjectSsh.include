@@ -1,0 +1,7 @@
+echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|home|args} <value>] [--match <install-script-filter>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}" >&2
+echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables|sync-script|exec-script|full-script}" >&2
+echo "📘 syntax: DeployProjectSsh.fn.sh --project <project> [--use-gz|--use-bz2|--use-xz] ..." >&2
+echo "📘 syntax: DeployProjectSsh.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.DeployProjectSsh.help.md" >&2
+fi

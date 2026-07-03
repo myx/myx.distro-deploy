@@ -1,0 +1,8 @@
+echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-stdin [<ssh arguments>...]" >&2
+echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-script <script-name> [<ssh arguments>...]" >&2
+echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --execute-command <command> [<ssh arguments>...]" >&2
+echo "📘 syntax: ExecuteParallel.fn.sh <project-selector> --display-targets [<ssh arguments>...]" >&2
+echo "📘 syntax: ExecuteParallel.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ExecuteParallel.help.md" >&2
+fi

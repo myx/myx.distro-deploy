@@ -359,20 +359,7 @@ InstallPrepareFiles(){
 case "$0" in
 	*/sh-scripts/InstallPrepareFiles.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> --print-sync-folders/--print-clone-files/--print-script" >&2
-			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> --to-temp <command> [<argument...>]" >&2
-			echo "📘 syntax: InstallPrepareFiles.fn.sh --project <project> [--save-script <fileName>] --to-directory <targetDirectory>" >&2
-			echo "📘 syntax: InstallPrepareFiles.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				echo "  Examples:" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-sync-folders" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-clone-files" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-source-patch-scripts" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-target-patch-scripts" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp find . | sort | grep web/default" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp 'pwd ; find . | sort'" >&2
-				echo "    InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp tar czvf - . > /dev/null" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.InstallPrepareFiles.include"
 			exit 1
 		fi
 		

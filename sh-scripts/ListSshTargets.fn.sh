@@ -118,13 +118,5 @@ case "$0" in
 		fi
 		
 		ListSshTargets "$@"
-
-		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			if [ "$1" = "--help" ] ; then
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/help/HelpSelectProjects.include"
-			fi
-			exit 1
-		fi
-		
 	;;
 esac

@@ -229,16 +229,7 @@ InstallPrepareScript(){
 case "$0" in
 	*/sh-scripts/InstallPrepareScript.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: InstallPrepareScript.fn.sh --project <project> [--match <name>...] --print-files/--print-script" >&2
-			echo "📘 syntax: InstallPrepareScript.fn.sh --project <project> [--match <name>...] --to-file <targetDirectory>" >&2
-			echo "📘 syntax: InstallPrepareScript.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				echo "  Examples:" >&2
-				echo "    InstallPrepareScript.fn.sh --project ndm/cloud.knt/setup.host-ndss112r3.example.org --print-script" >&2
-				echo "    InstallPrepareScript.fn.sh --project ndm/cloud.knt/setup.host-ndss112r3.example.org --match monit --print-script" >&2
-				echo "    InstallPrepareScript.fn.sh --project prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-files" >&2
-				echo "    InstallPrepareScript.fn.sh --project prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-script" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.InstallPrepareScript.include"
 			exit 1
 		fi
 		

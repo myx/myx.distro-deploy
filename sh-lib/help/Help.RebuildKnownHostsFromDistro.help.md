@@ -1,11 +1,36 @@
-# RebuildKnownHostsFromDistro
+📘 syntax: RebuildKnownHostsFromDistro.fn.sh [--no-delete]
+📘 syntax: RebuildKnownHostsFromDistro.fn.sh [--help|--help-syntax]
 
-Pass-through wrapper that runs RebuildKnownHosts in deploy-aware context.
+##  Summary:
 
-## Syntax
+		Runs RebuildKnownHosts through deploy-aware distro context, so workspace known_hosts
+		is rebuilt for the active deploy environment.
 
-- RebuildKnownHostsFromDistro.fn.sh [--no-delete]
+##  Arguments:
 
-## Notes
+		None. This command accepts no positional arguments.
 
-- Forwards options directly to RebuildKnownHosts.
+##  Options:
+
+		--no-delete
+			Keeps stale known_hosts lines not present in current
+			source set.
+
+		--help
+			Prints command help and exits (no known_hosts rebuild is
+			run).
+
+		--help-syntax
+			Prints syntax summary and exits.
+
+##  Notes:
+
+		Forwards options directly to RebuildKnownHosts.
+
+##  Examples:
+
+		# Rebuild workspace known_hosts from project known_hosts files
+		`RebuildKnownHostsFromDistro.fn.sh`
+
+		# Rebuild known_hosts but keep stale records
+		`RebuildKnownHostsFromDistro.fn.sh --no-delete`

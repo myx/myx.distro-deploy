@@ -81,15 +81,7 @@ ScreenTo(){
 case "$0" in
 	*/sh-scripts/ScreenTo.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ScreenTo.fn.sh <project> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ScreenTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ScreenTo.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				echo "  Examples:" >&2
-				echo "    ScreenTo.fn.sh ndss113" >&2
-				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org" >&2
-				echo "    ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ScreenTo.include"
 			exit 1
 		fi
 		

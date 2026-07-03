@@ -79,16 +79,7 @@ ShellTo(){
 case "$0" in
 	*/sh-scripts/ShellTo.fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
-			echo "📘 syntax: ShellTo.fn.sh <project> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ShellTo.fn.sh <unique-project-name-part> [<ssh arguments>...]" >&2
-			echo "📘 syntax: ShellTo.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				echo "  Examples:" >&2
-				echo "    ShellTo.fn.sh ndss113" >&2
-				echo "    ShellTo.fn.sh l63h2 --ssh-user root --ssh-home ~/.ssh uname" >&2
-				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org" >&2
-				echo "    ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.ShellTo.include"
 			exit 1
 		fi
 		
