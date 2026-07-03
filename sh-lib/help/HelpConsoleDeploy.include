@@ -1,4 +1,5 @@
+echo >&2
 echo "'Deploy' command provides/lists commands related to distro-deploy operations." >&2
-echo "Syntax: Deploy <distro-deploy-command-name>" >&2
+echo "📘 syntax: Deploy <distro-deploy-command-name>" >&2
 echo >&2
 set +e ; return 1
