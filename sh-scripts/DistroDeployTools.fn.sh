@@ -36,12 +36,7 @@ DistroDeployTools(){
 			return 0
 		;;
 		''|--help|--help-syntax)
-			echo "📘 syntax: DistroDeployTools.fn.sh <option>" >&2
-			echo "📘 syntax: DistroDeployTools.fn.sh --upgrade-deploy-tools" >&2
-			echo "📘 syntax: DistroDeployTools.fn.sh [--help]" >&2
-			if [ "$1" = "--help" ] ; then
-				myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/Help.DistroDeployTools.help.md" >&2
-			fi
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.DistroDeployTools.include"
 			return 0
 		;;
 		*)
