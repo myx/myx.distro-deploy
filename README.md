@@ -5,7 +5,7 @@ Default build steps (order in which operations are performed. Source: 1..3, Dist
 	1xxx - source-prepare, source to cached (mode: source, stage: prepare) 
 				cached contains all sources required to build changed 
 				projects and actual meta-data (distro indices: pre-parsed names, 
-				reqires, etc...).
+				requires, etc...).
 	2xxx - source-process, cached to output (mode: source, stage: process)
 				output contains all actual meta-data.
 	3xxx - image-prepare, output to distro (mode: image, prepare | util)
@@ -34,8 +34,8 @@ Builders Examples (actual builders, relative to the root of the workspace):
 	source/myx/myx.distro-source/builders/source-process/2000-env-from-cached.sh
 	source/myx/myx.distro-source/builders/source-process/2899-output-ready.sh
 	source/myx/myx.distro-source/builders/image-prepare/3899-distro-ready.sh
-	source/myx/myx.distro-distro/builders/image-process/4911-deploy-apply.sh
-	source/myx/myx.distro-distro/builders/image-install/5911-deploy-apply.sh
+	source/myx/myx.distro-deploy/builders/image-process/4911-deploy-apply.sh
+	source/myx/myx.distro-deploy/builders/image-install/5911-deploy-apply.sh
 
 Variables (context environment) available in: actions, build-step scripts and console (deploy mode):
 
@@ -49,7 +49,7 @@ Variables (context environment) available in: actions, build-step scripts and co
 	MDSC_DETAIL - debug settings, values: <empty>, "true", "full"
 	useSshUser - override from ssh user calculated from project sequence variables
 	useSshHome - override from ssh home calculated from project sequence variables
-	useSshArgs - extra arguments for ssh conection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
+	useSshArgs - extra arguments for ssh connection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
 
 Variables (context environment) specific to build-step scripts:
 
@@ -58,7 +58,7 @@ Variables (context environment) specific to build-step scripts:
 App Folders:
 
 	/ - workspace root directory
-	/source - source codes and projects - editable and commitable or pullable
+	/source - source codes and projects - editable and committable or pullable
 	/export - export resources (generated or cloned)
 	/distro - distro structure, whole project tree, prepared (generated or cloned)
 	/distro/repo[/group]/project - project folders structure
