@@ -1,0 +1,5 @@
+echo "syntax: RebuildKnownHostsFromDistro.fn.sh [--no-delete]" >&2
+echo "syntax: RebuildKnownHostsFromDistro.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.RebuildKnownHostsFromDistro.help.md" >&2
+fi

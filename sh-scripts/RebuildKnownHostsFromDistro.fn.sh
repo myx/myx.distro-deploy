@@ -12,6 +12,13 @@ type RebuildKnownHosts >/dev/null 2>&1 || \
 
 
 RebuildKnownHostsFromDistro(){
+	case "$1" in
+		--help|--help-syntax)
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.RebuildKnownHostsFromDistro.include"
+			return 0
+		;;
+	esac
+
 	if [ "$MDSC_INMODE" = "deploy" ] ; then
 		RebuildKnownHosts "$@"
 	else

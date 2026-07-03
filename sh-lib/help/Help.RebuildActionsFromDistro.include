@@ -1,0 +1,5 @@
+echo "syntax: RebuildActionsFromDistro.fn.sh [--no-delete|--test1|--test2|--test3]" >&2
+echo "syntax: RebuildActionsFromDistro.fn.sh [--help]" >&2
+if [ "$1" = "--help" ]; then
+	myx.common lib/catMarkdown "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.RebuildActionsFromDistro.help.md" >&2
+fi

@@ -12,6 +12,13 @@ type RebuildActions >/dev/null 2>&1 || \
 
 
 RebuildActionsFromDistro(){
+	case "$1" in
+		--help|--help-syntax)
+			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.RebuildActionsFromDistro.include"
+			return 0
+		;;
+	esac
+
 	if [ "$MDSC_INMODE" = "deploy" ] ; then
 		RebuildActions "$@"
 	else
