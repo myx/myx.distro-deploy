@@ -1,7 +1,7 @@
 📘 syntax: DistroDeployTools.fn.sh <option>
 📘 syntax: DistroDeployTools.fn.sh [--help]
 
-	Options:
+##  Options:
 
 		--upgrade-deploy-tools
 			Upgrades local deploy packages with latest `master` version.
@@ -73,14 +73,18 @@
 			Won't output helpful information on files created and how to use those files, when
 			`--quiet` option specified.
 
-	Examples (in Local Console, within workspace context):
+##  Examples (in Local Console, within workspace context):
 
-		DistroDeployTools.fn.sh --upgrade-deploy-tools
+		# Upgrade deploy tooling from local installer scripts
+		`DistroDeployTools.fn.sh --upgrade-deploy-tools`
 
-		DistroDeployTools.fn.sh --help
+		# Show deploy tools help
+		`DistroDeployTools.fn.sh --help`
 
-	Examples (in OS default shell):
+##  Examples (in OS default shell):
 
-		bash .local/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh --help
+		# Show deploy tools help from the OS shell
+		`bash .local/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh --help`
 
-		bash .local/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh --upgrade-deploy-tools
+		# Upgrade deploy tooling from the OS shell
+		`bash .local/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh --upgrade-deploy-tools`
