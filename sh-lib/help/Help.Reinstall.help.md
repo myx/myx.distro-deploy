@@ -25,11 +25,9 @@
 
 ##  Examples:
 
-				# Reinstall project on remote target using default SSH settings
-		`Reinstall.fn.sh <project> [<ssh arguments>...]`
+					# Reinstall a project on its remote target
+				`Reinstall.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
 
-				# Reinstall project while passing additional SSH options (port, key, proxy, etc.)
-		`Reinstall.fn.sh <project> [<ssh arguments>...]`
-
-				# Print command help and exit
+					# Reinstall with additional SSH arguments (user, port, key, etc.)
+				`Reinstall.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org [<ssh arguments>...]`
 		`Reinstall.fn.sh --help`

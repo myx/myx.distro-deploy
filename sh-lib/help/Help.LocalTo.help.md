@@ -34,11 +34,12 @@
 
 ##  Examples:
 
-				# Open local shell for the exact project name
-		`LocalTo.fn.sh <project>`
+					# Open local shell for a project using exact project path
+				`LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
 
-				# Resolve project by unique name fragment and open local shell
-		`LocalTo.fn.sh <unique-project-name-part>`
+					# Open local shell resolving project from a unique name fragment
+				`LocalTo.fn.sh ndss113`
 
-				# Print command help and exit
+					# Run a single command in a project local context as a specific user
+				`LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami`
 		`LocalTo.fn.sh --help`

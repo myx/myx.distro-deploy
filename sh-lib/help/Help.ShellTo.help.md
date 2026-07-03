@@ -30,11 +30,12 @@
 
 ##  Examples:
 
-				# Open remote shell for the exact project name
-		`ShellTo.fn.sh <project>`
+					# Open remote shell for a project using exact project path
+				`ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
 
-				# Open remote shell by resolving project from unique name fragment
-		`ShellTo.fn.sh <unique-project-name-part>`
+					# Open remote shell resolving project from a unique name fragment
+				`ShellTo.fn.sh ndss113`
 
-				# Print command help and exit
+					# Run a single command on the remote host as a specific user
+				`ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami`
 		`ShellTo.fn.sh --help`

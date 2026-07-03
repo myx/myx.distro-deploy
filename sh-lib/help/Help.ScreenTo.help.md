@@ -30,11 +30,12 @@
 
 ##  Examples:
 
-				# Attach to project screen session using exact project name
-		`ScreenTo.fn.sh <project>`
+					# Attach to screen session for a project using exact project path
+				`ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
 
-				# Attach using a unique project name fragment when full name is long
-		`ScreenTo.fn.sh <unique-project-name-part>`
+					# Attach to screen session resolving project from a unique name fragment
+				`ScreenTo.fn.sh ndss113`
 
-				# Print command help and exit
+					# Attach to screen session as a specific SSH user
+				`ScreenTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql`
 		`ScreenTo.fn.sh --help`
