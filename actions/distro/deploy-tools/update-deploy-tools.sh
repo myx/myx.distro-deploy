@@ -5,5 +5,4 @@
 cd "$MMDAPP"
 export MMDAPP
 
-echo "not implemented yet" >&2
-exit 1
+bash "$MMDAPP/.local/myx/myx.distro-deploy/sh-scripts/DistroDeployTools.fn.sh" --upgrade-deploy-tools
