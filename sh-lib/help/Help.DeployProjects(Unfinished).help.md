@@ -52,11 +52,11 @@
 
 ##  Examples:
 
-				# Deploy one project and choose execution mode (exec, sync, both, or dry run)
+		# Deploy one project and choose execution mode (exec, sync, both, or dry run)
 		`DeployProjectSsh.fn.sh <project> --do-exec|--do-sync|--do-both|--do-none`
 
-				# Re-run with a different mode value when validating workflow behavior
+		# Re-run with a different mode value when validating workflow behavior
 		`DeployProjectSsh.fn.sh <project> --do-exec|--do-sync|--do-both|--do-none`
 
-				# Print command help and exit
+		# Print command help and exit
 		`DeployProjectSsh.fn.sh --help`

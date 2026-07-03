@@ -45,11 +45,11 @@
 
 ##  Examples:
 
-				# List SSH targets for projects matching selector with optional line formatting
+		# List SSH targets for projects matching selector with optional line formatting
 		`ListSshTargets.fn.sh <project-selector> [--line-prefix <prefix>] [--line-suffix <suffix>] [<ssh arguments>...]`
 
-				# List all targets and suppress project/target columns for compact output
+		# List all targets and suppress project/target columns for compact output
 		`ListSshTargets.fn.sh [--no-project-column] [--no-target-column] --all-targets [<ssh arguments>...]`
 
-				# Print command help and exit
+		# Print command help and exit
 		`ListSshTargets.fn.sh --help`

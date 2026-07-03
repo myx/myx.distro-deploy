@@ -89,8 +89,6 @@
 		# Show full help and option reference.
 		`DeployProjectSsh.fn.sh --help`
 
-		# Reference syntax for project-scoped deploy with optional SSH overrides and prepare/deploy mode.
-		`DeployProjectSsh.fn.sh --project <project> [--ssh-{host|port|user|client} <value>] [--match <install-script-filter>] [--prepare-{exec|sync|full|none}] --deploy-{sync|exec|full|none}`
 
 		# Compact print-mode syntax variant.
 		`DeployProjectSsh.fn.sh --project <project> [--match <install-script-filter>] --print-{files|sync-tasks|installer|ssh-targets|deploy-patch-scripts|context-variables|full-script}`
