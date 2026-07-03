@@ -1,5 +1,19 @@
 echo >&2
-echo "'Deploy' command provides/lists commands related to distro-deploy operations." >&2
-echo "📘 syntax: Deploy <distro-deploy-command-name>" >&2
+echo "'Deploy' command runs deploy-stage distro commands in current Deploy context." >&2
+echo "📘 syntax: Deploy <distro-deploy-command-name> [<arguments>...]" >&2
+echo "📘 syntax: Deploy --help" >&2
+echo "📘 syntax: Deploy --info" >&2
+echo >&2
+echo "	Options:" >&2
+echo "		--help  Print this help text." >&2
+echo "		--info  Print current Deploy context variables." >&2
+echo >&2
+echo "	Info:" >&2
+echo "		MMDAPP ROOT: $MMDAPP" >&2
+echo "		MDLT_ORIGIN: ${MDLT_ORIGIN:-"Not Set"}" >&2
+echo "		MDSC_OPTION: ${MDSC_OPTION:-"Not Set"}" >&2
+echo "		MDSC_SOURCE: ${MDSC_SOURCE:-"Not Set"}" >&2
+echo "		MDSC_CACHED: ${MDSC_CACHED:-"Not Set"}" >&2
+echo "		MDSC_OUTPUT: ${MDSC_OUTPUT:-"Not Set"}" >&2
 echo >&2
 set +e ; return 1
