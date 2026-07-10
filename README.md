@@ -10,6 +10,7 @@ Default build steps (order in which operations are performed. Source: 1..3, Dist
 				output contains all actual meta-data.
 	3xxx - image-prepare, output to distro (mode: image, prepare | util)
 				distro contains indices and exported items (in their project's locations)
+				(reserved alt name: source-publish - not yet wired to a runner)
 	4xxx - image-process, distro to deploy (mode: image, process | util)
 				share repositories
 	5xxx - image-install, distro to deploy (mode: image, install | util)
