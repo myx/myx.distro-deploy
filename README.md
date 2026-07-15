@@ -52,6 +52,21 @@ Variables (context environment) available in: actions, build-step scripts and co
 	useSshHome - override from ssh home calculated from project sequence variables
 	useSshArgs - extra arguments for ssh connection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
 
+sh-scripts/ExecuteParallel.fn.sh - run a command/script across multiple projects' ssh targets in parallel:
+
+	must be invoked through a console dispatcher (e.g. `Deploy ExecuteParallel ...` piped into DistroDeployConsole.sh --non-interactive),
+	not run as a bare script - project-selection dispatch depends on PATH set up by the console's bashrc.
+
+	argument order matters: --ssh-user/--ssh-host/--ssh-port/--ssh-home/--ssh-args/--no-sleep/--non-interactive/--execute-post-process
+	must all come before --execute-command/--execute-script/--execute-stdin/--display-targets - the ssh-option parser
+	stops at the first token it doesn't recognize, so anything placed after the execute-type flag leaks onto the end
+	of the remote command line instead of being parsed as an option.
+
+	--select-projects <mask> matches against the project path (substring) - e.g. "setup.host-" selects every
+	prv/cloud.mel/setup.host-* project in one shot, simpler than --select-provides for a fixed fleet.
+
+	example: Deploy ExecuteParallel --select-projects setup.host- --ssh-user root --ssh-home ~/.ssh --no-sleep --execute-command 'uname -a'
+
 Variables (context environment) specific to build-step scripts:
 
 	BUILD_STAMP - current build timestamp (build steps only)
