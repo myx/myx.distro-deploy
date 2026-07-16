@@ -204,7 +204,7 @@ See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file
 
 ### Stage: image-prepare:
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-deploy)
+See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
 
 The 'distro-deploy' could be updated/cloned from compiled version without pulling and processing source files.
 The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
