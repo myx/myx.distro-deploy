@@ -210,7 +210,7 @@ The 'distro-deploy' could be updated/cloned from compiled version without pullin
 The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
 
 (todo) During this stage one of the following actions available:
-- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-image')
+- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-system')
 - `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
 
 ### Before we start: installation (distro-deploy)	
