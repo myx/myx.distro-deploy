@@ -1,6 +1,6 @@
 # myx.distro-* — AI assistant context
 
-Applies to: myx.distro-.local, myx.distro-deploy, myx.distro-source, myx.distro-system, myx.distro-remote.
+Applies to: myx.distro-.local, myx.distro-deploy, myx.distro-source, myx.distro-system, myx.distro-remote, myx.distro-agents.
 
 Canonical human docs (don't restate here, read them instead):
 - Each repo's `README.md` — pipeline stages, folders, variables, `project.inf` properties.
@@ -14,9 +14,10 @@ This file is reasoning aid + flagged issues, not a rewrite of those docs.
 - `myx.distro-source` — builds distro indices from source.
 - `myx.distro-deploy` — package management/deploy tooling. Requires `myx/myx.distro-source`.
 - `myx.distro-remote` — remote-host tooling.
+- `myx.distro-agents` — starts a `claude`/`copilot` CLI console (`DistroAgentsConsole.sh`) instead of a bash session. No pipeline builders (console-launcher role, like `-remote`).
 - `myx.distro-.local` — bootstraps a fresh workspace, installs the other subsystems. No pipeline builders (boot-only).
 
-Only `myx.distro-source` and `myx.distro-deploy` have shell-side pipeline builders; `-system`/`-remote` don't (kernel/tooling roles).
+Only `myx.distro-source` and `myx.distro-deploy` have shell-side pipeline builders; `-system`/`-remote`/`-agents` don't (kernel/tooling roles).
 
 ## Command layout & help conventions
 
@@ -39,7 +40,10 @@ Rule: follow the standard form for new/edited help. If touching a flagged except
 
 Recurring internal calling convention: `type <FunctionName> >/dev/null 2>&1 || . "$( myx.common which lib/<name> )"` — skip re-sourcing if the function is already defined in this shell, else resolve and source it. Unlike `myx.common`'s own internal convention (which hardcodes `.Common` and skips OS dispatch — see `myx.common/os-myx.common` CLAUDE.md), this one still calls `myx.common which`, so it stays OS-aware (one subprocess to resolve the path, none to run it) rather than assuming no OS variance.
 
-Confirmed live why bare-script invocation of a `.fn.sh` that itself calls `Distro <other-name> ...` can fail even though the target file exists: `Distro`'s own lookup only tries `type` then `command -v <name>.fn.sh` on `PATH` — unlike `Require`, it does **not** search the fixed `myx.distro-{system,source,deploy,remote,.local}/sh-scripts/` list itself. That search only happens because a console's bashrc (`console-*-bashrc.rc`) puts all five `sh-scripts/` dirs on `PATH` before handing off to `Deploy`/`Source`/etc. (e.g. `myx.distro-deploy/sh-scripts/ExecuteParallel.fn.sh`, whose `--select-*` handling calls `Distro ListDistroProjects ...`). Run such a script outside a console — plain `bash sh-scripts/Foo.fn.sh` — and any `Distro <name>` call inside it to a command that isn't already sourced fails with `unknown command: <name>`.
+Bare-script invocation of a `.fn.sh` that itself calls `Distro <other-name> ...` can fail even though the target file exists:
+- `Distro`'s own lookup only tries `type` then `command -v <name>.fn.sh` on `PATH` — unlike `Require`, it does **not** search the fixed `myx.distro-{system,source,deploy,remote,.local}/sh-scripts/` list itself.
+- That search only happens because a console's bashrc (`console-*-bashrc.rc`) puts all five `sh-scripts/` dirs on `PATH` before handing off to `Deploy`/`Source`/etc. (e.g. `myx.distro-deploy/sh-scripts/ExecuteParallel.fn.sh`, whose `--select-*` handling calls `Distro ListDistroProjects ...`).
+- Outside a console — plain `bash sh-scripts/Foo.fn.sh` — any `Distro <name>` call to a command not already sourced fails with `unknown command: <name>`.
 
 ## Dependency/index engine
 
