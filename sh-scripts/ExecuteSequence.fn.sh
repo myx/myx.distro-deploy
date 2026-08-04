@@ -124,7 +124,7 @@ ExecuteSequence(){
 		echo "> 📋 $MDSC_CMD: Will execute: " >&2
 		local project sshTarget sshOptions
 		echo "$sshTargets" | while read -r project sshTarget sshOptions; do
-			echo "  > $( basename "$project" ) $sshTarget $( DistroDeployContext --print-ssh-target $sshOptions 2>/dev/null )" >&2
+			echo "  > ${project##*/} $sshTarget $( DistroDeployContext --print-ssh-target $sshOptions 2>/dev/null )" >&2
 		done \
 		2>&1 | column -t 1>&2
 	fi

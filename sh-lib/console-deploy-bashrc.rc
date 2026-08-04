@@ -148,7 +148,7 @@ complete -W "Help Require" \
 
 for f in "$MDLT_ORIGIN"/myx/myx.distro-{source,deploy,remote,system,.local}/sh-scripts/*.fn.sh; do
   [ -x "$f" ] || continue
-  complete -F Distro "$(basename "$f")"
+	complete -F Distro "${f##*/}"
 done
 
 complete -F Distro \

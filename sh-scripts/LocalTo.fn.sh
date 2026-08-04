@@ -51,7 +51,7 @@ LocalTo(){
 
 	local argument
 	local extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
-	local defaultCommand="`which bash || which sh`"
+	local defaultCommand="$( command -v bash || command -v sh )"
 			
 	local targets="$( 
 		Distro ListSshTargets --select-projects "$filterProject" ${extraArguments:-$defaultCommand} 

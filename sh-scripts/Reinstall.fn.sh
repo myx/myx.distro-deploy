@@ -69,8 +69,8 @@ Reinstall(){
 		echo "Using Project: $sourceProject" >&2
 		echo "Using Command: $targetCommand" >&2
 		$targetCommand -t '
-			test -x "`which screen`" && screen -s sh -q -O -U -D -R 
-			test ! -x "`which screen`" && sh 
+			command -v screen >/dev/null 2>&1 && screen -s sh -q -O -U -D -R 
+			command -v screen >/dev/null 2>&1 || sh 
 		'
 		return 0
 	fi

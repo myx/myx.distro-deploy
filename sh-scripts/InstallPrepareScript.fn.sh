@@ -135,7 +135,7 @@ InstallPrepareScriptInternalPrintScript(){
 	| while read -r fileName ; do
 		# local SC_HASH="BLK_$(cat "$fileName" | md5)" # <<< Linux doesn't support md5.
 		local SC_HASH="BLK_$(cksum < "$fileName" | cut -d' ' -f1,2 | tr ' ' '_')"
-		local SC_NAME="$(basename "$fileName")"
+		local SC_NAME="${fileName##*/}"
 
 		echo
 		echo "##**--  start, $fileName"

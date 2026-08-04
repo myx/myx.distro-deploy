@@ -527,7 +527,7 @@ DistroImageEmbedScript(){ # "1-scriptFileName" "2-changeDir"
 	printf "\n\n# embedded script: %s\n\n( cd '%s' ; bash || echo '%s' >&2 ) << 'EOF_PROJECT_DIESSH_XXXXXXXX'\n" \
 		"${1#$MMDAPP}" \
 		"$2" \
-		"ImageDeploy: ⛔ ERROR: script execution failed: $( basename "$1" )"
+		"ImageDeploy: ⛔ ERROR: script execution failed: ${1##*/}"
 	cat "$1"
 	printf '\nEOF_PROJECT_DIESSH_XXXXXXXX\n\n'
 	[ -z "$MDSC_DETAIL" ] || echo "echo '< run: ${1#$MMDAPP}:$2' >&2"
