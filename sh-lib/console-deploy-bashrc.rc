@@ -4,7 +4,7 @@
 [ -z "$MDLT_ORIGIN" ] && echo "DeployConsole: Working in $MMDAPP" >&2
 [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" 
 
-[ -z "MDSC_ARGUMENTS" ] || {
+[ -z "$MDSC_ARGUMENTS" ] || {
 	set -- $MDSC_ARGUMENTS
 	export MDSC_ARGUMENTS=""
 }
@@ -125,7 +125,7 @@ while true; do
 			echo "⛔ ERROR: unknown MDSC_HISTORY: $MDSC_HISTORY" >&2; exit 1 ;;
 	esac 
 	[ -f "${HISTFILE-}" ] || {
-		cat "$MDLT_OGIRIN/myx/myx.distro-deploy/sh-lib/DeployConsole.History.seed.txt" > "$HISTFILE"
+		cat "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/DeployConsole.History.seed.txt" > "$HISTFILE"
 	}
 	export HISTCONTROL=ignoredups:erasedups
 	export HISTSIZE=999
@@ -146,7 +146,7 @@ complete -W "Help Require" \
          -o default -o filenames \
          "*"
 
-for f in "$MDLT_ORIGIN"/myx/myx.distro-{source,deploy,remote,system,.local}/sh-scripts/*.fn.sh; do
+for f in "$MDLT_ORIGIN"/myx/myx.distro-{source,deploy,remote,system,agents,.local}/sh-scripts/*.fn.sh; do
   [ -x "$f" ] || continue
 	complete -F Distro "${f##*/}"
 done
@@ -157,7 +157,7 @@ complete -F Distro \
 
 export LANG=en_US.UTF-8
 
-PROMPT_COMMAND='set +ex ; history -w; history -r ; PS1="$( Deploy --shell-prompt ): '"$PS1"'"'
+PROMPT_COMMAND='set +e ; history -w; history -r ; PS1="$( Deploy --shell-prompt ): '"$PS1"'"'
 
 export PATH
 
