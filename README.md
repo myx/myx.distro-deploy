@@ -145,13 +145,13 @@ Put these in a project's `Declares` to shape what happens on the target host.
 
 ## Build stages
 
-Deploy owns the last two of the five pipeline stages.
+Deploy owns the last two of the six pipeline stages.
 
 - `image-process` — builders `4???-*`. Builds single-file distro and repository
   indices, per-target concatenated deploy scripts, and per-target merged settings.
 - `image-install` — builders `5???-*`. Runs the deploy tasks on the targets.
 
-`myx.distro-source` documents the first three.
+`myx.distro-source` documents the first four.
 
 ## Workspace folders
 
