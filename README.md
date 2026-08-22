@@ -1,250 +1,192 @@
 # myx.distro-deploy
 
-Default build steps (order in which operations are performed. Source: 1..3, Distro: 4..5):
-
-	1xxx - source-prepare, source to cached (mode: source, stage: prepare) 
-				cached contains all sources required to build changed 
-				projects and actual meta-data (distro indices: pre-parsed names, 
-				requires, etc...).
-	2xxx - source-process, cached to output (mode: source, stage: process)
-				output contains all actual meta-data.
-	3xxx - image-prepare, output to distro (mode: image, prepare | util)
-				distro contains indices and exported items (in their project's locations)
-				(reserved alt name: source-publish - not yet wired to a runner)
-	4xxx - image-process, distro to deploy (mode: image, process | util)
-				share repositories
-	5xxx - image-install, distro to deploy (mode: image, install | util)
-				deploy tasks are executed upon
-
-
-Project Files & Folders (following masks have fixed meaning in the root folder of each project):
-
-	project.inf - project description file
-	actions/** - usable actions (predefined parameters for other scripts)
-	builders/source-prepare/1???-* - builders to work on project sets while building source-prepare
-	builders/source-process/2???-* - builders to work on project sets while building source-process
-	builders/image-prepare/3???-* - builders to work on project sets while building image-prepare
-	builders/image-process/4???-* - builders to work on project sets while building image-process
-	builders/image-install/5???-* - builders to work on project sets while building image-install
-	sh-libs/**
-	sh-scripts/**
-
-Builders Examples (actual builders, relative to the root of the workspace):
-
-	source/myx/myx.distro-source/builders/source-prepare/1000-env-from-source.sh
-	source/myx/myx.distro-source/builders/source-process/2000-env-from-cached.sh
-	source/myx/myx.distro-source/builders/source-process/2899-output-ready.sh
-	source/myx/myx.distro-source/builders/image-prepare/3899-distro-ready.sh
-	source/myx/myx.distro-deploy/builders/image-process/4911-deploy-apply.sh
-	source/myx/myx.distro-deploy/builders/image-install/5911-deploy-apply.sh
-
-Variables (context environment) available in: actions, build-step scripts and console (deploy mode):
-
-	MMDAPP - workspace root (something like: "/Volumes/ws-2017/myx-work")
-	MDSC_INMODE - console mode ("deploy")
-	MDLT_ORIGIN - source of System (Source or Deploy) Console commands (something like: "/Volumes/ws-2017/myx-work/.local/")
-	MDSC_OPTION - console mode settings (something like: "--distro-from-output")
-	MDSC_SOURCE - current source root (something like: "/Volumes/ws-2017/myx-work/.local/source-cache/sources")
-	MDSC_CACHED - current index cache root (something like: "/Volumes/ws-2017/myx-work/.local/system-index")
-	MDSC_OUTPUT - current target root (something like: "/Volumes/ws-2017/myx-work/.local/output-cache/")
-	MDSC_DETAIL - debug settings, values: <empty>, "true", "full"
-	useSshUser - override from ssh user calculated from project sequence variables
-	useSshHome - override from ssh home calculated from project sequence variables
-	useSshArgs - extra arguments for ssh connection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
-
-sh-scripts/ - the deploy tools. Pick the narrowest one that fits the job:
-
-	ListSshTargets.fn.sh - reports what a selector resolves to, acting on nothing.
-	ShellTo.fn.sh - exactly one target; refuses a selector matching more, without connecting.
-	ExecuteSequence.fn.sh - many targets, one after another.
-	ExecuteParallel.fn.sh - many targets at once, in parallel background jobs.
-
-sh-scripts/ExecuteParallel.fn.sh - run a command/script across multiple projects' ssh targets in parallel:
-
-	inside a console session these resolve on PATH and are called by full name, .fn.sh included.
-	the `Deploy ExecuteParallel ...` dispatcher form reuses a function already loaded into the session,
-	so after editing a tool's own source call the .fn.sh file. outside a console session the package
-	sh-scripts/ directories are not on PATH, so project-selection dispatch cannot resolve.
-
-	argument order matters: --ssh-user/--ssh-host/--ssh-port/--ssh-home/--ssh-args/--no-sleep/--non-interactive/--execute-post-process
-	must all come before --execute-command/--execute-script/--execute-stdin/--display-targets - the ssh-option parser
-	stops at the first token it doesn't recognize, so anything placed after the execute-type flag leaks onto the end
-	of the remote command line instead of being parsed as an option.
-
-	--select-projects <mask> matches against the project path (substring) - e.g. "setup.host-" selects every
-	prv/cloud.mel/setup.host-* project in one shot, simpler than --select-provides for a fixed fleet.
-
-	example: Deploy ExecuteParallel --select-projects setup.host- --ssh-user root --ssh-home ~/.ssh --no-sleep --execute-command 'uname -a'
-
-Variables (context environment) specific to build-step scripts:
-
-	BUILD_STAMP - current build timestamp (build steps only)
-
-App Folders:
-
-	/ - workspace root directory
-	/source - source codes and projects - editable and committable or pullable
-	/export - export resources (generated or cloned)
-	/distro - distro structure, whole project tree, prepared (generated or cloned)
-	/distro/repo[/group]/project - project folders structure
-	/distro/distro-namespaces.txt - repository names db file (prepared)
-	/distro/build-time-stamp.txt - distro timestamp file (prepared)
-	/distro/distro-index.env.inf - distro index shell-env file (prepared)
-	/actions - workspace actions - executable, non-editable (generated)
-	/.local - system tools, utilities and system integrations
-	/.local/distro-index - system index space (generated)
-	/.local/source-cache - build system cache space (generated), before source-prepare
-	/.local/output-cache - output products (generated, cloned or omitted (in pure deploy mode))
-
-image-receive, image-install directives:
-
-	image-install:context-variable:
-		image-install:context-variable:<variableName>:{create|change|ensure|insert|update|remove|re-set|delete}[:<valueNoSpaces>...]
-		image-install:context-variable:<variableName>:{create|change|ensure|append|update|remove|define|delete}[:<valueNoSpaces>...]
-		image-install:context-variable:<variableName>:{import|source}:{.|<projectName>}:<scriptPath>
+Installs a built distro image onto hosts. It resolves which SSH targets a project
+set maps to, prepares per-target files, settings and scripts, and runs them over
+SSH — one host, a sequence of hosts, or a whole fleet in parallel.
 
-		image-install:context-variable:DPL_HOST_TYPE:re-set:standalone
-		image-install:context-variable:DPL_HOST_TYPE:change:guest
-		image-install:context-variable:DPL_HOST_TYPE:delete
-		image-install:context-variable:DPL_LANGUAGES:update:en
-		image-install:context-variable:DPL_LANGUAGES:create:en
-		image-install:context-variable:DPL_LANGUAGES:insert:ru
-		image-install:context-variable:DPL_LANGUAGES:insert:lv
-		image-install:context-variable:DPL_LANGUAGES:remove:lv
-		image-install:context-variable:DPL_LANGUAGES:import:.:ssh/rsa.pub
-		image-install:context-variable:DPL_LANGUAGES:source:.:ssh/rsa.pub
+## Getting started
 
-		^^^ <sourceName> '.' - this (declarant) project's source
+Install the deploy toolset into a workspace, then open the deploy console:
 
-			# if variable is not defined - creates variable/array with given value 
-			create)
+	bash .local/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh --install-distro-deploy
+	./DistroDeployConsole.sh
 
-			# if variable is defined - sets it's value to given one
-			change)
+Inside the console, call a tool by its full name (`.fn.sh` included), or through
+the `Deploy` or `Distro` dispatcher:
 
-			# if variable is not defined - creates array with given value 
-			# if variable is defined - ensures array contains given value 
-			ensure)
+	ListSshTargets.fn.sh --all-targets
+	Deploy ListSshTargets --all-targets
 
-			# if variable is not defined - creates array with given value 
-			# if variable is defined - appends given value to array regardless if it's already present 
-			append|insert)
+Run one command without an interactive session:
 
-			# if variable is defined - ensures array contains given value 
-			update)
+	echo "Deploy ListSshTargets --all-targets" | ./DistroDeployConsole.sh --non-interactive
 
-			# if variable is defined - removes given value from array. Un-defines variable if no value given.
-			remove)
+## Common tasks
 
-			# if variable is not defined - creates variable with given value 
-			# if variable is defined - sets variable to given value (same) 
-			re-set|define|upsert)
+Always start by checking what a selector resolves to. This connects to nothing:
 
-			# define from project relative file
-			import|source)
-			
-			# Un-defines variable. Only when variable value matches, if variableValue specified.
-			delete)
+	ListSshTargets.fn.sh --all-targets
+	ListSshTargets.fn.sh --select-projects <project-name-part>
 
-	image-install:exec-update-before:
-		image-install:exec-update-before:host/install/<scriptName>
-		
-		image-install:exec-update-before:host/install/common-java.sh.txt
+Open a shell on exactly one target. It refuses a selector matching more than one,
+without connecting:
 
-	image-install:exec-update-after:
-		image-install:exec-update-after:host/install/<scriptName>
-		
-		image-install:exec-update-after:host/install/common-gctmte.restart.txt
+	ShellTo.fn.sh <project-name-part>
 
-	image-install:deploy-patch-script-prefix:
-		image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
+Open a `screen` session on one target, falling back to a plain shell:
 
-		image-install:deploy-patch-script-prefix:.:host/scripts/patch-on-before-deploy.txt
+	ScreenTo.fn.sh <project-name-part>
 
-	image-install:deploy-sync-files:
-		image-install:deploy-sync-files:<deploySourcePath>:<targetHostPath>
+Run one command across many targets, one after another:
 
-		image-install:deploy-sync-files:data/settings:/usr/local/ndfa/settings
+	ExecuteSequence.fn.sh --select-projects <mask> --execute-command 'uname -a'
 
-	image-install:source-patch-script:
-		image-install:source-patch-script:<deploySourcePath>:<scriptSourceName>:host/scripts/<scriptName>
+Run it across many targets at once:
 
-		image-install:source-patch-script:data/settings:.:host/scripts/patch-on-deploy.txt
+	ExecuteParallel.fn.sh --select-projects <mask> --ssh-user root --no-sleep --execute-command 'uname -a'
 
-	image-install:clone-deploy-file:
-		image-install:clone-deploy-file:<deploySourcePath>:<sourceFileName>:<targetNamePattern>[:<variableName>:<valueX...>]
+Preview a project's deploy without touching a host:
 
-		image-install:clone-deploy-file:data/settings:web/default:page-200.html:page-???.html:???:201:204 \
-		image-install:clone-deploy-file:data/settings:web/default:page-404.html:page-418.html \
+	DeployProjectSsh.fn.sh --project <project> --print-ssh-targets
+	DeployProjectSsh.fn.sh --project <project> --print-full-script
 
-	image-install:target-patch-script:
-		image-install:target-patch-script:<scriptSourceName>:host/scripts/<scriptName>:<targetHostPath>
+Deploy one project to its resolved targets:
 
-		image-install:target-patch-script:.:host/scripts/patch-on-deploy.txt:/usr/local/ndns/settings
+	DeployProjectSsh.fn.sh --project <project> --deploy-full
 
-	image-install:deploy-patch-script:
-		image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
+Regenerate deploy-side workspace files:
 
-		image-install:deploy-patch-script:.:host/scripts/patch-on-deploy.txt
-	
-	image-install:deploy-patch-script-suffix:
-		image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
+	RebuildActionsFromDistro.fn.sh
+	RebuildKnownHostsFromDistro.fn.sh
 
-		image-install:deploy-patch-script-suffix:.:host/scripts/patch-at-remote-on-after-deploy-prepared.txt
-	
-	image-install:deploy-applied-script:
-		image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:relativePath]
+Put every `--ssh-*`, `--no-sleep`, `--non-interactive` and `--execute-post-process`
+option **before** `--execute-command` / `--execute-script` / `--execute-stdin` /
+`--display-targets` — the option parser stops at the first token it does not
+recognise, and anything after that leaks onto the remote command line.
 
-		image-install:deploy-applied-script:.:host/scripts/at-remote-on-after-deploy.txt
+## Selecting targets
 
-### Before we start: installation (distro-source)	
+`--select-projects <mask>` matches a substring of the project path, which is the
+simplest way to reach a fixed fleet:
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+	Deploy ExecuteParallel --select-projects setup.host- --ssh-user root --no-sleep --execute-command 'uptime'
 
-### Stage: source-prepare:
+The full selector vocabulary — `--select-all`, `--select-changed`,
+`--select-provides`, `--select-keywords`, and the matching `--filter-` and
+`--remove-` forms — is the same one `myx.distro-system` documents, and every
+command prints it under `--help`.
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+## Commands
 
+Pick the narrowest tool that fits the job:
 
-### Stage: source-process:
+- `ListSshTargets.fn.sh` — report what a selector resolves to; acts on nothing.
+- `ShellTo.fn.sh` — open a shell on exactly one target.
+- `ScreenTo.fn.sh` — open a remote `screen` session on one target.
+- `LocalTo.fn.sh` — enter a project-local session for one resolved target.
+- `ExecuteSequence.fn.sh` — run a command or script across many targets, one at a time.
+- `ExecuteParallel.fn.sh` — run it across many targets in parallel.
+- `ExecuteInteractive.fn.sh` — run it interactively against selected targets.
+- `DeployProjectSsh.fn.sh` — build, print, save or run one project's deploy scripts.
+- `InstallPrepareFiles.fn.sh` — build a project's file-preparation plan; print, save or materialise it.
+- `InstallPrepareScript.fn.sh` — build a project's install patch-script bundle.
+- `Reinstall.fn.sh` — reconnect to one target and run its reinstall flow.
+- `RebuildActionsFromDistro.fn.sh` — regenerate workspace actions for the active deploy environment.
+- `RebuildKnownHostsFromDistro.fn.sh` — regenerate workspace `ssh/known_hosts`.
+- `DistroDeployTools.fn.sh` — re-create the deploy console launcher, set workspace options, upgrade deploy tools.
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+## image-install directives
 
+Put these in a project's `Declares` to shape what happens on the target host.
 
-### Stage: image-prepare:
+Set a context variable on the host:
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+	image-install:context-variable:<name>:<operation>[:<value>...]
+	image-install:context-variable:<name>:{import|source}:{.|<projectName>}:<scriptPath>
 
-The 'distro-deploy' could be updated/cloned from compiled version without pulling and processing source files.
-The 'distro-source' is exporting (pushing and syncing) all export packages built from sources.
+	image-install:context-variable:HOST_TYPE:re-set:standalone
+	image-install:context-variable:LANGUAGES:insert:en
+	image-install:context-variable:LANGUAGES:remove:lv
 
-(todo) During this stage one of the following actions available:
-- `DistroImageDownload` -- fetch published pre-built images (command provided by 'distro-system')
-- `DistroImagePublish` -- export images pre-built locally (command provided by 'distro-source')
+Operations:
 
-### Before we start: installation (distro-deploy)	
+	create        create the variable or array only if it is not defined
+	change        set the value only if the variable is already defined
+	ensure        create it, or make sure the array already contains the value
+	append|insert create it, or append the value whether or not it is present
+	update        make sure a defined array contains the value
+	remove        remove the value from the array; undefine it if no value given
+	re-set|define|upsert  set the variable, defined or not
+	import|source define it from a file inside the project
+	delete        undefine it; only when the current value matches, if one is given
 
-See: [distro-source](https://github.com/myx/myx.distro-source?tab=readme-ov-file#myxdistro-source)
+Copy prepared files onto the host:
 
-### Stage: image-process:
+	image-install:deploy-sync-files:<deploySourcePath>:<targetHostPath>
 
-At the start of this stage:
-1. Deploy system is ready to use content and indices of the distro-image to build deployment data
+	image-install:deploy-sync-files:data/settings:/usr/local/app/settings
 
-Following deployment data is built:
-1. distro and repositories single-file indices
-2. per-target concatenated deploy scripts
-3. per-target merged deploy settings data
+Clone one prepared file into many:
 
-At the end of this stage:
-1. all exported data is exported
-2. all projects packed with deployment data prepared
+	image-install:clone-deploy-file:<deploySourcePath>:<sourceFileName>:<targetNamePattern>[:<variableName>:<value>...]
 
+	image-install:clone-deploy-file:data/settings:web/default:page-200.html:page-???.html:???:201:204
+	image-install:clone-deploy-file:data/settings:web/default:page-404.html:page-418.html
 
-### Stage: image-install:
+Run scripts around the install:
 
-At the start of this stage:
-1. Deploy system is fully configured and ready to use all deploy commands.
+	image-install:exec-update-before:host/install/<scriptName>
+	image-install:exec-update-after:host/install/<scriptName>
 
+	image-install:exec-update-before:host/install/common-java.sh.txt
+	image-install:exec-update-after:host/install/service-restart.txt
 
+Patch content at each step:
 
+	image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
+	image-install:source-patch-script:<deploySourcePath>:<scriptSourceName>:host/scripts/<scriptName>
+	image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
+	image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
+	image-install:target-patch-script:<scriptSourceName>:host/scripts/<scriptName>:<targetHostPath>
+	image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
+
+	image-install:source-patch-script:data/settings:.:host/scripts/patch-on-deploy.txt
+	image-install:target-patch-script:.:host/scripts/patch-on-deploy.txt:/usr/local/app/settings
+
+`<scriptSourceName>` of `.` means this project's own source.
+
+## Build stages
+
+Deploy owns the last two of the five pipeline stages:
+
+| Stage | Builders | Does |
+| --- | --- | --- |
+| `image-process` | `4???-*` | build single-file indices, per-target deploy scripts and merged settings |
+| `image-install` | `5???-*` | run the deploy tasks on the targets |
+
+`myx.distro-source` documents the first three.
+
+## Workspace folders
+
+	/source                 source code and projects — editable, committable
+	/export                 export resources, generated or cloned
+	/distro                 whole prepared project tree, generated or cloned
+	/actions                generated workspace actions, executable, not editable
+	/.local                 installed tools and system integrations
+	/.local/distro-index    generated system index
+	/.local/source-cache    build cache, written before source-prepare
+	/.local/output-cache    output products; may be absent in pure deploy mode
+
+## Getting help
+
+- `<Tool>.fn.sh --help` prints full syntax, options and examples for any command above.
+- `Deploy --help` prints the deploy-context dispatcher syntax; `Deploy --info` prints the current context.
+- Press TAB after a command name and a space for shell completion.
+
+## Related packages
+
+- [myx.distro](https://github.com/myx/myx.distro) — the distro system overview.
+- [myx.distro-.local](https://github.com/myx/myx.distro-.local) — install and launch the toolsets.
+- [myx.distro-system](https://github.com/myx/myx.distro-system) — shared indexing and query tools.
+- [myx.distro-source](https://github.com/myx/myx.distro-source) — build source into a distro image.
+- [myx.distro-remote](https://github.com/myx/myx.distro-remote) — drive a workspace on another machine.
