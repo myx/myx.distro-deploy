@@ -17,6 +17,11 @@ Team-owned notes for the magic-* team.
 - Every `--ssh-*`, `--no-sleep`, `--non-interactive` and `--execute-post-process` option comes before `--execute-command`/`--execute-script`/`--execute-stdin`/`--display-targets`.
 - The option parser stops at the first token it does not recognise, so anything placed after the execute-type flag leaks onto the end of the remote command line instead of being parsed.
 
+## The `Deploy` verb reuses the function already loaded
+
+- `Deploy <Tool> ...` sources `sh-scripts/<Tool>.fn.sh` only when that function is not yet defined in the session. When it is defined, the loaded copy runs and nothing reports that the file was skipped.
+- After editing a tool's own source, invoke `<Tool>.fn.sh` directly — executing the file redefines the function. `Deploy ExecuteParallel ...` keeps running the pre-edit copy for the rest of the session.
+
 ## Exit status is not a deploy result
 
 - `DeployProjectSsh.fn.sh` can print an SSH failure to stderr and still return 0.
