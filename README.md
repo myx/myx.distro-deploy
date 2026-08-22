@@ -52,10 +52,19 @@ Variables (context environment) available in: actions, build-step scripts and co
 	useSshHome - override from ssh home calculated from project sequence variables
 	useSshArgs - extra arguments for ssh connection (something like: "-o ForwardAgent=yes -o AddKeysToAgent=yes")
 
+sh-scripts/ - the deploy tools. Pick the narrowest one that fits the job:
+
+	ListSshTargets.fn.sh - reports what a selector resolves to, acting on nothing.
+	ShellTo.fn.sh - exactly one target; refuses a selector matching more, without connecting.
+	ExecuteSequence.fn.sh - many targets, one after another.
+	ExecuteParallel.fn.sh - many targets at once, in parallel background jobs.
+
 sh-scripts/ExecuteParallel.fn.sh - run a command/script across multiple projects' ssh targets in parallel:
 
-	must be invoked through a console dispatcher (e.g. `Deploy ExecuteParallel ...` piped into DistroDeployConsole.sh --non-interactive),
-	not run as a bare script - project-selection dispatch depends on PATH set up by the console's bashrc.
+	inside a console session these resolve on PATH and are called by full name, .fn.sh included.
+	the `Deploy ExecuteParallel ...` dispatcher form reuses a function already loaded into the session,
+	so after editing a tool's own source call the .fn.sh file. outside a console session the package
+	sh-scripts/ directories are not on PATH, so project-selection dispatch cannot resolve.
 
 	argument order matters: --ssh-user/--ssh-host/--ssh-port/--ssh-home/--ssh-args/--no-sleep/--non-interactive/--execute-post-process
 	must all come before --execute-command/--execute-script/--execute-stdin/--display-targets - the ssh-option parser
