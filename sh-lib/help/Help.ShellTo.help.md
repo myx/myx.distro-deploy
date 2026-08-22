@@ -41,3 +41,11 @@
 
 		# Print command help and exit
 		`ShellTo.fn.sh --help`
+
+##  Notes:
+
+		Resolves the selector to exactly one target. A selector matching nothing exits 1.
+		A selector matching more than one prints the matching targets and exits 2 without
+		connecting to any of them.
+
+		Use ListSshTargets to see what a selector resolves to before acting on it.
