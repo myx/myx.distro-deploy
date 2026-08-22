@@ -73,114 +73,102 @@ simplest way to reach a fixed fleet:
 
 The full selector vocabulary — `--select-all`, `--select-changed`,
 `--select-provides`, `--select-keywords`, and the matching `--filter-` and
-`--remove-` forms — is the same one `myx.distro-system` documents, and every
-command prints it under `--help`.
+`--remove-` forms — is the one `myx.distro-system` documents, and every command
+prints it under `--help`.
 
 ## Commands
 
-Pick the narrowest tool that fits the job:
+Pick the narrowest tool that fits the job.
 
-- `ListSshTargets.fn.sh` — report what a selector resolves to; acts on nothing.
-- `ShellTo.fn.sh` — open a shell on exactly one target.
-- `ScreenTo.fn.sh` — open a remote `screen` session on one target.
-- `LocalTo.fn.sh` — enter a project-local session for one resolved target.
-- `ExecuteSequence.fn.sh` — run a command or script across many targets, one at a time.
-- `ExecuteParallel.fn.sh` — run it across many targets in parallel.
-- `ExecuteInteractive.fn.sh` — run it interactively against selected targets.
-- `DeployProjectSsh.fn.sh` — build, print, save or run one project's deploy scripts.
-- `InstallPrepareFiles.fn.sh` — build a project's file-preparation plan; print, save or materialise it.
-- `InstallPrepareScript.fn.sh` — build a project's install patch-script bundle.
-- `Reinstall.fn.sh` — reconnect to one target and run its reinstall flow.
-- `RebuildActionsFromDistro.fn.sh` — regenerate workspace actions for the active deploy environment.
-- `RebuildKnownHostsFromDistro.fn.sh` — regenerate workspace `ssh/known_hosts`.
-- `DistroDeployTools.fn.sh` — re-create the deploy console launcher, set workspace options, upgrade deploy tools.
+- Look before you connect:
+	- `ListSshTargets.fn.sh` — report what a selector resolves to. Acts on nothing.
+- Reach one target:
+	- `ShellTo.fn.sh` — open a shell on exactly one target.
+	- `ScreenTo.fn.sh` — open a remote `screen` session on one target.
+	- `LocalTo.fn.sh` — enter a project-local session for one resolved target.
+	- `Reinstall.fn.sh` — reconnect to one target and run its reinstall flow.
+- Reach many targets:
+	- `ExecuteSequence.fn.sh` — run a command or script across many targets, one at a time.
+	- `ExecuteParallel.fn.sh` — run it across many targets in parallel.
+	- `ExecuteInteractive.fn.sh` — run it interactively against selected targets.
+- Deploy a project:
+	- `DeployProjectSsh.fn.sh` — build, print, save or run one project's deploy scripts.
+	- `InstallPrepareFiles.fn.sh` — build a project's file-preparation plan; print, save or materialise it.
+	- `InstallPrepareScript.fn.sh` — build a project's install patch-script bundle.
+- Maintain the workspace:
+	- `RebuildActionsFromDistro.fn.sh` — regenerate workspace actions for the active deploy environment.
+	- `RebuildKnownHostsFromDistro.fn.sh` — regenerate workspace `ssh/known_hosts`.
+	- `DistroDeployTools.fn.sh` — re-create the deploy console launcher, set workspace options, upgrade deploy tools.
 
 ## image-install directives
 
 Put these in a project's `Declares` to shape what happens on the target host.
 
-Set a context variable on the host:
-
-	image-install:context-variable:<name>:<operation>[:<value>...]
-	image-install:context-variable:<name>:{import|source}:{.|<projectName>}:<scriptPath>
-
-	image-install:context-variable:HOST_TYPE:re-set:standalone
-	image-install:context-variable:LANGUAGES:insert:en
-	image-install:context-variable:LANGUAGES:remove:lv
-
-Operations:
-
-	create        create the variable or array only if it is not defined
-	change        set the value only if the variable is already defined
-	ensure        create it, or make sure the array already contains the value
-	append|insert create it, or append the value whether or not it is present
-	update        make sure a defined array contains the value
-	remove        remove the value from the array; undefine it if no value given
-	re-set|define|upsert  set the variable, defined or not
-	import|source define it from a file inside the project
-	delete        undefine it; only when the current value matches, if one is given
-
-Copy prepared files onto the host:
-
-	image-install:deploy-sync-files:<deploySourcePath>:<targetHostPath>
-
-	image-install:deploy-sync-files:data/settings:/usr/local/app/settings
-
-Clone one prepared file into many:
-
-	image-install:clone-deploy-file:<deploySourcePath>:<sourceFileName>:<targetNamePattern>[:<variableName>:<value>...]
-
-	image-install:clone-deploy-file:data/settings:web/default:page-200.html:page-???.html:???:201:204
-	image-install:clone-deploy-file:data/settings:web/default:page-404.html:page-418.html
-
-Run scripts around the install:
-
-	image-install:exec-update-before:host/install/<scriptName>
-	image-install:exec-update-after:host/install/<scriptName>
-
-	image-install:exec-update-before:host/install/common-java.sh.txt
-	image-install:exec-update-after:host/install/service-restart.txt
-
-Patch content at each step:
-
-	image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
-	image-install:source-patch-script:<deploySourcePath>:<scriptSourceName>:host/scripts/<scriptName>
-	image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
-	image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
-	image-install:target-patch-script:<scriptSourceName>:host/scripts/<scriptName>:<targetHostPath>
-	image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]
-
-	image-install:source-patch-script:data/settings:.:host/scripts/patch-on-deploy.txt
-	image-install:target-patch-script:.:host/scripts/patch-on-deploy.txt:/usr/local/app/settings
-
-`<scriptSourceName>` of `.` means this project's own source.
+- `image-install:context-variable:<name>:<operation>[:<value>...]` — set a variable
+  on the host.
+	- `create` — create the variable or array, only if it is not defined.
+	- `change` — set the value, only if the variable is already defined.
+	- `ensure` — create it, or make sure the array already contains the value.
+	- `append` / `insert` — create it, or append the value whether or not it is present.
+	- `update` — make sure a defined array contains the value.
+	- `remove` — remove the value from the array; undefine it when no value is given.
+	- `re-set` / `define` / `upsert` — set the variable, defined or not.
+	- `delete` — undefine it; only when the current value matches, if one is given.
+	- Examples:
+		- `image-install:context-variable:HOST_TYPE:re-set:standalone`
+		- `image-install:context-variable:LANGUAGES:insert:en`
+		- `image-install:context-variable:LANGUAGES:remove:lv`
+- `image-install:context-variable:<name>:{import|source}:{.|<projectName>}:<scriptPath>` —
+  take the value from a file inside a project.
+	- `image-install:context-variable:HOST_KEY:import:.:ssh/rsa.pub`
+- `image-install:deploy-sync-files:<deploySourcePath>:<targetHostPath>` — copy prepared
+  files onto the host.
+	- `image-install:deploy-sync-files:data/settings:/usr/local/app/settings`
+- `image-install:clone-deploy-file:<deploySourcePath>:<sourceFileName>:<targetNamePattern>[:<variableName>:<value>...]` —
+  clone one prepared file into many.
+	- `image-install:clone-deploy-file:data/settings:web/default:page-200.html:page-???.html:???:201:204`
+	- `image-install:clone-deploy-file:data/settings:web/default:page-404.html:page-418.html`
+- `image-install:exec-update-before:host/install/<scriptName>` — run a script before the install.
+	- `image-install:exec-update-before:host/install/common-java.sh.txt`
+- `image-install:exec-update-after:host/install/<scriptName>` — run a script after the install.
+	- `image-install:exec-update-after:host/install/service-restart.txt`
+- Patch content at each step. `<scriptSourceName>` of `.` means this project's own source.
+	- `image-install:deploy-patch-script-prefix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]`
+	- `image-install:source-patch-script:<deploySourcePath>:<scriptSourceName>:host/scripts/<scriptName>`
+	- `image-install:deploy-patch-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]`
+	- `image-install:deploy-patch-script-suffix:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]`
+	- `image-install:target-patch-script:<scriptSourceName>:host/scripts/<scriptName>:<targetHostPath>`
+	- `image-install:deploy-applied-script:<scriptSourceName>:host/scripts/<scriptName>[:<relativePath>]`
+	- Examples:
+		- `image-install:source-patch-script:data/settings:.:host/scripts/patch-on-deploy.txt`
+		- `image-install:target-patch-script:.:host/scripts/patch-on-deploy.txt:/usr/local/app/settings`
 
 ## Build stages
 
-Deploy owns the last two of the five pipeline stages:
+Deploy owns the last two of the five pipeline stages.
 
-| Stage | Builders | Does |
-| --- | --- | --- |
-| `image-process` | `4???-*` | build single-file indices, per-target deploy scripts and merged settings |
-| `image-install` | `5???-*` | run the deploy tasks on the targets |
+- `image-process` — builders `4???-*`. Builds single-file distro and repository
+  indices, per-target concatenated deploy scripts, and per-target merged settings.
+- `image-install` — builders `5???-*`. Runs the deploy tasks on the targets.
 
 `myx.distro-source` documents the first three.
 
 ## Workspace folders
 
-	/source                 source code and projects — editable, committable
-	/export                 export resources, generated or cloned
-	/distro                 whole prepared project tree, generated or cloned
-	/actions                generated workspace actions, executable, not editable
-	/.local                 installed tools and system integrations
-	/.local/distro-index    generated system index
-	/.local/source-cache    build cache, written before source-prepare
-	/.local/output-cache    output products; may be absent in pure deploy mode
+- `/source` — source code and projects. Editable and committable.
+- `/export` — export resources, generated or cloned.
+- `/distro` — the whole prepared project tree, generated or cloned.
+	- `/distro/repo[/group]/project` — project folder structure.
+- `/actions` — generated workspace actions. Executable, not editable.
+- `/.local` — installed tools and system integrations.
+	- `/.local/distro-index` — generated system index.
+	- `/.local/source-cache` — build cache, written before source-prepare.
+	- `/.local/output-cache` — output products. May be absent in pure deploy mode.
 
 ## Getting help
 
-- `<Tool>.fn.sh --help` prints full syntax, options and examples for any command above.
-- `Deploy --help` prints the deploy-context dispatcher syntax; `Deploy --info` prints the current context.
+- `<Tool>.fn.sh --help` — full syntax, options and examples for any command above.
+- `Deploy --help` — deploy-context dispatcher syntax. `Deploy --info` prints the current context.
 - Press TAB after a command name and a space for shell completion.
 
 ## Related packages
@@ -190,3 +178,4 @@ Deploy owns the last two of the five pipeline stages:
 - [myx.distro-system](https://github.com/myx/myx.distro-system) — shared indexing and query tools.
 - [myx.distro-source](https://github.com/myx/myx.distro-source) — build source into a distro image.
 - [myx.distro-remote](https://github.com/myx/myx.distro-remote) — drive a workspace on another machine.
+- [myx.distro-agents](https://github.com/myx/myx.distro-agents) — the magic-team agents and their tooling.
