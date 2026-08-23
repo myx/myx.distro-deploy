@@ -67,7 +67,7 @@
 			Won't output helpful information on files created and how to use those files, when
 			`--quiet` option specified.
 
-		--make-workspace-integration-files [--quiet]
+		--make-workspace-integrations [--quiet]
 			Runs all `--make-*` commands, (re-)creating all workspace integration files.
 
 			Won't output helpful information on files created and how to use those files, when

@@ -1,4 +1,4 @@
-📘 syntax: DistroDeployTools.fn.sh --make-workspace-integration-files [--quiet]
+📘 syntax: DistroDeployTools.fn.sh --make-workspace-integrations [--quiet]
 📘 syntax: DistroDeployTools.fn.sh --make-console-command [--quiet]
 📘 syntax: DistroDeployTools.fn.sh --make-console-script
 📘 syntax: DistroDeployTools.fn.sh --{system|custom}-config-option <operation>
@@ -16,7 +16,7 @@
 
 ##  Options:
 
-		--make-workspace-integration-files [--quiet]
+		--make-workspace-integrations [--quiet]
 			Runs all relevant `--make-*` commands, (re-)creating all workspace
 			integration files and exits.
 
