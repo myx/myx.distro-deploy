@@ -7,12 +7,7 @@ cat <<- 'DISTROCONSOLE'
 	set -e
 
 	if [ -z "$MMDAPP" ] || [ ! -d "$MMDAPP" ] ; then
-		## Quoted, and `&&`-chained. Unquoted, $(dirname "$0") word-
-		## splits the moment the workspace path contains a space, and
-		## the way it then fails is worse than not starting: `cd` gets
-		## several arguments and fails, `;` runs `pwd` regardless, and
-		## the console comes up with MMDAPP set to whatever directory
-		## the caller happened to be in.
+		## Quoted and &&-chained: an unquoted $(dirname "$0") word-splits on a workspace path containing a space, leaving the console with the wrong MMDAPP.
 		MMDAPP="$( ( cd "$( dirname "$0" )" && pwd ) )" || MMDAPP=""
 		if [ -z "$MMDAPP" ] ; then
 			echo "⛔ ERROR: cannot resolve this console's own directory from '$0'." >&2
