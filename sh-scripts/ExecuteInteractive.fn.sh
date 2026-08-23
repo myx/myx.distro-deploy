@@ -41,7 +41,7 @@ ExecuteInteractive(){
 		--select-from-env)
 			shift
 			if [ -z "${MDSC_SELECT_PROJECTS:0:1}" ] ; then
-				echo "⛔ ERROR: $MDSC_CMD: no projects selected!" >&2
+				echo "$MDSC_CMD: ⛔ ERROR: no projects selected!" >&2
 				set +e ; return 1
 			fi
 		;;

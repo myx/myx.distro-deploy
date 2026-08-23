@@ -12,7 +12,7 @@ NAMESPACES=$( . "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/deploy-context/ScanDe
 
 ( 
 	cd "$MDSC_CACHED" || {
-		echo "⛔ ERROR: $MDSC_CMD: ScanDeployProjects.include: no source folder!" >&2
+		echo "$MDSC_CMD: ⛔ ERROR: ScanDeployProjects.include: no source folder!" >&2
 		set +e ; return 1
 	}
 
