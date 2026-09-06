@@ -311,7 +311,7 @@ InstallPrepareFiles(){
 				fi
 			fi
 
-			
+
 			[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: done." >&2
 			return 0
 		;;
@@ -326,14 +326,14 @@ InstallPrepareFiles(){
 			echo "$MDSC_CMD: temp prepared" >&2
 
 			cd "$tempDirectory"
-			
+
 			if [ -z "$1" ] ; then
 				find "." -type f | sort
-				return 0 
+				return 0
 			fi
-			 
+
 			eval "$@"
-			return 0 
+			return 0
 		;;
 		--to-deploy-output)
 			if [ ! -d "$MMDAPP/output" ] ; then
