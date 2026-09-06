@@ -45,3 +45,11 @@ Team-owned notes for the magic-* team.
 
 - The emitted payload runs its tty guard before it creates any directory, so a guard abort leaves the host untouched.
 - The unpack directory is created before the cleanup trap is armed, so a failure in that window leaves the directory behind.
+
+## The generated installer carries two inert shebangs
+
+- `InstallPrepareScript.fn.sh:146-151` embeds each hooked body into the aggregate as `( eval "$( cat << 'BLK_<cksum>' … )" )`. A shebang inside one of those bodies is data, never an interpreter line.
+- `InstallPrepareScript.fn.sh:96` writes `#!/bin/sh` as the aggregate's own first line, and `DeployProjectSsh.fn.sh:333` emits `bash ./exec`, which overrides it. So both shebangs are inert, and the aggregate's own is the one a careful reader would otherwise trust.
+- The real interpreter for those bodies is bash. `reference/shell.md` in `magic-developer` states which standard follows from that.
+- The discriminator is the mechanism, not a count: a file installed as a real executable under `data/**` runs under its own shebang; a body hooked in through `image-install:exec-update-*:host/install/*.txt` does not. Read how a file is executed before deciding which standard it is held to.
+- Open, not yet fixed: `DeployProjectSsh.fn.sh:333` emits `bash ./exec` unconditionally while the generated file declares `#!/bin/sh`, so a target carrying no bash fails at the last step.
