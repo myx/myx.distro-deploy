@@ -296,15 +296,18 @@ InstallPrepareFiles(){
 			fi
 			
 			if [ -z "$directoryNew" ] ; then
-				local tempDirectory="`mktemp -d -t "MDSC_IPF_XXXXXXXX"`"
-				local saveDirectory="`pwd`"
-				trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
-				echo "$MDSC_CMD: using temp: $tempDirectory" >&2
-				if ! ( set -e ; cd "$tempDirectory" ; eval "$executeScript" ) ; then
-					echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
-				fi
-				rsync -iprltOoD --delete --chmod=ug+rwX "$tempDirectory/" "$targetPath" 2>&1 \
-					| (grep -v --line-buffered -E '^>f\.\.t\.+ ' >&2 || :)
+				## trap inside the subshell: it is that subshell's own, never the console's,
+				## and it fires on every way out including a failure under set -e
+				(
+					tempDirectory="$( mktemp -d -t "MDSC_IPF_XXXXXXXX" )" || exit 1
+					trap 'rm -rf -- "$tempDirectory"' EXIT
+					echo "$MDSC_CMD: using temp: $tempDirectory" >&2
+					if ! ( set -e ; cd "$tempDirectory" ; eval "$executeScript" ) ; then
+						echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
+					fi
+					rsync -iprltOoD --delete --chmod=ug+rwX "$tempDirectory/" "$targetPath" 2>&1 \
+						| (grep -v --line-buffered -E '^>f\.\.t\.+ ' >&2 || :)
+				)
 			else
 				if ! ( set -e ; cd "$targetPath" ; eval "$executeScript" ) ; then
 					echo "$MDSC_CMD: ⛔ ERROR: executing image-prepare script!" >&2
@@ -317,22 +320,23 @@ InstallPrepareFiles(){
 		;;
 		--to-temp)
 			shift
-			local tempDirectory="`mktemp -d -t "MDSC_IPF_XXXXXXXX"`"
-			local saveDirectory="`pwd`"
 			local directoryNew="true"
-			trap "cd '$saveDirectory' ; rm -rf '$tempDirectory'" EXIT
-			echo "$MDSC_CMD: using temp: $tempDirectory" >&2
-			InstallPrepareFiles --to-directory "$tempDirectory"
-			echo "$MDSC_CMD: temp prepared" >&2
+			## the cd stays inside the subshell, so the caller's directory needs no restoring
+			(
+				tempDirectory="$( mktemp -d -t "MDSC_IPF_XXXXXXXX" )" || exit 1
+				trap 'rm -rf -- "$tempDirectory"' EXIT
+				echo "$MDSC_CMD: using temp: $tempDirectory" >&2
+				InstallPrepareFiles --to-directory "$tempDirectory"
+				echo "$MDSC_CMD: temp prepared" >&2
 
-			cd "$tempDirectory"
+				cd "$tempDirectory"
 
-			if [ -z "$1" ] ; then
-				find "." -type f | sort
-				return 0
-			fi
-
-			eval "$@"
+				if [ -z "$1" ] ; then
+					find "." -type f | sort
+				else
+					eval "$@"
+				fi
+			)
 			return 0
 		;;
 		--to-deploy-output)
