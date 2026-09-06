@@ -75,6 +75,14 @@ NotifySmart(){
 			return 1
 		fi
 
+		## stdin carries the token, never argv: a bearer on curl's command line is readable via ps
+		local slackBody="{
+			\"text\": \"$( echo -n "$eventText" | sed -e 's/\"/\\\"/g;s/\r/\\\r/g;s/\n/\\\n/g' )\",
+			\"channel\": \"$slackChannel\",
+			\"username\": \"$eventUser\",
+			\"icon_emoji\": \"$eventEmoji\"
+		}"
+
 		echo "📟 slack notification: 👤 $(whoami) @ $(hostname), result: $( \
 			(	\
 				curl 'https://slack.com/api/chat.postMessage' \
@@ -82,19 +90,14 @@ NotifySmart(){
 					--silent \
 					--show-error \
 					--max-time 20 \
-					--data-binary "@/dev/stdin" \
+					--data-binary "$slackBody" \
 					-H "Content-Type: application/json; charset=utf-8" \
-					-H "Authorization: Bearer ${slackBearer}" \
+					-H @- \
 					2>&1 \
 				|| : \
-			) <<- RESTJSON
-				{
-					"text": "$( echo -n "$eventText" | sed -e 's/\"/\\\"/g;s/\r/\\\r/g;s/\n/\\\n/g' )", 
-					"channel": "$slackChannel", 
-					"username": "$eventUser", 
-					"icon_emoji": "$eventEmoji"
-				}	
-			RESTJSON
+			) <<- RESTAUTH
+				Authorization: Bearer ${slackBearer}
+			RESTAUTH
 		)" >&2
 
 	fi
