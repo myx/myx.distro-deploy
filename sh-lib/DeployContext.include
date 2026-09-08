@@ -37,14 +37,14 @@ DistroDeployContext(){
 				return 0
 			fi
 			[ -z "$MDSC_DETAIL" ] || echo "DistroSystemContext: input spec: $1" >&2
-			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
+			. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include" || { set +e ; return 1 ; }
 			return 0
 		;;
 		--distro-*|--run-from-*|--init-*)
 			if DistroSystemContext --is-spec-option "$1" ; then
 				local adpcChangeSpec="true"
 				[ -z "$MDSC_DETAIL" ] || echo "DistroSystemContext: input spec: $1" >&2
-				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include"
+				. "$MDLT_ORIGIN/myx/myx.distro-system/sh-lib/SystemContext.SetInputSpec.include" || { set +e ; return 1 ; }
 				return 0
 			fi
 		;;
