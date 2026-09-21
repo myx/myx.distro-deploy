@@ -47,9 +47,49 @@ ShellTo(){
 
 	shift
 
+	local executeType="" executeCommand="" executeScriptName=""
+
+	case "$1" in
+		--execute-stdin)
+			shift
+			executeType="--execute-stdin"
+		;;
+		--execute-script)
+			shift
+			executeType="--execute-script"
+			if [ -z "$1" ] ; then
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script' - file pathname argument required!" >&2
+				set +e ; return 1
+			fi
+			executeScriptName="$MMDAPP/source/${1#"$MMDAPP/source/"}" ; shift
+			if [ ! -f "$executeScriptName" ] ; then
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-script $executeScriptName' - file is not available!" >&2
+				set +e ; return 1
+			fi
+		;;
+		--execute-command)
+			shift
+			executeType="--execute-command"
+			if [ -z "$1" ] ; then
+				echo "$MDSC_CMD: ⛔ ERROR: '--execute-command' - command argument required!" >&2
+				set +e ; return 1
+			fi
+			executeCommand="$1" ; shift
+		;;
+	esac
+
 	local argument
 	local extraArguments="$( printf '%q ' "$@" )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
+
+	case "$executeType" in
+		--execute-command)
+			extraArguments="$executeCommand $( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+		;;
+		--execute-stdin|--execute-script)
+			extraArguments="-T $( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+		;;
+	esac
 
 	local targets="$( 
 		Distro ListSshTargets --select-projects "$filterProject" \
@@ -71,6 +111,18 @@ ShellTo(){
 	fi
 
 	set -e
+
+	case "$executeType" in
+		--execute-stdin)
+			printf "\n%s\n\n" "📝 ...Enter script and press CTRL+D to execute or press CTRL+C to cancel..." >&2
+			executeCommand="$(cat)"
+			targets='echo "$executeCommand" | '"$targets"
+		;;
+		--execute-script)
+			executeCommand="$(cat "$executeScriptName")"
+			targets='echo "$executeCommand" | '"$targets"
+		;;
+	esac
 
 	printf "> 🌐 $MDSC_CMD: Using Command: \n  %s\n" "$targets" >&2
 	eval "$targets"
