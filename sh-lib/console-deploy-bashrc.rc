@@ -47,11 +47,11 @@ Deploy(){
 
 	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if ! command -v "${distroCommand%.fn.sh}.fn.sh" >/dev/null 2>&1; then
 			echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e ; "${distroCommand%.fn.sh}" "$@" || {
@@ -74,11 +74,11 @@ Source(){
 
 	local distroCommand="$1" ; shift
 	if ! type "${distroCommand%.fn.sh}" >/dev/null 2>&1 ; then
-		if [ ! -f "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh" ] ; then
+		if ! command -v "${distroCommand%.fn.sh}.fn.sh" >/dev/null 2>&1; then
 			echo "⛔ ERROR: unknown command: ${distroCommand%.fn.sh}" >&2
 			set +e ; return 1
 		fi
-		. "$MDLT_ORIGIN/myx/myx.distro-source/sh-scripts/${distroCommand%.fn.sh}.fn.sh"
+		. "${distroCommand%.fn.sh}.fn.sh"
 	fi
 
 	set +e ; "${distroCommand%.fn.sh}" "$@" || {
@@ -157,7 +157,10 @@ complete -F Distro \
 
 export LANG=en_US.UTF-8
 
-PROMPT_COMMAND='set +e ; history -w; history -r ; PS1="$( Deploy --shell-prompt ): '"$PS1"'"'
+# project-declared commands, prepopulated here and refreshed after every prompt
+PATH="$PATH$( Distro --shell-path-append )"
+
+PROMPT_COMMAND='set +e ; history -w; history -r ; PATH="$PATH$( Distro --shell-path-append )" ; PS1="$( Deploy --shell-prompt ): '"$PS1"'"'
 
 export PATH
 
