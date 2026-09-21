@@ -402,7 +402,7 @@ DistroImageProjectContextVariables(){
 		done
 		echo "$buildBuffer"
 		for variableName in $variableNames ; do
-			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=\\"%s\\"\n" "$variableName" "$variableName"
+			printf 'printf %q %s "\$VAR_%s"\n' "$prefix%s=%q\n" "$variableName" "$variableName"
 		done
 	`"
 	

@@ -143,13 +143,17 @@ InstallPrepareScriptInternalPrintScript(){
 		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script start: $SC_NAME' >&2"
 		#echo "$SC_HASH=\"\`"
 		#echo "\`\""
-		echo "( eval \"\$( cat << '$SC_HASH'"
+		echo "( set -e ; eval \"\$( cat << '$SC_HASH'"
 			cat "$fileName"
 			echo
-			[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
 		echo "$SC_HASH"
 		echo ")\" )"
+		## Capture first, diagnose after: this generator interleaves diagnostic and structural
+		## emission, so any echo placed between the subshell and the test becomes what $? reports.
+		echo "mdscFragmentRc=\$?"
+		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
 		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
+		echo "[ \$mdscFragmentRc -eq 0 ] || { echo '⛔ ERROR: deploy fragment failed: $SC_NAME' >&2 ; exit 1 ; }"
 		echo
 		echo "##**--  end, $fileName"
 		echo
