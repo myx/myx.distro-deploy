@@ -11,7 +11,6 @@ Declares: \
 
 Provides: \
 	myx/myx.distro-deploy \
-	build-tool:pack.jar \
 	build-tool:pack.tbz \
 	build-tool:pack.tgz \
 	build-tool:pack.txz \
@@ -19,9 +18,5 @@ Provides: \
 	build-tool:pack.data.tbz \
 	build-tool:pack.data.txz \
 	build-tool:pack.docs.txz \
-	build-tool:pack.java.jar \
-	build-tool:classpath.jar \
-	build-tool:classpath.java.jar \
-	build-tool:classpath.use.jars \
 			
 Replaces: 

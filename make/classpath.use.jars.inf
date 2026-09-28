@@ -1,4 +1,0 @@
-Type: build-tool
-Name: classpath.use.jars
-Class: ru.myx.distro.make.ScanClasspathJarsBuilder
-Requires: 
