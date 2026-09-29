@@ -31,9 +31,9 @@ ExecuteInteractive(){
 		--project)
 			shift
 			set -e
-			local internSourceProject="$1" ; shift
-			local internTargetCommand="$@"
-			Prefix "$( echo $internTargetCommand | cut -d ' ' -f 2 )" $internTargetCommand
+			## <project> <target> <command...>: the target names the output, the command runs.
+			local internSourceProject="$1" internTargetName="$2" ; shift 2
+			Prefix "$internTargetName" "$@"
 			return 0
 		;;
 		--all-targets)
@@ -52,12 +52,17 @@ ExecuteInteractive(){
 		;;
 	esac
 	
+	## Each argument quoted once more: the eval below strips one layer and DistroSshConnect's
+	## own eval the other, so only the remote shell parses `;`, `|`, `$` or quotes in them.
+	local argument targetArguments=()
+	for argument in "$@" ; do targetArguments+=( "$( printf '%q' "$argument" )" ) ; done
+	## Each line becomes `ExecuteInteractive --project <project> <target> DistroSshConnect <ssh options> ;`.
 	local sshTargets="$( \
 		Distro ListSshTargets --select-from-env \
-			--line-prefix 'ExecuteInteractive --project' \
+			--line-prefix 'DistroSshConnect ' \
 			--line-suffix ' ;' \
-			-t "$@" \
-		| awk '{ print $2, $3, $1, substr($0, index($0,$4)) }'
+			-t ${targetArguments[@]+"${targetArguments[@]}"} \
+		| awk '{ print "ExecuteInteractive --project", $1, $2, substr($0, index($0, $3)) }'
 	)"
 	# | cut -d" " -f 2,3,1,4- # cut can't reorder columns
 	
