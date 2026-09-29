@@ -82,9 +82,13 @@ ShellTo(){
 	local extraArguments="$( printf '%q ' "$@" )"
 	local defaultCommand="-t '\`command -v bash || command -v sh\`'"
 
+	## Quoted twice: this eval and DistroSshConnect's each strip one layer, so only the remote shell parses it.
+	local executeCommandQuoted=""
 	case "$executeType" in
 		--execute-command)
-			extraArguments="$executeCommand $( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
+			executeCommandQuoted="$( printf '%q' "$executeCommand" )"
+			defaultCommand=""
+			extraArguments="$( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
 		;;
 		--execute-stdin|--execute-script)
 			extraArguments="-T $( for argument in "$@" ; do printf '%q ' "$argument" ; done )"
@@ -96,6 +100,7 @@ ShellTo(){
 			--line-prefix 'DistroSshConnect ' \
 			--no-project-column \
 			--no-target-column \
+			${executeCommandQuoted:+"$executeCommandQuoted"} \
 			${extraArguments:-$defaultCommand}
 	)"
 

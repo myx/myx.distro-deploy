@@ -127,8 +127,9 @@ ExecuteParallel(){
 			--line-prefix '' \
 			--line-suffix '' \
 			-T -o PreferredAuthentications=publickey -o ConnectTimeout=15 \
-			$executeCommand $targetCommand
+			${executeCommand:+"$( printf '%q' "$executeCommand" )"} $targetCommand
 	)"
+	## Quoted twice: the eval below and DistroSshConnect's each strip one layer, so only the remote shell parses it.
 
 	if [ "true" = "$explainTasks" ] && [ "$executeType" != "--display-targets" ] ; then
 		echo "> 📋 $MDSC_CMD: Will execute: " >&2
