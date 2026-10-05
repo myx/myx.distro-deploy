@@ -2,6 +2,8 @@
 
 [Back to the README](../README.md)
 
+These directives go in a project's `Declares` entry. The [project.inf manual](https://github.com/myx/myx.distro-.local/blob/main/sh-lib/help/Man.Project.Inf.file.help.md) describes the file format.
+
 ## image-install directives
 
 Put these in a project's `Declares` to shape what happens on the target host.
