@@ -303,12 +303,14 @@ DeployProjectSshInternalPrintRemoteScript(){
 					| (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 \
 					| awk '{print \"> $sourcePath: \"\$0}' \
 					| tee -a 'host-files-rsync.log' >&2 || :)"
+				echo "mdscRsyncRc=\"\${PIPESTATUS[0]}\" ; [ \"\$mdscRsyncRc\" -eq 0 ] || { echo \"ImageDeploy: ⛔ ERROR: rsync of $sourcePath failed (exit \$mdscRsyncRc)\" >&2 ; exit 1 ; }"
 			else
 				echo "mkdir -p -m 770 '$( dirname $targetPath )'"
 				echo "rsync -iprltoD --delete --chmod=ug+rwX 'sync/$sourcePath' '$targetPath' 2>&1 \
 					| (grep --line-buffered -v -E '[\\.>][fd]\\.\\.[t\\.][p\\.][o\\.]\\.+ ' 2>&1 \
 					| awk '{print \"> $sourcePath: \"\$0}' \
 					| tee -a 'host-files-rsync.log' >&2 || :)"
+				echo "mdscRsyncRc=\"\${PIPESTATUS[0]}\" ; [ \"\$mdscRsyncRc\" -eq 0 ] || { echo \"ImageDeploy: ⛔ ERROR: rsync of $sourcePath failed (exit \$mdscRsyncRc)\" >&2 ; exit 1 ; }"
 			fi
 
 		done
@@ -330,7 +332,7 @@ DeployProjectSshInternalPrintRemoteScript(){
 	if [ "$deployType" != "sync" ] ; then
 		[ -z "$MDSC_DETAIL" ] || echo "$MDSC_CMD: building exec script" >&2
 		echo 'echo "ImageDeploy: 🙈 executing scripts..." >&2'
-		echo 'bash ./exec'
+		echo 'bash ./exec || { mdscExecRc=$? ; echo "ImageDeploy: ⛔ ERROR: the exec script failed (exit $mdscExecRc), the deploy is not finished" >&2 ; exit "$mdscExecRc" ; }'
 	fi
 
 	echo 'echo "ImageDeploy: 🏁 task finished." >&2'
