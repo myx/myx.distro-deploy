@@ -39,6 +39,7 @@ Team-owned notes for the magic-* team.
 
 - `DeployProjectSsh.fn.sh` can print an SSH failure to stderr and still return 0.
 - Gate on the artifact: `DeployProjectSsh.fn.sh --print-installer` emitting the expected content is the real pre-deploy check.
+- The remote script ends with `bash ./exec`, and the rsync lines sit in a `| tee` pipeline. The client reports the real `exec` status and checks `PIPESTATUS[0]` after each rsync. Each install fragment runs as its own `set -e` subshell. When the log is the only evidence, look for `deploy fragment failed: <name>`.
 
 ## Cross-workspace invocation and TTY requirements
 
