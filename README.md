@@ -4,6 +4,23 @@ Installs a built distro image onto hosts. It resolves which SSH targets a projec
 set maps to, prepares per-target files, settings and scripts, and runs them over
 SSH — one host, a sequence of hosts, or a whole fleet in parallel.
 
+Use it to reach and deploy to the hosts your workspace projects declare as SSH targets.
+
+## First command
+
+Open the deploy console, then list what the workspace can reach. This connects to nothing:
+
+	./DistroDeployConsole.sh
+	ListSshTargets.fn.sh --all-targets
+
+## Check a selector first
+
+A fan-out tool acts on every target a selector matches. Before you deploy or run a command, check the selector:
+
+	ListSshTargets.fn.sh --select-projects <project-name-part>
+
+An exit status of 0 does not prove a deploy worked. [Troubleshooting](docs/troubleshooting.md) shows what to check.
+
 ## Documentation
 
 - [Installation](docs/installation.md) — requirements, install, upgrade and uninstall.

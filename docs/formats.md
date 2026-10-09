@@ -65,6 +65,6 @@ Deploy owns the last two of the six pipeline stages.
 	- `/distro/repo[/group]/project` — project folder structure.
 - `/actions` — generated workspace actions. Executable, not editable.
 - `/.local` — installed tools and system integrations.
-	- `/.local/distro-index` — generated system index.
+	- `/.local/system-index` — generated system index.
 	- `/.local/source-cache` — build cache, written before source-prepare.
 	- `/.local/output-cache` — output products. May be absent in pure deploy mode.

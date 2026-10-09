@@ -16,15 +16,11 @@ Run `ListSshTargets.fn.sh --all-targets` first. Check whether the workspace decl
 
 Narrow the selector. Check what it resolves to with `ListSshTargets.fn.sh`.
 
-## A command ran on this machine, not on the targets
+## Where a remote command is parsed
 
-`--execute-command` is evaluated by your local shell before ssh runs. A `|`, `;`, `&`, redirection, glob, backtick or `$( )` in the command expands and executes locally. Quoting at the call site does not stop this.
+`--execute-command` quotes its value, so the remote shell parses it. A `|`, `;` or redirection in it runs on the target.
 
-The output still carries the remote host name as a prefix. A local result can therefore pass for a fleet-wide answer, and nothing marks it.
-
-- Use `--execute-stdin` or `--execute-script <path>` for anything with more than one line or any metacharacter. They send the body over the wire.
-- Keep `--execute-command` for one simple command.
-- Put `hostname` in any payload where the target must be certain.
+For a body with more than one line, use `--execute-stdin` or `--execute-script <path>`. They send the body over the wire as stdin.
 
 ## Options show up on the remote command line
 
