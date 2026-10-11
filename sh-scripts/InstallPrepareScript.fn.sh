@@ -152,8 +152,8 @@ InstallPrepareScriptInternalPrintScript(){
 		## emission, so any echo placed between the subshell and the test becomes what $? reports.
 		echo "mdscFragmentRc=\$?"
 		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script end: $SC_NAME' >&2"
-		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
 		echo "[ \$mdscFragmentRc -eq 0 ] || { echo '⛔ ERROR: deploy fragment failed: $SC_NAME' >&2 ; exit 1 ; }"
+		[ "none" = "$MDSC_DETAIL" ] || echo "echo '>>> script done: $SC_NAME' >&2"
 		echo
 		echo "##**--  end, $fileName"
 		echo
