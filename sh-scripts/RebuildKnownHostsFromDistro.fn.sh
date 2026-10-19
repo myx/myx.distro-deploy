@@ -33,7 +33,7 @@ RebuildKnownHostsFromDistro(){
 case "$0" in
 	*/sh-scripts/RebuildKnownHostsFromDistro.fn.sh) 
 
-		. "$( dirname $0 )/../../myx.distro-system/sh-lib/SystemContext.include"
+		. "${MDLT_ORIGIN:-$( dirname $0 )/../../..}/myx/myx.distro-system/sh-lib/SystemContext.include"
 		DistroSystemContext --distro-path-auto
 		
 		RebuildKnownHostsFromDistro "$@"
