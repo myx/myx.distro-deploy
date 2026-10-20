@@ -4,7 +4,9 @@
 
 MDSC_DEPLOY_STARTED="$(date +%s)"
 
-MDSC_IMAGE_UNPACK_DIR="$(mktemp -t "mdsc-deploy-remote-XXXXXXXX" -d)"
+## This runs on the target host, where no workspace exists by design: the private place is the running user's own
+## home, never the system temp folder (shared with every user of the machine).
+mkdir -p "${HOME:?}/.local/temp" && MDSC_IMAGE_UNPACK_DIR="$(mktemp -d "$HOME/.local/temp/mdsc-deploy-remote-XXXXXXXX")"
 echo "ImageDeploy: 🛠 starting: 👤 $(whoami) @ $(hostname), 📂 temporary directory: $MDSC_IMAGE_UNPACK_DIR" >&2
 
 ## from myx.common, statically inserted to reduce dependencies

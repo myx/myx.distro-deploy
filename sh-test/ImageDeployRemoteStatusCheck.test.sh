@@ -11,7 +11,7 @@ rigRefuse(){
 	echo "⛔ ERROR: $1 -- refusing to report a result" >&2 ; exit 1
 }
 [ -f "$rigSource" ] || rigRefuse "the generator is not at $rigSource"
-rigTmp="$( mktemp -d -t ImageDeployRemoteStatusCheck.XXXXXX )" || exit 1
+rigTmp="$( mkdir -p "${MMDAPP:?⛔ ERROR: MMDAPP is not set}/.local/temp" && mktemp -d "$MMDAPP/.local/temp/ImageDeployRemoteStatusCheck.XXXXXX" )" || exit 1
 trap 'rm -rf -- "$rigTmp"' EXIT
 
 rigPassCount=0

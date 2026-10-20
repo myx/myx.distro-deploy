@@ -299,7 +299,7 @@ InstallPrepareFiles(){
 				## trap inside the subshell: it is that subshell's own, never the console's,
 				## and it fires on every way out including a failure under set -e
 				(
-					tempDirectory="$( mktemp -d -t "MDSC_IPF_XXXXXXXX" )" || exit 1
+					tempDirectory="$( mkdir -p "${MMDAPP:?⛔ ERROR: MMDAPP is not set}/.local/temp" && mktemp -d "$MMDAPP/.local/temp/MDSC_IPF_XXXXXXXX" )" || exit 1
 					trap 'rm -rf -- "$tempDirectory"' EXIT
 					echo "$MDSC_CMD: using temp: $tempDirectory" >&2
 					if ! ( set -e ; cd "$tempDirectory" ; eval "$executeScript" ) ; then
@@ -323,7 +323,7 @@ InstallPrepareFiles(){
 			local directoryNew="true"
 			## the cd stays inside the subshell, so the caller's directory needs no restoring
 			(
-				tempDirectory="$( mktemp -d -t "MDSC_IPF_XXXXXXXX" )" || exit 1
+				tempDirectory="$( mkdir -p "${MMDAPP:?⛔ ERROR: MMDAPP is not set}/.local/temp" && mktemp -d "$MMDAPP/.local/temp/MDSC_IPF_XXXXXXXX" )" || exit 1
 				trap 'rm -rf -- "$tempDirectory"' EXIT
 				echo "$MDSC_CMD: using temp: $tempDirectory" >&2
 				InstallPrepareFiles --to-directory "$tempDirectory"
