@@ -92,5 +92,5 @@
 		`ExecuteParallel.fn.sh --select-provides`
 
 		# Run a setup script file in parallel for a project selector.
-		`ExecuteParallel.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash`
+		`ExecuteParallel.fn.sh --select-projects ndns- --execute-script source/prv/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash`
 

@@ -64,23 +64,23 @@
 		`InstallPrepareFiles.fn.sh --project <project> --to-temp <command> [<argument...>]`
 
 		# Show folders that will be synchronized for selected project.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-sync-folders`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --print-sync-folders`
 
 		# Show files that will be cloned/multiplied in prepare phase.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-clone-files`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --print-clone-files`
 
 		# Show source-path patch scripts used during preparation.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-source-patch-scripts`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --print-source-patch-scripts`
 
 		# Show target-path patch scripts used during preparation.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --print-target-patch-scripts`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --print-target-patch-scripts`
 
 		# Prepare into temp directory and inspect resulting web/default paths.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp find . | sort | grep web/default`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --to-temp find . | sort | grep web/default`
 
 		# Prepare into temp directory and print resulting temp path.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --to-temp`
 
 		# Prepare into temp directory and validate content by archiving it.
-		`InstallPrepareFiles.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --to-temp tar czvf - . > /dev/null`
+		`InstallPrepareFiles.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --to-temp tar czvf - . > /dev/null`
 

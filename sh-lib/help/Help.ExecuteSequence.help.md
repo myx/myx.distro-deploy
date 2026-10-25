@@ -80,5 +80,5 @@
 		`ExecuteSequence.fn.sh --select-provides`
 
 		# Run setup script sequentially for selector-matched projects.
-		`ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/ndm/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash`
+		`ExecuteSequence.fn.sh --select-projects ndns- --execute-script source/prv/cloud.all/setup.common-ndns/host/install/common-ndns-setup.txt -l root bash`
 

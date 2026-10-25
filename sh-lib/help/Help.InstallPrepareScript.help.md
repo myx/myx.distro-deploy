@@ -51,14 +51,14 @@
 		`InstallPrepareScript.fn.sh --project <project> [--match <name>...] --to-file <targetDirectory>`
 
 		# Generate and print full installer script for selected project.
-		`InstallPrepareScript.fn.sh --project ndm/cloud.knt/setup.host-ndss112r3.example.org --print-script`
+		`InstallPrepareScript.fn.sh --project prv/cloud.fleet4/setup.host-ndss112r3.example.org --print-script`
 
 		# Generate installer script filtered to monit-related patches.
-		`InstallPrepareScript.fn.sh --project ndm/cloud.knt/setup.host-ndss112r3.example.org --match monit --print-script`
+		`InstallPrepareScript.fn.sh --project prv/cloud.fleet4/setup.host-ndss112r3.example.org --match monit --print-script`
 
 		# Print files selected for installer generation.
-		`InstallPrepareScript.fn.sh --project prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-files`
+		`InstallPrepareScript.fn.sh --project prv/cloud.example/setup.host-l6b2h1.myx.co.nz --print-files`
 
 		# Generate and print full installer script for selected project.
-		`InstallPrepareScript.fn.sh --project prv/cloud.mel/setup.host-l6b2h1.myx.co.nz --print-script`
+		`InstallPrepareScript.fn.sh --project prv/cloud.example/setup.host-l6b2h1.myx.co.nz --print-script`
 

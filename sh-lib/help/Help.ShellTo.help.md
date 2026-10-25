@@ -49,13 +49,13 @@
 ##  Examples:
 
 		# Open remote shell for a project using exact project path
-		`ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
+		`ShellTo.fn.sh prv/cloud.fleet4/setup.host-ndss112r3.example.org`
 
 		# Open remote shell resolving project from a unique name fragment
 		`ShellTo.fn.sh ndss113`
 
 		# Run a single command on the remote host as a specific user
-		`ShellTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami`
+		`ShellTo.fn.sh prv/cloud.fleet4/setup.host-ndss112r3.example.org -l mysql whoami`
 
 		# Run a single command on the remote host, stated as a mode
 		`ShellTo.fn.sh ndss113 --execute-command 'uname -a'`
@@ -64,7 +64,7 @@
 		`ShellTo.fn.sh ndss113 --execute-stdin`
 
 		# Send a script file from the workspace source tree to the remote host
-		`ShellTo.fn.sh ndss113 --execute-script ndm/cloud.knt/setup.host-ndss113/host/install/setup.txt`
+		`ShellTo.fn.sh ndss113 --execute-script prv/cloud.fleet4/setup.host-ndss113/host/install/setup.txt`
 
 		# Print command help and exit
 		`ShellTo.fn.sh --help`

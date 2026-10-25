@@ -35,13 +35,13 @@
 ##  Examples:
 
 		# Open local shell for a project using exact project path
-		`LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org`
+		`LocalTo.fn.sh prv/cloud.fleet4/setup.host-ndss112r3.example.org`
 
 		# Open local shell resolving project from a unique name fragment
 		`LocalTo.fn.sh ndss113`
 
 		# Run a single command in a project local context as a specific user
-		`LocalTo.fn.sh ndm/cloud.knt/setup.host-ndss112r3.example.org -l mysql whoami`
+		`LocalTo.fn.sh prv/cloud.fleet4/setup.host-ndss112r3.example.org -l mysql whoami`
 
 		# Print command help and exit
 		`LocalTo.fn.sh --help`

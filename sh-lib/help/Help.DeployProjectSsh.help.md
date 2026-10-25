@@ -97,7 +97,7 @@
 		`DeployProjectSsh.fn.sh --project <project> [--use-bz2|--use-xz] ...`
 
 		# Sync deployment for one explicitly selected project.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --prepare-sync --deploy-sync`
+		`DeployProjectSsh.fn.sh --project prv/cloud.fleet3/setup.host-ndns011.example.org --prepare-sync --deploy-sync`
 
 		# Selector-based exec deployment with explicit SSH user/home overrides.
 		`DeployProjectSsh.fn.sh --select-projects ndss001 --no-sleep --ssh-user root --ssh-home ~/.ssh --prepare-full --deploy-exec`
@@ -118,16 +118,16 @@
 		`DeployProjectSsh.fn.sh --select-projects ndns001 --prepare-exec --deploy-exec`
 
 		# Run complete prepare+deploy flow for one project.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --deploy-full`
+		`DeployProjectSsh.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --prepare-full --deploy-full`
 
 		# Generate and print full deploy script without running it.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --prepare-full --print-full-script`
+		`DeployProjectSsh.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --prepare-full --print-full-script`
 
 		# Print deploy patch script list for selected project.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-deploy-patch-scripts`
+		`DeployProjectSsh.fn.sh --project prv/cloud.fleet3/setup.host-ndns011.example.org --print-deploy-patch-scripts`
 
 		# Print effective context variables used for deploy script generation.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.ndm/setup.host-ndns011.example.org --print-context-variables`
+		`DeployProjectSsh.fn.sh --project prv/cloud.fleet3/setup.host-ndns011.example.org --print-context-variables`
 
 		# Preview resolved SSH targets without deployment.
 		`DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --prepare-none --print-ssh-targets`
@@ -139,5 +139,5 @@
 		`DeployProjectSsh.fn.sh --select-projects ndns001 --no-sleep --ssh-port 22 --prepare-none --print-ssh-targets`
 
 		# Preview SSH targets with explicit SSH user override.
-		`DeployProjectSsh.fn.sh --project ndm/cloud.dev/setup.host-ndns001.example.org --ssh-user guest --prepare-none --print-ssh-targets`
+		`DeployProjectSsh.fn.sh --project prv/cloud.dev/setup.host-ndns001.example.org --ssh-user guest --prepare-none --print-ssh-targets`
 
