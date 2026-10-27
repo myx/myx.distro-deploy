@@ -1,0 +1,12 @@
+## The Dashboard panels of myx.distro-deploy, declared once (F12.2 of the refactorings epic): a panel a line,
+## TAB-separated, read as plain text by `--manager-dashboard-read` (LocalTools.ManagerDashboard.include), so what
+## this console offers is known with no python.
+##   panel  <group>  <name>  <label>  <reader>  <include>  <read>
+##       a panel of a group, `root` being the Dashboard itself: its reader is a function of <include>, a file under
+##       myx/ (`-` where the reader is `.local`'s own); <read> is `named` where the panel is printed only when it is
+##       asked for by its name, `-` otherwise.
+## The Machine and Disk Space are `.local`'s own, which this console registers (F11.4); the panels of this subsystem
+## are a later feature, named when wanted.
+
+panel	root	machine	The_Machine	LocalToolsManagerDashboardMachine	-	-
+panel	root	disk	Disk_Space	LocalToolsManagerDashboardDisk	-	-

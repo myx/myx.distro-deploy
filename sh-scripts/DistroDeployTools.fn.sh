@@ -30,6 +30,13 @@ DistroDeployTools(){
 			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/LocalTools.Config.include"
 			return 0
 		;;
+		--manager)
+			## The console's manager screen, started in this terminal: one shared start for the
+			## sibling consoles (F12.2, LocalTools.InternManager.include), not one copy each. The
+			## package and the app are derived from $MDSC_CMD, so a sibling adds no lines of its own.
+			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/manager/LocalTools.InternManager.include"
+			return $?
+		;;
 		--upgrade-deploy-tools)
 			shift
 			bash "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
