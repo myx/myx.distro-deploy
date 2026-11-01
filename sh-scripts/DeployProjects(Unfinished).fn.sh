@@ -152,7 +152,7 @@ DeployProjectSsh(){
 }
 
 case "$0" in
-	*/sh-scripts/DeployProjectSsh.fn.sh)
+	*/sh-scripts/DeployProjects\(Unfinished\).fn.sh)
 		if [ -z "$1" ] || [ "$1" = "--help" ] ; then
 			. "$MDLT_ORIGIN/myx/myx.distro-deploy/sh-lib/help/Help.DeployProjects(Unfinished).include"
 			exit 1
