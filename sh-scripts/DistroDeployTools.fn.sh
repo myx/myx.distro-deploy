@@ -37,6 +37,15 @@ DistroDeployTools(){
 			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/manager/LocalTools.InternManager.include"
 			return $?
 		;;
+		--manager-*)
+			## The manager operations of the screen this console starts (F12.2): they are the agents
+			## dispatcher's own, so they are answered here rather than refused, and what the console
+			## shows and what its keys act on stay one subsystem (owner's ruling, 2026-11-01).
+			set +e
+			. "$MDLT_ORIGIN/myx/myx.distro-agents/sh-scripts/DistroAgentsTools.fn.sh"
+			DistroAgentsTools "$@"
+			return $?
+		;;
 		--upgrade-deploy-tools)
 			shift
 			bash "$MDLT_ORIGIN/myx/myx.distro-.local/sh-scripts/DistroLocalTools.fn.sh" --install-distro-deploy
