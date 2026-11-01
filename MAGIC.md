@@ -68,3 +68,20 @@ Team-owned notes for the magic-* team.
 - The real interpreter for those bodies is bash. `reference/shell.md` in `magic-developer` states which standard follows from that.
 - The discriminator is the mechanism, not a count. A file installed as a real executable under `data/**` runs under its own shebang. A body hooked in through `image-install:exec-update-*:host/install/*.txt` does not. Read how a file is executed before deciding which standard it is held to.
 - Open, not yet fixed: `DeployProjectSsh.fn.sh:335` emits `bash ./exec` unconditionally while the generated file declares `#!/bin/sh`, so a target carrying no bash fails at the last step.
+
+## Tools that call `DistroDeployContext` load DeployContext twice (owner, 2026-11-01)
+
+- `LocalTo`, `ScreenTo`, `ShellTo`, `ExecuteParallel`, `ExecuteSequence` and `DeployProjectSsh` call `DistroDeployContext` themselves. Only DeployContext defines it. SystemContext does not.
+- Any console can call these functions, the source console included, where DeployContext was never loaded. So each one loads DeployContext inside its function.
+- Each one also loads it in its `.fn.sh` arm, so a bare run sets it at the root. One comment line in the arm marks it as special.
+- Moving that load out of the function, or swapping it for SystemContext, breaks every `--ssh-*` option with "command not found".
+
+## `LocalTo` opens a deploy target locally
+
+- `JumpTo` opens a project. `LocalTo` opens one deploy target. It resolves exactly one project with an ssh target through `ListSshTargets`, selects it, and starts a local console shell for it. `ShellTo` reaches the same target over ssh.
+- Open, not yet fixed: `LocalTo` parses the `--ssh-*` options into `useSsh*`, and nothing reads them afterwards.
+
+## `Rebuild*FromDistro` is the deploy stage of the source command
+
+- `RebuildActionsFromDistro` and `RebuildKnownHostsFromDistro` run the same job as `RebuildActions` and `RebuildKnownHosts` in `myx.distro-source`, on the built distro instead of `source/`. They are two pipeline stages, not one meaning split across two packages.
+- Each one loads the source package's script from `MDLT_ORIGIN` and runs it.

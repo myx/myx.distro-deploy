@@ -3,8 +3,8 @@
 if [ -z "$MMDAPP" ] ; then
 	set -e
 	export MMDAPP="$( cd $(dirname "$0")/../../../.. ; pwd )"
-	echo "$0: Working in: $MMDAPP"  >&2
-	[ -d "$MMDAPP/source" ] || ( echo "⛔ ERROR: expecting 'source' directory." >&2 && exit 1 )
+	echo "$0: Working in: $MMDAPP" >&2
+	[ -d "$MMDAPP/.local" ] || ( echo "⛔ ERROR: expecting '.local' directory." >&2 && exit 1 )
 fi
 
 
@@ -774,6 +774,12 @@ case "$0" in
 			exit 1
 		fi
 		
+		# special: needs DeployContext of its own family, loaded here at the root and again in the function for any console
+		if [ -z "$MDLT_ORIGIN" ] || ! type DistroDeployContext >/dev/null 2>&1 ; then
+			. "${MDLT_ORIGIN:=$MMDAPP/.local}/myx/myx.distro-deploy/sh-lib/DeployContext.include"
+			DistroSystemContext --distro-path-auto
+		fi
+
 		DeployProjectSsh "$@"
 	;;
 esac
