@@ -31,19 +31,13 @@ DistroDeployTools(){
 			return 0
 		;;
 		--manager)
-			## The console's manager screen, started in this terminal: one shared start for the
-			## sibling consoles (F12.2, LocalTools.InternManager.include), not one copy each. The
-			## package and the app are derived from $MDSC_CMD, so a sibling adds no lines of its own.
+			## The console's manager screen: the shared start of the sibling consoles (LocalTools.InternManager.include).
 			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/manager/LocalTools.InternManager.include"
 			return $?
 		;;
 		--manager-*)
-			## The manager operations of the screen this console starts (F12.2): they are the agents
-			## dispatcher's own, so they are answered here rather than refused, and what the console
-			## shows and what its keys act on stay one subsystem (owner's ruling, 2026-11-01).
-			set +e
-			. "$MDLT_ORIGIN/myx/myx.distro-agents/sh-scripts/DistroAgentsTools.fn.sh"
-			DistroAgentsTools "$@"
+			## The manager operations of the screen this console starts, answered by .local (LocalTools.Manager.include).
+			. "$MDLT_ORIGIN/myx/myx.distro-.local/sh-lib/manager/LocalTools.Manager.include"
 			return $?
 		;;
 		--upgrade-deploy-tools)
