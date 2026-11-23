@@ -109,6 +109,21 @@ ShellTo(){
 		set +e ; return 1
 	fi
 	
+	## A line that names no ssh host would run its body on this machine: refuse it. Every line the target list gives carries `--ssh-host <name>`, and the name is not empty.
+	case "$targets" in
+		*--ssh-host*) ;;
+		*)
+			echo "$MDSC_CMD: ⛔ ERROR: The target for '$filterProject' names no ssh host, so nothing was run (a body would run on this machine): $targets" >&2
+			set +e ; return 1
+		;;
+	esac
+	case "$targets" in
+		*"--ssh-host ''"*|*"--ssh-host \"\""*|*"--ssh-host "--*)
+			echo "$MDSC_CMD: ⛔ ERROR: The target for '$filterProject' has an empty ssh host, so nothing was run (a body would run on this machine): $targets" >&2
+			set +e ; return 1
+		;;
+	esac
+
 	if [ "$targets" != "$( echo "$targets" | head -n 1 )" ] ; then
 		echo "> 🌐 $MDSC_CMD: 🙋 STOP: More than one match! Matching targets:" >&2
 		printf "%s\n" "$( echo "$targets" | sed -e 's|^|    |g' )" >&2
