@@ -30,11 +30,11 @@ Team-owned notes for the magic-* team.
 
 ## The `Deploy` verb reuses the function already loaded
 
-- `Deploy <Tool> ...` sources `sh-scripts/<Tool>.fn.sh` only when that function is not yet defined in the session. When it is defined, the loaded copy runs and nothing reports that the file was skipped. User-facing note: [Troubleshooting](docs/troubleshooting.md).
+- `Deploy <Tool>...` sources `sh-scripts/<Tool>.fn.sh` only when that function is not yet defined in the session. When it is defined, the loaded copy runs and nothing reports that the file was skipped. User-facing note: [Troubleshooting](docs/troubleshooting.md).
 
 ## `DeployConsole.include`'s prompt hook applies nothing
 
-- The `--shell-prompt` arm reads `MDSC_INT_CD`, `cd`s to it and clears it, and cannot change the console's working directory. The `Deploy()` wrapper sources this include inside `( … )`, and `PROMPT_COMMAND` calls that wrapper inside `$( … )`. Both statements therefore run two subshells below the interactive shell. The arm announces the change on stderr before applying nothing, which is why it reads as working.
+- The `--shell-prompt` arm reads `MDSC_INT_CD`, `cd`s to it and clears it, and cannot change the console's working directory. The `Deploy` wrapper sources this include inside `(…)`, and `PROMPT_COMMAND` calls that wrapper inside `$(…)`. Both statements therefore run two subshells below the interactive shell. The arm announces the change on stderr before applying nothing, which is why it reads as working.
 - Full entry: `myx.distro-.local/MAGIC.md`, "The prompt hook announces a change it cannot apply" — read there, not duplicated here.
 
 ## Exit status is not a deploy result
@@ -63,13 +63,14 @@ Team-owned notes for the magic-* team.
 
 ## The generated installer carries two inert shebangs
 
-- `InstallPrepareScript.fn.sh:146-150` embeds each hooked body into the aggregate as `( set -e ; eval "$( cat << '<hash>' … )" )`. A shebang inside one of those bodies is data, never an interpreter line.
+- `InstallPrepareScript.fn.sh:146-150` embeds each hooked body into the aggregate as `(set -e; eval "$(cat << '<hash>' …)")`. A shebang inside one of those bodies is data, never an interpreter line.
 - `InstallPrepareScript.fn.sh:96` writes `#!/bin/sh` as the aggregate's own first line, and `DeployProjectSsh.fn.sh:335` emits `bash ./exec`, which overrides it. So both shebangs are inert, and the aggregate's own is the one a careful reader would otherwise trust.
 - The real interpreter for those bodies is bash. `reference/shell.md` in `magic-developer` states which standard follows from that.
 - The discriminator is the mechanism, not a count. A file installed as a real executable under `data/**` runs under its own shebang. A body hooked in through `image-install:exec-update-*:host/install/*.txt` does not. Read how a file is executed before deciding which standard it is held to.
 - Open, not yet fixed: `DeployProjectSsh.fn.sh:335` emits `bash ./exec` unconditionally while the generated file declares `#!/bin/sh`, so a target carrying no bash fails at the last step.
 
-## Tools that call `DistroDeployContext` load DeployContext twice (owner, 2026-11-01)
+## Tools that call `DistroDeployContext` load DeployContext twice ()
+
 
 - `LocalTo`, `ScreenTo`, `ShellTo`, `ExecuteParallel`, `ExecuteSequence` and `DeployProjectSsh` call `DistroDeployContext` themselves. Only DeployContext defines it. SystemContext does not.
 - Any console can call these functions, the source console included, where DeployContext was never loaded. So each one loads DeployContext inside its function.
