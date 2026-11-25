@@ -412,6 +412,47 @@ DistroImageProjectContextVariables(){
 	return 0
 }
 
+# echoes one path under a given root, when it exists
+# arguments: <root> --path/--file <declaredAt> <relativePath> <extraArguments>
+# output: <declaredAt> <extraArguments>
+DistroImageCheckRootPath(){
+	local MDSC_CMD='DistroImageCheckRootPath'
+	[ -z "$MDSC_DETAIL" ] || echo "> $MDSC_CMD $(printf '%q ' "$@")" >&2
+
+	local checkRoot="$1" ; shift
+	local checkFlag="--path"
+	while true ; do
+		case "$1" in
+			--path)
+				shift ; checkFlag="--path" ; continue ;;
+			--file)
+				shift ; checkFlag="--file" ; continue ;;
+			*)
+				break ;;
+		esac
+	done
+
+	local declaredAt="$1" checkPath="$2"
+	shift 2
+
+	if [ -z "$checkPath" ] ; then
+		echo "$MDSC_CMD: ⛔ ERROR: arguments missing" >&2
+		set +e ; return 1
+	fi
+
+	local check="-d"
+	[ "--file" != "$checkFlag" ] || check="-f"
+
+	if [ $check "$checkRoot/$checkPath" ] ; then
+		[ full != "$MDSC_DETAIL" ] || echo ">> $MDSC_CMD found path: " $check "$checkRoot/$checkPath" >&2
+		echo "$declaredAt" "$@"
+		return 0
+	fi
+
+	echo "$MDSC_CMD: 🙋 WARNING: declared path is not found: $declaredAt:$checkPath" >&2
+	set +e ; return 1
+}
+
 # echoes none/all matching deploy source folders or files
 # arguments: --path/--file declaredAt sourceName sourcePath <extraArguments>
 # output: declaredAt sourceName sourcePath <extraArguments>

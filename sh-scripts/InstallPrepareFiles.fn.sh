@@ -38,6 +38,7 @@ InstallPrepareFilesInternalPrintScript(){
 	##
 	[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: select property lists" >&2
 	local allSyncFolders="$( ImagePrepareProjectSyncFolders )"
+	local allExportFiles="$( ImagePrepareProjectSyncExportFiles )"
 	local allSourceScripts="$( ImagePrepareProjectSourcePatchScripts )"
 	local allCloneTasks="$( ImagePrepareProjectCloneTasks )"
 	local allTargetScripts="$( ImagePrepareProjectTargetPatchScripts )"
@@ -77,6 +78,26 @@ InstallPrepareFilesInternalPrintScript(){
 					echo "rsync -rtO --chmod=ug+rwX '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
 				else
 					echo "rsync -rtO --include='$filterGlob' --exclude='*' --chmod=ug+rwX '$MDSC_SOURCE/$sourceName/$sourcePath/' './$mergePath/'"
+				fi
+			done
+		echo "} 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || :)"
+	fi
+
+	##
+	## sync files from the published export tree to output
+	##
+	local declaredAt mergePath filterGlob
+	if [ -n "${allExportFiles:0:1}" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: sync files from the export tree to output" >&2
+		echo '{'
+			echo 'echo "ImagePrepareFiles: 🔁 syncing built exports..." >&2'
+			echo "$allExportFiles" | cut -d" " -f 2 | sort -u | xargs echo mkdir -p
+			echo "$allExportFiles" \
+			| while read -r declaredAt mergePath filterGlob ; do
+				if [ -z "$filterGlob" ] ; then
+					echo "rsync -rtO --chmod=ug+rwX '$MMDAPP/export/$declaredAt/' './$mergePath/'"
+				else
+					echo "rsync -rtO --include='$filterGlob' --exclude='*' --chmod=ug+rwX '$MMDAPP/export/$declaredAt/' './$mergePath/'"
 				fi
 			done
 		echo "} 2>&1 | (grep -v --line-buffered -E '^>f\\.\\.t\\.+ ' >&2 || :)"
@@ -158,6 +179,40 @@ InstallPrepareFilesInternalPrintScript(){
 	[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute target path-related patches" >&2
 	local sourceName sourcePath mergePath filterGlob
 	local scriptSourceName scriptName matchTargetPath
+	if [ -n "${allExportFiles:0:1}" ] ; then
+		[ -z "$MDSC_DETAIL" ] || echo "| $MDSC_CMD: execute target path-related patches for export content" >&2
+		[ -z "${allTargetScripts:0:1}" ] || echo "$allExportFiles" \
+		| while read -r declaredAt mergePath filterGlob ; do
+			echo "$allTargetScripts" \
+			| while read -r scriptSourceName scriptName matchTargetPath; do
+				case "$matchTargetPath" in
+					*'*')
+						local globTargetPath="${matchTargetPath%'*'}"
+						case "${mergePath%/}" in
+							"${globTargetPath%/}/"*)
+								[ -z "$MDSC_DETAIL" ] || echo "= $MDSC_CMD: path matched: $matchTargetPath ?= $mergePath" >&2
+								echo "$scriptSourceName" "$scriptName" "${mergePath%/}"
+								continue
+							;;
+						esac
+					;;
+					*)
+						case "${matchTargetPath%/}/" in
+							"${mergePath%/}/"*)
+								[ -z "$MDSC_DETAIL" ] || echo "= $MDSC_CMD: path matched: $matchTargetPath ?= $mergePath" >&2
+								echo "$scriptSourceName" "$scriptName" "${mergePath%/}${matchTargetPath#${mergePath%/}}"
+								continue
+							;;
+						esac
+					;;
+				esac
+			done
+		done \
+		| awk '!x[$0]++' \
+		| while read -r scriptSourceName scriptName mergePath; do
+			DistroImageEmbedScript "$MMDAPP/source/$scriptSourceName/$scriptName" "./$mergePath"
+		done
+	fi
 	[ -z "${allSyncFolders:0:1}" ] || echo "$allSyncFolders" \
 	| while read -r sourceName sourcePath mergePath filterGlob ; do
 		[ -z "${allTargetScripts:0:1}" ] || echo "$allTargetScripts" \
